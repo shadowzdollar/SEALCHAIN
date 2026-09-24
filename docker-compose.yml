@@ -1,0 +1,42 @@
+# Self-contained demo: local chain + contract deployment + SealChain.
+# For a pilot, point the app at a public chain instead (see .env.example)
+# and drop the `chain` and `deploy` services.
+services:
+  chain:
+    image: node:24-slim
+    working_dir: /contracts
+    volumes: ["./packages/contracts:/contracts"]
+    command: sh -c "corepack enable && pnpm install --ignore-workspace && npx hardhat node --hostname 0.0.0.0 --port 8546"
+    environment: { HARDHAT_DISABLE_TELEMETRY_PROMPT: "true", LOCAL_RPC_URL: "http://chain:8546" }
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:8546',{method:'POST',headers:{'content-type':'application/json'},body:'{\\\"jsonrpc\\\":\\\"2.0\\\",\\\"id\\\":1,\\\"method\\\":\\\"eth_chainId\\\"}'}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 5s
+      retries: 60
+    ports: ["8546:8546"]
+
+  deploy:
+    image: node:24-slim
+    working_dir: /contracts
+    volumes: ["./packages/contracts:/contracts"]
+    depends_on: { chain: { condition: service_healthy } }
+    command: npx hardhat run scripts/deploy.js --network localhost
+    environment: { HARDHAT_DISABLE_TELEMETRY_PROMPT: "true", LOCAL_RPC_URL: "http://chain:8546" }
+
+  app:
+    build: .
+    depends_on: { deploy: { condition: service_completed_successfully } }
+    environment:
+      RPC_URL: http://chain:8546
+      PUBLIC_RPC_URL: http://localhost:8546
+      CHAIN_ID: "31337"
+      # Deterministic address of the first deployment on a fresh Hardhat chain.
+      ANCHOR_CONTRACT: "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+      ANCHOR_PRIVATE_KEY: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+      PUBLIC_WEB_URL: http://localhost:4100
+      CORS_ORIGINS: http://localhost:4100
+      ADMIN_EMAILS: compliance@sealchain.test
+    volumes: ["sealchain-data:/data"]
+    ports: ["4100:4100"]
+
+volumes:
+  sealchain-data:
