@@ -1,0 +1,26 @@
+{
+  "name": "sealchain",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Cross-border trade compliance for SMEs: document generation, validation and blockchain-anchored authenticity.",
+  "type": "module",
+  "packageManager": "pnpm@12.4.1",
+  "engines": {
+    "node": ">=22.5"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "chain": "pnpm --filter @sealchain/contracts chain",
+    "deploy:local": "pnpm --filter @sealchain/contracts deploy:local",
+    "seed": "pnpm --filter @sealchain/api seed",
+    "e2e": "node scripts/e2e.mjs",
+    "backup": "pnpm --filter @sealchain/api backup",
+    "anchor:preflight": "pnpm --filter @sealchain/api anchor:preflight"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5"
+  }
+}
