@@ -33,3 +33,12 @@ Thumbs.db
 *.blend
 *.glb
 .workspace/
+
+# SealChain runtime data
+data/
+*.sqlite
+*.sqlite-*
+packages/contracts/artifacts/
+packages/contracts/cache/
+packages/contracts/deployments/*.local.json
+!.env.example
