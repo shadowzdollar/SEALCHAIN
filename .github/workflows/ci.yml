@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - name: Core unit tests
+        run: pnpm --filter @sealchain/core test
+      - name: API integration tests
+        run: pnpm --filter @sealchain/api test
+      - name: Contract tests
+        run: pnpm --filter @sealchain/contracts test
+        env:
+          HARDHAT_DISABLE_TELEMETRY_PROMPT: 'true'
+      - name: Build web app
+        run: pnpm --filter @sealchain/web build
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: test
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t sealchain:ci .
