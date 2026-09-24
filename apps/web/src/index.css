@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Primary action colour — blue */
+  --color-brand-50: #eff5ff;
+  --color-brand-100: #dbe8fe;
+  --color-brand-200: #bfd5fe;
+  --color-brand-300: #93b8fd;
+  --color-brand-400: #6093fa;
+  --color-brand-500: #3b6ff6;
+  --color-brand-600: #2555eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+  --color-brand-900: #1e3a8a;
+  --color-brand-950: #172554;
+
+  /* Chrome — deep navy */
+  --color-navy-50: #f2f5fa;
+  --color-navy-100: #e1e8f2;
+  --color-navy-200: #c3d0e3;
+  --color-navy-300: #93a6c4;
+  --color-navy-400: #647ba0;
+  --color-navy-500: #435a80;
+  --color-navy-600: #2d4468;
+  --color-navy-700: #1c3254;
+  --color-navy-800: #132844;
+  --color-navy-900: #0b1f3a;
+  --color-navy-950: #06142a;
+
+  --color-accent-500: #0ea5e9;
+  --color-surface: #f6f8fb;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+  body { @apply bg-surface text-[14px] text-slate-900 dark:bg-navy-950 dark:text-slate-100; }
+  ::selection { @apply bg-brand-100 text-brand-900; }
+  input[type='number']::-webkit-inner-spin-button { opacity: 0.4; }
+  :focus-visible { outline: 2px solid var(--color-brand-500); outline-offset: 2px; }
+}
+
+@layer components {
+  .input {
+    @apply block h-9 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-900 shadow-[0_1px_0_rgba(15,23,42,0.03)]
+      placeholder:text-slate-400 focus:border-brand-600 focus:outline-none focus:ring-3 focus:ring-brand-600/15
+      disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500
+      dark:border-navy-600 dark:bg-navy-900 dark:text-slate-100 dark:placeholder:text-navy-400 dark:disabled:bg-navy-800;
+  }
+  textarea.input { @apply h-auto py-2; }
+  .input-error { @apply border-red-500 focus:border-red-600 focus:ring-red-600/15; }
+  .card { @apply rounded-lg border border-slate-200/90 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] dark:border-navy-700 dark:bg-navy-900; }
+  .label { @apply mb-1.5 block text-[12px] font-medium text-slate-700 dark:text-navy-200; }
+  .mono { @apply font-mono text-[12px] tracking-tight; }
+  .eyebrow { @apply text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-navy-300; }
+
+  /* Enterprise data tables */
+  .table-ent { @apply w-full text-sm; }
+  .table-ent thead th {
+    @apply border-b border-slate-200 bg-slate-50/80 px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[0.06em] text-slate-500
+      dark:border-navy-700 dark:bg-navy-800/60 dark:text-navy-300;
+  }
+  .table-ent tbody td { @apply border-b border-slate-100 px-4 py-3 align-middle dark:border-navy-800; }
+  .table-ent tbody tr:last-child td { @apply border-b-0; }
+  .table-ent tbody tr { @apply transition-colors; }
+}

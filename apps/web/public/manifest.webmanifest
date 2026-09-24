@@ -1,0 +1,19 @@
+{
+  "name": "SealChain — trade documents you can prove",
+  "short_name": "SealChain",
+  "description": "Compliant cross-border trade documents with provable authenticity. Verify any SealChain document.",
+  "start_url": "/app",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0b1f3a",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ],
+  "shortcuts": [
+    { "name": "Verify a document", "url": "/verify", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "New shipment", "url": "/app/shipments/new", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] }
+  ]
+}
