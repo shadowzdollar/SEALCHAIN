@@ -7,10 +7,10 @@ import { cx } from '../components/ui';
 
 const SHEET = 'rounded-[2px] border border-paper-rule bg-paper-card shadow-[0_1px_2px_rgba(11,31,58,0.06),0_12px_32px_-12px_rgba(11,31,58,0.18)]';
 
-export function Stamp({ children = 'Anchored', className }: { children?: string; className?: string }) {
+export function Stamp({ children = 'Anchored', className, tick = true }: { children?: string; className?: string; tick?: boolean }) {
   return (
     <div className={cx('stamp bg-paper/70', className)}>
-      {children} <Check className="size-3.5" strokeWidth={2.5} />
+      {children} {tick && <Check className="size-3.5" strokeWidth={2.5} />}
     </div>
   );
 }
@@ -91,7 +91,7 @@ export function QrGlyph({ className }: { className?: string }) {
 export function CorridorMap({ className, highlight }: { className?: string; highlight?: string }) {
   const cities = {
     kigali: { x: 150, y: 250, label: 'Kigali', anchor: 'end' as const },
-    kampala: { x: 262, y: 118, label: 'Kampala', anchor: 'start' as const },
+    kampala: { x: 262, y: 118, label: 'Kampala', anchor: 'middle' as const },
     nairobi: { x: 470, y: 180, label: 'Nairobi', anchor: 'start' as const },
     mombasa: { x: 560, y: 300, label: 'Mombasa', anchor: 'start' as const },
     dar: { x: 480, y: 420, label: 'Dar es Salaam', anchor: 'start' as const },
@@ -101,16 +101,16 @@ export function CorridorMap({ className, highlight }: { className?: string; high
     { id: 'RW-UG', d: 'M150 250 C 180 200, 220 150, 262 118', post: { x: 182, y: 196, label: 'Gatuna · Katuna' } },
     { id: 'RW-KE', d: 'M262 118 C 330 110, 400 140, 470 180 C 510 210, 540 260, 560 300', post: { x: 372, y: 124, label: 'Malaba · Busia' } },
     { id: 'RW-TZ', d: 'M150 250 C 210 300, 260 340, 330 370 C 390 395, 440 410, 480 420', post: { x: 232, y: 318, label: 'Rusumo' } },
-    { id: 'RW-BI', d: 'M150 250 C 140 280, 130 305, 120 330', post: { x: 92, y: 292, label: 'Akanyaru · Nemba' } },
+    { id: 'RW-BI', d: 'M150 250 C 140 280, 130 305, 120 330', post: { x: 136, y: 292, label: 'Akanyaru · Nemba', end: true } },
   ];
   return (
-    <svg viewBox="0 0 640 480" className={cx('w-full', className)} role="img" aria-label="Map of SealChain corridors from Kigali to Kampala, Nairobi, Mombasa, Dar es Salaam and Bujumbura">
+    <svg viewBox="0 0 700 480" className={cx("w-full", className)} role="img" aria-label="Map of SealChain corridors from Kigali to Kampala, Nairobi, Mombasa, Dar es Salaam and Bujumbura">
       <defs>
         <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
           <path d="M24 0H0V24" fill="none" stroke="#0b1f3a" strokeOpacity="0.05" />
         </pattern>
       </defs>
-      <rect width="640" height="480" fill="url(#grid)" />
+      <rect width="700" height="480" fill="url(#grid)" />
       {/* Lake Victoria and Lake Tanganyika, schematic */}
       <path d="M300 180 C 330 150, 400 160, 410 200 C 420 250, 380 280, 340 270 C 300 262, 280 215, 300 180 Z" fill="#e8e1d0" />
       <text x="352" y="222" textAnchor="middle" className="fill-slate-500 font-plexmono" fontSize="10" letterSpacing="1.5">L. VICTORIA</text>
@@ -124,7 +124,7 @@ export function CorridorMap({ className, highlight }: { className?: string; high
           <g key={r.id} opacity={on ? 1 : 0.25}>
             <path d={r.d} fill="none" stroke="#0b1f3a" strokeWidth="2.2" strokeDasharray="6 5" strokeLinecap="round" />
             <circle cx={r.post.x} cy={r.post.y} r="5" fill="#fffdf8" stroke="#b42318" strokeWidth="2" />
-            <text x={r.post.x + 9} y={r.post.y + 4} className="fill-stamp font-plexmono" fontSize="10.5">{r.post.label}</text>
+            <text x={'end' in r.post ? r.post.x - 9 : r.post.x + 9} y={r.post.y + 4} textAnchor={'end' in r.post ? 'end' : 'start'} className="fill-stamp font-plexmono" fontSize="10.5">{r.post.label}</text>
           </g>
         );
       })}
@@ -132,7 +132,7 @@ export function CorridorMap({ className, highlight }: { className?: string; high
         <g key={c.label}>
           <circle cx={c.x} cy={c.y} r={c.label === 'Kigali' ? 9 : 6} fill="#0b1f3a" />
           {c.label === 'Kigali' && <circle cx={c.x} cy={c.y} r="15" fill="none" stroke="#0b1f3a" strokeOpacity="0.35" />}
-          <text x={c.x + (c.anchor === 'start' ? 12 : -12)} y={c.y + 5} textAnchor={c.anchor} className="fill-navy-900 font-serif" fontSize="16" fontWeight="600">{c.label}</text>
+          <text x={c.x + (c.anchor === 'start' ? 12 : c.anchor === 'end' ? -12 : 0)} y={c.anchor === 'middle' ? c.y - 14 : c.y + 5} textAnchor={c.anchor} className="fill-navy-900 font-serif" fontSize="16" fontWeight="600">{c.label}</text>
         </g>
       ))}
     </svg>
