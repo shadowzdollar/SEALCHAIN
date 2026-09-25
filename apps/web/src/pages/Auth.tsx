@@ -12,38 +12,36 @@ import { OAuthButtons } from '../components/OAuthButtons';
 function Shell({ title, subtitle, children, footer }: { title: string; subtitle: string; children: ReactNode; footer: ReactNode }) {
   return (
     <div className="grid min-h-dvh lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
-      <aside className="relative hidden overflow-hidden bg-navy-900 px-12 py-10 text-white lg:flex lg:flex-col">
-        <div className="pointer-events-none absolute -right-32 -top-32 size-[28rem] rounded-full bg-brand-600/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-40 -left-20 size-[26rem] rounded-full bg-accent-500/10 blur-3xl" />
-        <Link to="/" className="relative"><Logo light /></Link>
+      <aside className="paper-grid relative hidden border-r border-slate-200 px-12 py-10 lg:flex lg:flex-col dark:border-navy-800">
+        <Link to="/" className="relative"><Logo /></Link>
         <div className="relative my-auto max-w-md">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-brand-300">EAC trade compliance</p>
-          <h2 className="mt-3 text-[28px] font-semibold leading-tight tracking-[-0.02em]">Export documents that clear the border — and prove they are genuine.</h2>
-          <ul className="mt-8 space-y-4 text-[14px] text-navy-100">
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-slate-500 dark:text-navy-300">EAC trade compliance</p>
+          <h2 className="mt-4 font-serif text-[36px] font-semibold leading-[1.1] tracking-[-0.02em]">
+            Export documents that clear the border — and prove they are <em className="font-medium text-stamp">genuine</em>.
+          </h2>
+          <ol className="mt-9 divide-y divide-slate-200 border-y border-slate-200 text-[14px] dark:divide-navy-800 dark:border-navy-800">
             {[
               ['Validated before submission', 'Tariff codes, rules of origin, tax IDs and permits checked for your corridor.'],
               ['Authentic from issue', 'Every PDF is signed and anchored on a public blockchain. Any edit is detected.'],
               ['Verifiable by anyone', 'Customs, banks and buyers confirm a document in seconds — no account needed.'],
-            ].map(([t, d]) => (
-              <li key={t} className="flex gap-3">
-                <span className="mt-1 flex size-5 shrink-0 items-center justify-center rounded-full bg-brand-600/30 text-brand-200">
-                  <svg viewBox="0 0 16 16" className="size-3" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M3.5 8.5l3 3 6-7" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                </span>
-                <span><span className="font-medium text-white">{t}.</span> <span className="text-navy-200">{d}</span></span>
+            ].map(([t, d], i) => (
+              <li key={t} className="grid grid-cols-[2.5rem_minmax(0,1fr)] gap-3 py-4">
+                <span className="font-mono text-[12px] text-stamp">{String(i + 1).padStart(2, '0')}</span>
+                <span><span className="block font-serif text-[16px] font-medium">{t}</span> <span className="text-slate-600 dark:text-navy-300">{d}</span></span>
               </li>
             ))}
-          </ul>
+          </ol>
         </div>
-        <p className="relative text-[12px] text-navy-400">Rwanda · Kenya · Uganda · Tanzania · Burundi</p>
+        <p className="relative font-mono text-[11px] uppercase tracking-[0.2em] text-slate-500 dark:text-navy-400">Rwanda · Kenya · Uganda · Tanzania · Burundi</p>
       </aside>
-      <div className="flex flex-col bg-white dark:bg-navy-950">
+      <div className="flex flex-col bg-surface dark:bg-navy-950">
         <header className="flex items-center justify-between px-6 py-5 sm:px-10">
           <Link to="/" className="lg:invisible"><Logo /></Link>
           <ThemeToggle />
         </header>
         <div className="flex flex-1 items-start justify-center px-6 pb-16 pt-4 sm:pt-12">
           <div className="w-full max-w-[400px]">
-            <h1 className="text-[24px] font-semibold tracking-[-0.02em]">{title}</h1>
+            <h1 className="font-serif text-[30px] font-semibold tracking-[-0.02em]">{title}</h1>
             <p className="mt-1.5 text-[14px] text-slate-500 dark:text-navy-300">{subtitle}</p>
             <div className="mt-7">{children}</div>
             <p className="mt-6 text-[13px] text-slate-500 dark:text-navy-300">{footer}</p>
