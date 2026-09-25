@@ -104,6 +104,8 @@ export function loadConfig() {
       apiKey: env('MAIL_API_KEY'),
       from: env('MAIL_FROM', 'SealChain <no-reply@sealchain.example>')!,
     },
+    /** Where "talk to us" requests from the public site are sent. */
+    contactEmail: env('CONTACT_EMAIL', 'pilot@sealchain.example')!,
     /** Emails that are granted the platform `admin` role on registration. */
     adminEmails: (env('ADMIN_EMAILS', '') ?? '').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean),
   };
