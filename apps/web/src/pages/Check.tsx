@@ -111,12 +111,12 @@ function ReportView({ report }: { report: ForensicReport }) {
   const issues = report.signals.filter((s) => s.level !== 'pass');
   return (
     <div className="space-y-6">
-      <div className={cx('rounded-xl border-2 p-5', r.cls)}>
+      <div className={cx('rounded-[3px] border-2 p-5', r.cls)}>
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             {report.risk.level === 'high' ? <AlertOctagon className="size-7 text-red-600" /> : report.risk.level === 'medium' ? <ShieldAlert className="size-7 text-amber-600" /> : <CheckCircle2 className="size-7 text-emerald-600" />}
             <div>
-              <p className="text-lg font-semibold">{r.label}</p>
+              <p className="font-serif text-[22px] font-semibold">{r.label}</p>
               <p className="text-xs text-slate-600 dark:text-navy-300">{report.filename}</p>
             </div>
           </div>
