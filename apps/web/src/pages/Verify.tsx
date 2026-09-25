@@ -86,7 +86,7 @@ export function Verify() {
 export function LanguageSelect() {
   const { lang, setLang } = useContext(LangContext);
   return (
-    <select aria-label="Language" className="rounded-md border border-white/20 bg-white/5 px-2 py-1 text-xs text-white [&>option]:text-slate-900" value={lang} onChange={(e) => setLang(e.target.value as Lang)}>
+    <select aria-label="Language" className="rounded-[3px] border border-slate-200 bg-white px-2 py-1 text-xs text-navy-900 dark:border-white/20 dark:bg-white/5 dark:text-white [&>option]:text-slate-900" value={lang} onChange={(e) => setLang(e.target.value as Lang)}>
       {LANGS.map((l) => <option key={l.id} value={l.id}>{l.label}</option>)}
     </select>
   );
@@ -138,17 +138,17 @@ function VerifyPage() {
   }
 
   return (
-    <div className="min-h-dvh bg-slate-50 dark:bg-navy-950">
-      <header className="bg-navy-900 text-white">
+    <div className="paper-grid min-h-dvh">
+      <header className="border-b border-slate-200 bg-surface/90 dark:border-navy-800 dark:bg-navy-950">
         <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-4">
-            <Link to="/"><Logo light /></Link>
-            <span className="hidden h-5 w-px bg-white/20 sm:block" />
-            <span className="hidden truncate text-[12px] font-medium uppercase tracking-[0.1em] text-navy-200 sm:block">Document verification service</span>
+            <Link to="/"><Logo /></Link>
+            <span className="hidden h-5 w-px bg-slate-300 sm:block dark:bg-white/20" />
+            <span className="hidden truncate font-mono text-[11px] uppercase tracking-[0.16em] text-slate-500 sm:block dark:text-navy-300">Document verification service</span>
           </div>
           <div className="flex items-center gap-2">
             <LanguageSelect />
-            <ThemeToggle className="text-navy-200 hover:bg-white/10 hover:text-white" />
+            <ThemeToggle />
           </div>
         </div>
       </header>
@@ -156,7 +156,7 @@ function VerifyPage() {
       <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
         {!id && (
           <div className="mb-6">
-            <h1 className="text-2xl font-semibold tracking-tight">{t('title')}</h1>
+            <h1 className="font-serif text-[34px] font-semibold tracking-[-0.02em]">{t('title')}</h1>
             <p className="mt-1 text-sm text-slate-600 dark:text-navy-300">{t('subtitle')}</p>
           </div>
         )}
@@ -226,11 +226,11 @@ function ResultView({ result, file, onFile, withDrop }: { result: VerificationRe
 
   return (
     <div className="space-y-5">
-      <div className={cx('rounded-xl border-2 p-5 sm:p-6', v.tone)}>
+      <div className={cx('rounded-[3px] border-2 p-5 sm:p-6', v.tone)}>
         <div className="flex gap-4">
           <div className="shrink-0">{v.icon}</div>
           <div className="min-w-0">
-            <h1 className="text-xl font-semibold sm:text-2xl">{t(`v.${v.key}.t`)}</h1>
+            <h1 className="font-serif text-[26px] font-semibold tracking-[-0.015em] sm:text-[30px]">{t(`v.${v.key}.t`)}</h1>
             <p className="mt-1 text-sm opacity-90">{t(`v.${v.key}.b`)}</p>
             {result.verdict === 'superseded' && d.supersededBy && (
               <p className="mt-2 text-sm">{t('currentVersion')} <Link className="font-medium underline" to={`/v/${d.supersededBy.id}`}>{d.supersededBy.number}</Link></p>
