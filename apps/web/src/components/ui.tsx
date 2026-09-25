@@ -8,8 +8,8 @@ export function cx(...c: Array<string | false | null | undefined>) {
 // ----------------------------------------------------------------- Button
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 const VARIANT: Record<Variant, string> = {
-  primary: 'bg-brand-700 text-white hover:bg-brand-800 active:bg-brand-900 shadow-[0_1px_2px_rgba(29,78,216,0.25),inset_0_1px_0_rgba(255,255,255,0.12)] disabled:bg-brand-700/50',
-  secondary: 'bg-white text-slate-800 border border-slate-300 hover:bg-slate-50 hover:border-slate-400 shadow-[0_1px_0_rgba(15,23,42,0.04)] dark:bg-navy-900 dark:text-slate-100 dark:border-navy-600 dark:hover:bg-navy-800',
+  primary: 'bg-brand-700 text-white hover:bg-brand-800 active:bg-brand-900 shadow-[0_1px_0_rgba(0,0,0,0.25)] disabled:bg-brand-700/50 dark:bg-slate-100 dark:text-navy-900 dark:hover:bg-white',
+  secondary: 'bg-white text-slate-900 border border-slate-200 hover:border-slate-400 shadow-[0_1px_0_rgba(11,31,58,0.06)] dark:bg-navy-900 dark:text-slate-100 dark:border-navy-600 dark:hover:bg-navy-800',
   ghost: 'text-slate-700 hover:bg-slate-100 dark:text-navy-200 dark:hover:bg-navy-800',
   danger: 'bg-red-600 text-white hover:bg-red-700 shadow-[0_1px_2px_rgba(220,38,38,0.25)]',
 };
@@ -48,7 +48,7 @@ export function Card({ className, children, title, action, subtitle, padded = tr
       {(title || action) && (
         <header className="flex items-start justify-between gap-4 border-b border-slate-200/80 px-5 py-3.5 dark:border-navy-700">
           <div className="min-w-0">
-            <h2 className="text-[14px] font-semibold tracking-[-0.005em] text-slate-900 dark:text-white">{title}</h2>
+            <h2 className="font-serif text-[16px] font-medium tracking-[-0.005em] text-slate-900 dark:text-white">{title}</h2>
             {subtitle && <p className="mt-0.5 text-[12px] text-slate-500 dark:text-navy-300">{subtitle}</p>}
           </div>
           {action}
@@ -73,7 +73,7 @@ const TONE: Record<Tone, string> = {
 
 export function Badge({ tone = 'neutral', children, className, dot }: { tone?: Tone; children: ReactNode; className?: string; dot?: boolean }) {
   return (
-    <span className={cx('inline-flex items-center gap-1.5 whitespace-nowrap rounded-[5px] px-1.5 py-[3px] text-[11.5px] font-medium leading-none ring-1 ring-inset', TONE[tone], className)}>
+    <span className={cx('inline-flex items-center gap-1.5 whitespace-nowrap rounded-[2px] px-1.5 py-[3px] text-[11.5px] font-medium leading-none ring-1 ring-inset', TONE[tone], className)}>
       {dot && <span className="size-1.5 rounded-full bg-current" />}
       {children}
     </span>
@@ -104,7 +104,7 @@ export function Alert({ tone = 'info', title, children, className }: { tone?: 'i
   } as const;
   const [cls, Icon] = styles[tone];
   return (
-    <div className={cx('flex gap-3 rounded-lg border px-4 py-3 text-sm', cls, className)} role={tone === 'error' ? 'alert' : undefined}>
+    <div className={cx('flex gap-3 rounded-[3px] border px-4 py-3 text-sm', cls, className)} role={tone === 'error' ? 'alert' : undefined}>
       <Icon className="mt-0.5 size-4 shrink-0" />
       <div className="min-w-0">
         {title && <p className="font-medium">{title}</p>}
@@ -130,10 +130,10 @@ export function PageLoader() {
 // ------------------------------------------------------------- PageHeader
 export function PageHeader({ title, subtitle, actions, eyebrow }: { title: ReactNode; subtitle?: ReactNode; actions?: ReactNode; eyebrow?: ReactNode }) {
   return (
-    <div className="mb-6 flex flex-col gap-4 border-b border-slate-200/80 pb-5 sm:flex-row sm:items-end sm:justify-between dark:border-navy-800">
+    <div className="mb-6 flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between dark:border-navy-800">
       <div className="min-w-0">
         {eyebrow && <div className="eyebrow mb-1.5">{eyebrow}</div>}
-        <h1 className="text-[22px] font-semibold leading-tight tracking-[-0.015em] text-slate-900 dark:text-white">{title}</h1>
+        <h1 className="font-serif text-[28px] font-semibold leading-tight tracking-[-0.02em] text-slate-900 dark:text-white">{title}</h1>
         {subtitle && <p className="mt-1.5 max-w-3xl text-[13px] text-slate-500 dark:text-navy-300">{subtitle}</p>}
       </div>
       {actions && <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>}
@@ -149,7 +149,7 @@ export function Stat({ label, value, sub, icon }: { label: string; value: ReactN
         <p className="eyebrow">{label}</p>
         {icon && <span className="flex size-7 items-center justify-center rounded-md bg-brand-50 text-brand-700 dark:bg-navy-800 dark:text-brand-300 [&>svg]:size-3.5">{icon}</span>}
       </div>
-      <p className="mt-2.5 text-[26px] font-semibold leading-none tabular-nums tracking-[-0.02em] text-slate-900 dark:text-white">{value}</p>
+      <p className="mt-2.5 font-serif text-[28px] font-semibold leading-none tabular-nums tracking-[-0.02em] text-slate-900 dark:text-white">{value}</p>
       {sub && <p className="mt-2 text-[12px] text-slate-500 dark:text-navy-300">{sub}</p>}
     </div>
   );
@@ -186,7 +186,7 @@ export function EmptyState({ icon, title, children, action }: { icon?: ReactNode
   return (
     <div className="flex flex-col items-center justify-center px-6 py-14 text-center">
       {icon && <div className="mb-3 rounded-full bg-slate-100 p-3 text-slate-500 dark:bg-navy-800">{icon}</div>}
-      <h3 className="text-sm font-semibold">{title}</h3>
+      <h3 className="font-serif text-[16px] font-medium">{title}</h3>
       {children && <p className="mt-1 max-w-sm text-sm text-slate-500 dark:text-navy-300">{children}</p>}
       {action && <div className="mt-4">{action}</div>}
     </div>
@@ -215,9 +215,9 @@ export function Dropzone({ onFile, accept = 'application/pdf', label, sub, compa
         if (f) onFile(f);
       }}
       className={cx(
-        'flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed text-center transition-colors',
+        'flex cursor-pointer flex-col items-center justify-center rounded-[3px] border-2 border-dashed text-center transition-colors',
         compact ? 'px-4 py-5' : 'px-6 py-10',
-        over ? 'border-brand-500 bg-brand-50 dark:bg-brand-950/40' : 'border-slate-300 hover:border-brand-400 hover:bg-slate-50 dark:border-navy-600 dark:hover:bg-slate-900',
+        over ? 'border-brand-500 bg-brand-50 dark:bg-brand-950/40' : 'border-slate-300 bg-white/60 hover:border-brand-400 hover:bg-white dark:border-navy-600 dark:bg-transparent dark:hover:bg-navy-900',
       )}
     >
       <UploadCloud className={cx('text-slate-400', compact ? 'mb-1.5 size-6' : 'mb-3 size-8')} />
@@ -277,11 +277,11 @@ export function Modal({ open, onClose, title, children, footer, wide }: { open: 
       <div
         role="dialog"
         aria-modal="true"
-        className={cx('card max-h-[90vh] w-full overflow-hidden rounded-b-none sm:rounded-xl', wide ? 'sm:max-w-3xl' : 'sm:max-w-lg')}
+        className={cx('card max-h-[90vh] w-full overflow-hidden rounded-b-none sm:rounded-[3px]', wide ? 'sm:max-w-3xl' : 'sm:max-w-lg')}
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3.5 dark:border-navy-700">
-          <h2 className="text-sm font-semibold">{title}</h2>
+          <h2 className="font-serif text-[16px] font-medium">{title}</h2>
           <button className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-navy-800" onClick={onClose} aria-label="Close">
             <X className="size-4" />
           </button>
