@@ -1,5 +1,6 @@
 /** Public-site chrome: announcement bar, mega-menu header, CTA band, mega footer. */
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, Outlet, useLocation } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowRight, ChevronDown, Menu as MenuIcon, X } from 'lucide-react';
@@ -9,6 +10,9 @@ import { Logo } from '../components/Layout';
 import { cx } from '../components/ui';
 import { FOOTER, MENUS, type Menu } from './content';
 import { CorridorMap, QrGlyph, Stamp } from './Illustrations';
+
+/** Horizontal page padding shared by every public page. */
+export const PAGE_X = 'px-5 sm:px-8 lg:px-12 2xl:px-16';
 
 export const INK_BTN =
   'inline-flex h-11 items-center justify-center gap-2 rounded-[3px] bg-navy-900 px-6 text-[14px] font-medium text-white shadow-[0_1px_0_rgba(0,0,0,0.25)] transition-colors hover:bg-navy-800';
@@ -48,7 +52,7 @@ export function SectionHeading({ eyebrow, title, body, className, center }: { ey
 export function PageHero({ eyebrow, title, body, actions, art, grid = true }: { eyebrow: ReactNode; title: ReactNode; body?: ReactNode; actions?: ReactNode; art?: ReactNode; grid?: boolean }) {
   return (
     <section className={cx('border-b border-paper-rule', grid && 'paper-grid')}>
-      <div className={cx('mx-auto grid max-w-6xl items-center gap-14 px-5 pb-20 pt-14 sm:px-8 lg:pb-24 lg:pt-20', art && 'lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]')}>
+      <div className={cx('mx-auto grid grid-cols-1 max-w-[1680px] items-center gap-14 px-5 pb-20 pt-14 sm:px-8 lg:px-12 2xl:px-16 lg:pb-24 lg:pt-20', !!art && 'lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]')}>
         <div className="min-w-0">
           <Eyebrow>{eyebrow}</Eyebrow>
           <h1 className="mt-5 font-serif text-[40px] font-semibold leading-[1.06] tracking-[-0.02em] sm:text-[52px]">{title}</h1>
@@ -73,7 +77,7 @@ function Announcement() {
   if (hidden) return null;
   return (
     <div className="bg-navy-900 text-[13px] text-slate-100">
-      <div className="relative mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-3 gap-y-1 px-10 py-2 text-center">
+      <div className="relative mx-auto flex max-w-[1680px] flex-wrap items-center justify-center gap-x-3 gap-y-1 px-10 py-2 text-center">
         <span className="hidden rounded-[2px] bg-stamp px-1.5 py-px font-plexmono text-[10.5px] uppercase tracking-[0.12em] text-white sm:inline">New</span>
         <span>Four EAC corridors from Rwanda are open for pilot shipments.</span>
         <Link to="/changelog" className="inline-flex items-center gap-1 font-medium text-white underline-offset-4 hover:underline">What’s new <ArrowRight className="size-3.5" /></Link>
@@ -111,7 +115,7 @@ function FeaturedArt({ art }: { art: Menu['featured']['art'] }) {
 function MegaPanel({ menu, onNavigate }: { menu: Menu; onNavigate: () => void }) {
   return (
     <div className="absolute inset-x-0 top-full border-b border-paper-rule bg-paper-card shadow-[0_24px_40px_-24px_rgba(11,31,58,0.25)]">
-      <div className="mx-auto grid max-w-6xl gap-10 px-8 py-8 lg:grid-cols-[minmax(0,1fr)_300px]">
+      <div className="mx-auto grid max-w-[1680px] gap-10 px-8 py-8 lg:px-12 2xl:px-16 lg:grid-cols-[minmax(0,1fr)_300px]">
         <div className={cx('grid gap-8', menu.groups.length === 3 ? 'grid-cols-3' : 'grid-cols-2')}>
           {menu.groups.map((g) => (
             <div key={g.title}>
@@ -226,7 +230,7 @@ function Header() {
 
   return (
     <header ref={ref} className={cx('sticky top-0 z-40 border-b bg-paper/95 backdrop-blur transition-colors', scrolled || open ? 'border-paper-rule' : 'border-transparent')} onMouseLeave={() => hover(null)}>
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 px-5 sm:px-8">
+      <div className="mx-auto flex h-16 max-w-[1680px] items-center justify-between gap-6 px-5 sm:px-8 lg:px-12 2xl:px-16">
         <Link to="/" aria-label="SealChain home"><Logo /></Link>
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Main">
           {MENUS.map((m) => (
@@ -260,7 +264,8 @@ function Header() {
           <MegaPanel menu={active} onNavigate={() => setOpen(null)} />
         </div>
       )}
-      {mobile && <MobileMenu onClose={() => setMobile(false)} />}
+      {/* Portalled: the header's backdrop blur would otherwise trap a fixed overlay. */}
+      {mobile && createPortal(<MobileMenu onClose={() => setMobile(false)} />, document.body)}
     </header>
   );
 }
@@ -269,7 +274,7 @@ function Header() {
 export function CtaBand() {
   return (
     <section className="border-t border-paper-rule bg-navy-900 text-white">
-      <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 py-16 sm:px-8 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)]">
+      <div className="mx-auto grid max-w-[1680px] items-center gap-10 px-5 py-16 sm:px-8 lg:px-12 2xl:px-16 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)]">
         <div>
           <p className="font-plexmono text-[12px] uppercase tracking-[0.22em] text-navy-300">Ready when your next container is</p>
           <h2 className="mt-4 font-serif text-[34px] font-semibold leading-[1.1] tracking-[-0.02em] sm:text-[42px]">
@@ -301,7 +306,7 @@ function StatusDot() {
 function Footer() {
   return (
     <footer className="bg-paper">
-      <div className="mx-auto max-w-6xl px-5 pb-10 pt-16 sm:px-8">
+      <div className="mx-auto max-w-[1680px] px-5 pb-10 pt-16 sm:px-8 lg:px-12 2xl:px-16">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,3fr)]">
           <div>
             <Logo />
@@ -334,6 +339,7 @@ function Footer() {
               <Link to="/legal/terms" className="hover:text-navy-900">Terms</Link>
               <Link to="/security" className="hover:text-navy-900">Security</Link>
               <Link to="/status" className="hover:text-navy-900">Status</Link>
+              <Link to="/credits" className="hover:text-navy-900">Photo credits</Link>
             </div>
           </div>
         </div>
@@ -374,7 +380,7 @@ function useForceLight() {
 export function MarketingLayout({ cta = true }: { cta?: boolean }) {
   useForceLight();
   return (
-    <div className="min-h-dvh bg-paper font-plex text-navy-900 selection:bg-navy-900 selection:text-paper">
+    <div className="min-h-dvh overflow-x-clip bg-paper font-plex text-navy-900 selection:bg-navy-900 selection:text-paper">
       <ScrollManager />
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-navy-900 focus:px-3 focus:py-2 focus:text-white">Skip to content</a>
       <Announcement />
