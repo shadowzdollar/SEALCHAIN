@@ -26,6 +26,7 @@ import { verifyRoutes } from './routes/verify';
 import { forensicsRoutes } from './routes/forensics';
 import { adminRoutes } from './routes/admin';
 import { metaRoutes } from './routes/meta';
+import { publicRoutes } from './routes/public';
 
 export interface App {
   app: FastifyInstance;
@@ -95,6 +96,7 @@ export async function buildApp(cfg: Config, opts: { logger?: boolean; startAncho
 
   await app.register(async (api) => {
     await metaRoutes(api, deps);
+    await publicRoutes(api, deps);
     await authRoutes(api, deps);
     await teamRoutes(api, deps);
     await sharingRoutes(api, deps);
