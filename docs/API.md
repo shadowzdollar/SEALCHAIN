@@ -83,6 +83,8 @@ HS codes may include dots; amounts are in the shipment's `currency`.
 | GET | `/shares/:token` | A shared bundle |
 | GET | `/keys` | SealChain issuer public key (Ed25519) |
 | GET | `/meta` | Corridors, anchoring network, pricing |
+| GET | `/status` | Component health and anchoring backlog (no internal detail) |
+| POST | `/contact` | Public-site enquiry `{name, email, company?, country?, topic, message}` (5/hour) |
 
 ## Webhooks
 
