@@ -21,15 +21,15 @@ export function SharedBundle() {
   const q = useQuery({ queryKey: ['bundle', token], queryFn: () => api.get<Bundle>(`/shares/${token}`), retry: false, refetchOnMount: false });
 
   return (
-    <div className="min-h-dvh bg-slate-50 dark:bg-navy-950">
-      <header className="bg-navy-900 text-white">
+    <div className="paper-grid min-h-dvh">
+      <header className="border-b border-slate-200 bg-surface/90 dark:border-navy-800 dark:bg-navy-950">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4 sm:px-6">
           <div className="flex items-center gap-4">
-            <Link to="/"><Logo light /></Link>
-            <span className="hidden h-5 w-px bg-white/20 sm:block" />
-            <span className="hidden text-[12px] font-medium uppercase tracking-[0.1em] text-navy-200 sm:block">Shared trade documents</span>
+            <Link to="/"><Logo /></Link>
+            <span className="hidden h-5 w-px bg-slate-300 sm:block dark:bg-white/20" />
+            <span className="hidden font-mono text-[11px] uppercase tracking-[0.16em] text-slate-500 sm:block dark:text-navy-300">Shared trade documents</span>
           </div>
-          <ThemeToggle className="text-navy-200 hover:bg-white/10 hover:text-white" />
+          <ThemeToggle />
         </div>
       </header>
       <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
@@ -48,11 +48,11 @@ function BundleView({ b, token }: { b: Bundle; token: string }) {
     <div className="space-y-6">
       <div>
         <p className="text-sm text-slate-500">{b.sharedBy} shared these documents with <span className="font-medium text-slate-700 dark:text-slate-300">{b.recipient}</span></p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">{s.reference || s.invoiceNumber}</h1>
+        <h1 className="mt-1 font-serif text-[30px] font-semibold tracking-[-0.02em]">{s.reference || s.invoiceNumber}</h1>
         <p className="mt-1 text-sm text-slate-600 dark:text-navy-300">{s.corridor} · {s.route}{s.border ? ` · via ${s.border}` : ''} · {s.transport}</p>
       </div>
 
-      <div className={`flex items-center gap-3 rounded-xl border-2 p-4 ${allAnchored ? 'border-emerald-300 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/40' : 'border-sky-300 bg-sky-50 dark:border-sky-800 dark:bg-sky-950/40'}`}>
+      <div className={`flex items-center gap-3 rounded-[3px] border-2 p-4 ${allAnchored ? 'border-emerald-300 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/40' : 'border-sky-300 bg-sky-50 dark:border-sky-800 dark:bg-sky-950/40'}`}>
         {allAnchored ? <ShieldCheck className="size-7 text-emerald-600" /> : <Clock className="size-7 text-sky-600" />}
         <p className="text-sm">
           {allAnchored
