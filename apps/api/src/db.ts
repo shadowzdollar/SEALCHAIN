@@ -370,6 +370,21 @@ const MIGRATIONS: string[] = [
   CREATE INDEX webhook_deliveries_due ON webhook_deliveries(status, next_attempt_at);
   CREATE INDEX webhook_deliveries_hook ON webhook_deliveries(webhook_id, created_at);
   `,
+  /* 11 — "talk to us" requests from the public site */ `
+  CREATE TABLE contact_requests (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    company TEXT,
+    country TEXT,
+    topic TEXT NOT NULL,
+    message TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    handled_at TEXT,
+    handled_by TEXT
+  );
+  CREATE INDEX contact_requests_open ON contact_requests(handled_at, created_at);
+  `,
 ];
 
 export class Db {
