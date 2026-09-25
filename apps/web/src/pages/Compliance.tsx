@@ -7,7 +7,7 @@ import { Alert, Badge, Button, Card, Field, Hash, Modal, PageHeader, PageLoader,
 import { cents, dateTime, relative } from '../format';
 import { Checklist, RuleChanges } from './ComplianceRules';
 
-type Tab = 'checklist' | 'changes' | 'rules' | 'tariff' | 'signals' | 'authorities' | 'anchor' | 'orgs' | 'audit';
+type Tab = 'checklist' | 'changes' | 'rules' | 'tariff' | 'signals' | 'authorities' | 'anchor' | 'orgs' | 'inbox' | 'audit';
 
 export function Compliance() {
   const [tab, setTab] = useState<Tab>('checklist');
@@ -26,6 +26,7 @@ export function Compliance() {
           { id: 'authorities', label: 'Authorities' },
           { id: 'anchor', label: 'Anchoring' },
           { id: 'orgs', label: 'Pilot accounts' },
+          { id: 'inbox', label: 'Enquiries' },
           { id: 'audit', label: 'Audit log' },
         ]}
       />
@@ -38,6 +39,7 @@ export function Compliance() {
         {tab === 'authorities' && <Authorities />}
         {tab === 'anchor' && <Anchoring />}
         {tab === 'orgs' && <Orgs />}
+        {tab === 'inbox' && <Inbox />}
         {tab === 'audit' && <Audit />}
       </div>
     </>
@@ -274,6 +276,46 @@ function Orgs() {
           <Field label="Reference"><input className="input" value={form.reference} onChange={(e) => setForm({ ...form, reference: e.target.value })} placeholder="MoMo transaction ID" /></Field>
         </div>
       </Modal>
+    </Card>
+  );
+}
+
+interface ContactRequest { id: string; name: string; email: string; company: string | null; country: string | null; topic: string; message: string; createdAt: string; handledAt: string | null; handledBy: string | null }
+
+/** "Talk to us" requests from the public site. */
+function Inbox() {
+  const qc = useQueryClient();
+  const q = useQuery({ queryKey: ['admin-contact'], queryFn: () => api.get<ContactRequest[]>('/admin/contact-requests') });
+  const done = useMutation({
+    mutationFn: (id: string) => api.post(`/admin/contact-requests/${id}/handled`, {}),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-contact'] }),
+  });
+  if (q.isLoading) return <PageLoader />;
+  const open = (q.data ?? []).filter((r) => !r.handledAt).length;
+  return (
+    <Card title="Enquiries" subtitle={`${open} open · from the contact form on the public site`} padded={false}>
+      {(q.data ?? []).length === 0 && <p className="px-5 py-8 text-center text-sm text-slate-500">No enquiries yet.</p>}
+      <ul className="divide-y divide-slate-100 dark:divide-navy-800">
+        {(q.data ?? []).map((r) => (
+          <li key={r.id} className={r.handledAt ? 'px-5 py-4 opacity-60' : 'px-5 py-4'}>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-medium">{r.name} <a href={`mailto:${r.email}`} className="font-normal text-slate-500 underline">{r.email}</a></p>
+                <p className="text-xs text-slate-500">{[r.company, r.country].filter(Boolean).join(' · ') || '—'} · {relative(r.createdAt)}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge tone={r.topic === 'pilot' ? 'green' : r.topic === 'authority' ? 'brand' : 'neutral'}>{r.topic}</Badge>
+                {r.handledAt ? (
+                  <span className="text-xs text-slate-500">Handled by {r.handledBy}</span>
+                ) : (
+                  <Button size="sm" variant="secondary" loading={done.isPending && done.variables === r.id} onClick={() => done.mutate(r.id)} icon={<CheckCircle2 className="size-3.5" />}>Mark handled</Button>
+                )}
+              </div>
+            </div>
+            <p className="mt-2 whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300">{r.message}</p>
+          </li>
+        ))}
+      </ul>
     </Card>
   );
 }
