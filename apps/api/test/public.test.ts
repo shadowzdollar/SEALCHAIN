@@ -56,6 +56,15 @@ describe('contact requests', () => {
   });
 });
 
+describe('social sign-in before it is configured', () => {
+  it('sends the browser back to sign-in with a message instead of an error page', async () => {
+    const res = await app.inject({ method: 'GET', url: '/api/auth/oauth/google/start' });
+    expect(res.statusCode).toBe(302);
+    expect(res.headers.location).toMatch(/\/login\?oauth_error=.*Google/);
+    expect((await app.inject({ method: 'GET', url: '/api/auth/oauth/facebook/start' })).statusCode).toBe(404);
+  });
+});
+
 describe('status', () => {
   it('reports each component without internal detail', async () => {
     const res = await app.inject({ method: 'GET', url: '/api/status' });
