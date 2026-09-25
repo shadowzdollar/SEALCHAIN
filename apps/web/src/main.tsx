@@ -1,4 +1,4 @@
-import { StrictMode, lazy, Suspense, type ReactNode } from 'react';
+import { StrictMode, lazy, Suspense, type LazyExoticComponent, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from './auth';
 import { AppLayout } from './components/Layout';
 import { PageLoader } from './components/ui';
 import { Landing } from './pages/Landing';
+import { MarketingLayout } from './marketing/Chrome';
 import { AcceptInvite, ForgotPassword, Login, Register, ResetPassword, SignupComplete } from './pages/Auth';
 import { Team } from './pages/Team';
 import { SharedBundle } from './pages/SharedBundle';
@@ -21,6 +22,30 @@ import { Parties } from './pages/Parties';
 import { Billing } from './pages/Billing';
 
 const Compliance = lazy(() => import('./pages/Compliance').then((m) => ({ default: m.Compliance })));
+
+// Public-site pages load on demand so the app bundle stays small.
+const page = <K extends string>(load: () => Promise<Record<K, () => ReactNode>>, name: K) =>
+  lazy(() => load().then((m) => ({ default: m[name] })));
+const ProductPage = page(() => import('./marketing/pages/Product'), 'ProductPage');
+const SolutionsPage = page(() => import('./marketing/pages/Solutions'), 'SolutionsPage');
+const PricingPage = page(() => import('./marketing/pages/Pricing'), 'PricingPage');
+const CorridorsPage = page(() => import('./marketing/pages/Corridors'), 'CorridorsPage');
+const SecurityPage = page(() => import('./marketing/pages/Security'), 'SecurityPage');
+const DevelopersPage = page(() => import('./marketing/pages/Developers'), 'DevelopersPage');
+const ContactPage = page(() => import('./marketing/pages/Contact'), 'ContactPage');
+const AboutPage = page(() => import('./marketing/pages/Company'), 'AboutPage');
+const ChangelogPage = page(() => import('./marketing/pages/Company'), 'ChangelogPage');
+const StatusPage = page(() => import('./marketing/pages/Company'), 'StatusPage');
+const PrivacyPage = page(() => import('./marketing/pages/Company'), 'PrivacyPage');
+const TermsPage = page(() => import('./marketing/pages/Company'), 'TermsPage');
+const NotFoundPage = page(() => import('./marketing/pages/Company'), 'NotFoundPage');
+const CreditsPage = page(() => import('./marketing/pages/Company'), 'CreditsPage');
+
+const lazyEl = (C: LazyExoticComponent<() => ReactNode>) => (
+  <Suspense fallback={<div className="min-h-[60vh]" />}>
+    <C />
+  </Suspense>
+);
 
 // Apply the saved theme before first paint.
 try {
@@ -61,7 +86,24 @@ createRoot(document.getElementById('root')!).render(
       <AuthProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route element={<MarketingLayout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/product" element={lazyEl(ProductPage)} />
+              <Route path="/solutions" element={<Navigate to="/solutions/exporters" replace />} />
+              <Route path="/solutions/:segment" element={lazyEl(SolutionsPage)} />
+              <Route path="/pricing" element={lazyEl(PricingPage)} />
+              <Route path="/corridors" element={lazyEl(CorridorsPage)} />
+              <Route path="/security" element={lazyEl(SecurityPage)} />
+              <Route path="/developers" element={lazyEl(DevelopersPage)} />
+              <Route path="/about" element={lazyEl(AboutPage)} />
+              <Route path="/contact" element={lazyEl(ContactPage)} />
+              <Route path="/changelog" element={lazyEl(ChangelogPage)} />
+              <Route path="/status" element={lazyEl(StatusPage)} />
+              <Route path="/legal/privacy" element={lazyEl(PrivacyPage)} />
+              <Route path="/legal/terms" element={lazyEl(TermsPage)} />
+              <Route path="/credits" element={lazyEl(CreditsPage)} />
+              <Route path="*" element={lazyEl(NotFoundPage)} />
+            </Route>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -98,7 +140,6 @@ createRoot(document.getElementById('root')!).render(
                 }
               />
             </Route>
-            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>
