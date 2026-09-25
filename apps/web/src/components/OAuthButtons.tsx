@@ -1,4 +1,7 @@
+import { useState } from 'react';
+import { Info } from 'lucide-react';
 import { useMeta } from '../auth';
+import { cx } from './ui';
 
 export function GoogleIcon({ className = 'size-4' }: { className?: string }) {
   return (
@@ -20,35 +23,52 @@ export function AppleIcon({ className = 'size-4' }: { className?: string }) {
 }
 
 const LABEL = { google: 'Google', apple: 'Apple' } as const;
+type Provider = keyof typeof LABEL;
 
-/** Full-page navigations to the API's OAuth start endpoint. */
+const STYLE: Record<Provider, string> = {
+  google: 'border border-slate-300 bg-white text-slate-800 hover:border-slate-400 hover:bg-slate-50 dark:border-navy-600 dark:bg-navy-900 dark:text-slate-100 dark:hover:bg-navy-800',
+  apple: 'bg-black text-white hover:bg-slate-800 dark:bg-white dark:text-black dark:hover:bg-slate-200',
+};
+
+/**
+ * "Continue with Google / Apple". Both are always offered; a provider that
+ * isn't configured on this server explains itself instead of failing.
+ */
 export function OAuthButtons({ verb = 'Continue', next, invite }: { verb?: string; next?: string; invite?: string }) {
-  const providers = useMeta().data?.oauthProviders ?? [];
-  if (!providers.length) return null;
-  const qs = (p: string) => {
+  const meta = useMeta();
+  const enabled = meta.data?.oauthProviders ?? [];
+  const [notice, setNotice] = useState<string | null>(null);
+  const href = (p: Provider) => {
     const q = new URLSearchParams();
     if (next) q.set('next', next);
     if (invite) q.set('invite', invite);
     return `/api/auth/oauth/${p}/start${q.size ? `?${q}` : ''}`;
   };
+  const cls = (p: Provider) => cx('flex h-11 w-full items-center justify-center gap-2.5 rounded-[3px] text-[14px] font-medium transition-colors', STYLE[p]);
   return (
-    <div className="space-y-2">
-      {providers.map((p) => (
-        <a
-          key={p}
-          href={qs(p)}
-          className={
-            p === 'apple'
-              ? 'flex h-10 w-full items-center justify-center gap-2 rounded-md bg-black text-sm font-medium text-white hover:bg-slate-800 dark:bg-white dark:text-black dark:hover:bg-slate-200'
-              : 'flex h-10 w-full items-center justify-center gap-2 rounded-md border border-slate-300 bg-white text-sm font-medium text-slate-800 hover:bg-slate-50 dark:border-navy-600 dark:bg-navy-900 dark:text-slate-100 dark:hover:bg-navy-800'
-          }
-        >
-          {p === 'google' ? <GoogleIcon /> : <AppleIcon />}
-          {verb} with {LABEL[p]}
-        </a>
-      ))}
-      <div className="flex items-center gap-3 py-1 text-xs text-slate-400">
-        <span className="h-px flex-1 bg-slate-200 dark:bg-navy-800" /> or <span className="h-px flex-1 bg-slate-200 dark:bg-navy-800" />
+    <div className="space-y-2.5">
+      {(['google', 'apple'] as const).map((p) => {
+        const label = <>{p === 'google' ? <GoogleIcon className="size-[18px]" /> : <AppleIcon className="size-[18px]" />}{verb} with {LABEL[p]}</>;
+        return enabled.includes(p) ? (
+          <a key={p} href={href(p)} className={cls(p)}>{label}</a>
+        ) : (
+          <button
+            key={p}
+            type="button"
+            className={cls(p)}
+            onClick={() => setNotice(`Sign in with ${LABEL[p]} is being connected for the pilot. Please use your email and password for now.`)}
+          >
+            {label}
+          </button>
+        );
+      })}
+      {notice && (
+        <p role="status" className="flex gap-2 rounded-[3px] border border-amber-200 bg-amber-50 px-3 py-2 text-[13px] text-amber-900 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-100">
+          <Info className="mt-0.5 size-4 shrink-0" /> {notice}
+        </p>
+      )}
+      <div className="flex items-center gap-3 py-2 font-mono text-[10.5px] uppercase tracking-[0.16em] text-slate-400">
+        <span className="h-px flex-1 bg-slate-200 dark:bg-navy-800" /> or with email <span className="h-px flex-1 bg-slate-200 dark:bg-navy-800" />
       </div>
     </div>
   );
