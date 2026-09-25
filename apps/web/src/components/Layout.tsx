@@ -22,21 +22,27 @@ import {
 import { useAuth, useMeta } from '../auth';
 import { cx } from './ui';
 
-export function LogoMark({ className = 'size-7' }: { className?: string }) {
+/** Circular "S" seal — the same mark as on the printed documents. */
+export function LogoMark({ className = 'size-8', light }: { className?: string; light?: boolean }) {
   return (
-    <svg viewBox="0 0 32 32" className={cx('shrink-0', className)} aria-hidden>
-      <rect width="32" height="32" rx="7" fill="#1d4ed8" />
-      <path d="M16 6.5l7.5 3.3v5.7c0 4.8-3.2 8.5-7.5 10-4.3-1.5-7.5-5.2-7.5-10V9.8z" fill="none" stroke="#fff" strokeWidth="2" strokeLinejoin="round" />
-      <path d="M12.4 16.1l2.5 2.5 4.8-5" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
+    <span
+      aria-hidden
+      className={cx(
+        'flex shrink-0 items-center justify-center rounded-full border-[1.5px] font-serif text-[15px] font-semibold leading-none',
+        light ? 'border-white text-white' : 'border-navy-900 text-navy-900 dark:border-slate-100 dark:text-slate-100',
+        className,
+      )}
+    >
+      S
+    </span>
   );
 }
 
 export function Logo({ className, light }: { className?: string; light?: boolean }) {
   return (
-    <span className={cx('inline-flex items-center gap-2.5 font-semibold tracking-[-0.01em]', className)}>
-      <LogoMark />
-      <span className={cx('text-[15px]', light ? 'text-white' : 'text-slate-900 dark:text-white')}>SealChain</span>
+    <span className={cx('inline-flex items-center gap-2.5', className)}>
+      <LogoMark light={light} />
+      <span className={cx('font-serif text-[20px] font-semibold tracking-[-0.01em]', light ? 'text-white' : 'text-navy-900 dark:text-white')}>SealChain</span>
     </span>
   );
 }
@@ -79,14 +85,14 @@ function NavItem({ to, icon, children, end }: { to: string; icon: ReactNode; chi
       className={({ isActive }) =>
         cx(
           'group relative flex items-center gap-3 rounded-md px-3 py-[7px] text-[13px] font-medium transition-colors',
-          isActive ? 'bg-white/10 text-white' : 'text-navy-200 hover:bg-white/5 hover:text-white',
+          isActive ? 'bg-white text-navy-900 shadow-[0_1px_2px_rgba(11,31,58,0.06)] ring-1 ring-slate-200 dark:bg-white/10 dark:text-white dark:ring-0' : 'text-slate-600 hover:bg-white/70 hover:text-navy-900 dark:text-navy-200 dark:hover:bg-white/5 dark:hover:text-white',
         )
       }
     >
       {({ isActive }) => (
         <>
-          {isActive && <span className="absolute inset-y-1.5 -left-3 w-[3px] rounded-r bg-brand-400" />}
-          <span className={cx('[&>svg]:size-[17px]', isActive ? 'text-brand-300' : 'text-navy-300 group-hover:text-navy-100')}>{icon}</span>
+          {isActive && <span className="absolute inset-y-1.5 -left-3 w-[3px] rounded-r bg-stamp" />}
+          <span className={cx('[&>svg]:size-[17px]', isActive ? 'text-navy-900 dark:text-slate-100' : 'text-slate-500 group-hover:text-navy-900 dark:text-navy-300 dark:group-hover:text-navy-100')}>{icon}</span>
           {children}
         </>
       )}
@@ -97,7 +103,7 @@ function NavItem({ to, icon, children, end }: { to: string; icon: ReactNode; chi
 function Section({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="space-y-0.5">
-      <p className="px-3 pb-1.5 pt-4 text-[10.5px] font-semibold uppercase tracking-[0.1em] text-navy-400">{label}</p>
+      <p className="px-3 pb-1.5 pt-4 font-mono text-[10.5px] uppercase tracking-[0.16em] text-slate-500 dark:text-navy-400">{label}</p>
       {children}
     </div>
   );
@@ -165,7 +171,7 @@ function UserMenu() {
   return (
     <div className="relative" ref={ref}>
       <button onClick={() => setOpen((v) => !v)} className="flex items-center gap-2 rounded-md py-1 pl-1 pr-2 hover:bg-slate-100 dark:hover:bg-navy-800" aria-haspopup="menu" aria-expanded={open}>
-        <span className="flex size-7 items-center justify-center rounded-full bg-navy-900 text-[11px] font-semibold text-white dark:bg-brand-700">{initials}</span>
+        <span className="flex size-7 items-center justify-center rounded-full bg-navy-900 text-[11px] font-semibold text-white dark:bg-slate-100 dark:text-navy-900">{initials}</span>
         <span className="hidden text-left sm:block">
           <span className="block max-w-36 truncate text-[13px] font-medium leading-tight text-slate-900 dark:text-white">{me?.user.name}</span>
           <span className="block text-[11px] capitalize leading-tight text-slate-500 dark:text-navy-300">{me?.user.role}</span>
@@ -173,7 +179,7 @@ function UserMenu() {
         <ChevronDown className="size-3.5 text-slate-400" />
       </button>
       {open && (
-        <div role="menu" className="absolute right-0 z-50 mt-1.5 w-64 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg shadow-slate-900/10 dark:border-navy-700 dark:bg-navy-900">
+        <div role="menu" className="absolute right-0 z-50 mt-1.5 w-64 overflow-hidden rounded-[3px] border border-slate-200 bg-white shadow-lg shadow-slate-900/10 dark:border-navy-700 dark:bg-navy-900">
           <div className="border-b border-slate-100 px-4 py-3 dark:border-navy-700">
             <p className="truncate text-sm font-medium">{me?.user.name}</p>
             <p className="truncate text-xs text-slate-500 dark:text-navy-300">{me?.user.email}</p>
@@ -210,7 +216,7 @@ function TopSearch() {
   return (
     <form onSubmit={submit} className="relative hidden w-72 lg:block" role="search">
       <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-      <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search shipments, invoices, buyers…" aria-label="Search shipments" className="input h-8 bg-slate-50 pl-8 text-[13px] dark:bg-navy-900" />
+      <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search shipments, invoices, buyers…" aria-label="Search shipments" className="input h-8 pl-8 text-[13px] dark:bg-navy-900" />
     </form>
   );
 }
@@ -255,18 +261,18 @@ export function AppLayout() {
   );
 
   const sidebar = (
-    <div className="flex h-full flex-col bg-navy-900 dark:bg-navy-950 dark:border-r dark:border-navy-800">
+    <div className="flex h-full flex-col border-r border-slate-200 bg-slate-100 dark:border-navy-800 dark:bg-navy-950">
       <div className="flex h-14 items-center px-5">
-        <Link to="/app"><Logo light /></Link>
+        <Link to="/app"><Logo /></Link>
       </div>
-      <div className="mx-3 mb-1 rounded-md border border-white/10 bg-white/5 px-3 py-2.5">
-        <p className="truncate text-[13px] font-medium text-white">{me?.org.name}</p>
-        <p className="mt-0.5 text-[11px] text-navy-300">
+      <div className="mx-3 mb-1 rounded-[2px] border border-slate-200 bg-white px-3 py-2.5 dark:border-white/10 dark:bg-white/5">
+        <p className="truncate font-serif text-[14px] font-medium text-navy-900 dark:text-white">{me?.org.name}</p>
+        <p className="mt-0.5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-slate-500 dark:text-navy-300">
           {authority ? 'Issuing authority' : me?.user.role === 'compliance' ? 'Platform administration' : me?.org.plan === 'pilot' ? 'Pilot plan' : `${me?.org.plan} plan`}
         </p>
       </div>
       {nav}
-      <div className="border-t border-white/10 px-5 py-3 text-[11px] text-navy-400">SealChain · EAC trade compliance</div>
+      <div className="border-t border-slate-200 px-5 py-3 font-mono text-[10.5px] uppercase tracking-[0.12em] text-slate-500 dark:border-white/10 dark:text-navy-400">EAC trade compliance</div>
     </div>
   );
 
@@ -278,11 +284,11 @@ export function AppLayout() {
           <div className="absolute inset-0 bg-navy-950/50" />
           <div className="absolute inset-y-0 left-0 w-64" onClick={(e) => e.stopPropagation()}>
             {sidebar}
-            <button onClick={() => setOpen(false)} className="absolute right-3 top-4 rounded p-1 text-navy-200" aria-label="Close menu"><X className="size-5" /></button>
+            <button onClick={() => setOpen(false)} className="absolute right-3 top-4 rounded p-1 text-slate-600 dark:text-navy-200" aria-label="Close menu"><X className="size-5" /></button>
           </div>
         </div>
       )}
-      <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-slate-200/80 bg-white/95 px-4 backdrop-blur sm:px-6 dark:border-navy-800 dark:bg-navy-950/95">
+      <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-slate-200 bg-surface/90 px-4 backdrop-blur sm:px-6 dark:border-navy-800 dark:bg-navy-950/95">
         <button className="rounded-md p-1.5 hover:bg-slate-100 lg:hidden dark:hover:bg-navy-800" onClick={() => setOpen(true)} aria-label="Open menu">
           <Menu className="size-5" />
         </button>
