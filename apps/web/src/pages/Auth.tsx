@@ -8,40 +8,61 @@ import { Alert, Button, Field } from '../components/ui';
 import { useMeta } from '../auth';
 import { cents } from '../format';
 import { OAuthButtons } from '../components/OAuthButtons';
+import { PHOTOS, type Photo } from '../marketing/photos';
 
-function Shell({ title, subtitle, children, footer }: { title: string; subtitle: string; children: ReactNode; footer: ReactNode }) {
+const SHELL_COPY: Record<'default' | 'signup', { eyebrow: string; title: ReactNode }> = {
+  default: { eyebrow: 'EAC trade compliance', title: <>Export documents that clear the border — and prove they are <em className="font-medium text-[#f3b4ad]">genuine</em>.</> },
+  signup: { eyebrow: 'Join the pilot', title: <>From the hillside to the harbour, paperwork that <em className="font-medium text-[#f3b4ad]">checks out</em>.</> },
+};
+
+function Shell({ title, subtitle, children, footer, photo = PHOTOS.portCranes, copy = 'default' }: { title: string; subtitle: string; children: ReactNode; footer: ReactNode; photo?: Photo; copy?: keyof typeof SHELL_COPY }) {
+  const c = SHELL_COPY[copy];
   return (
-    <div className="grid min-h-dvh lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
-      <aside className="paper-grid relative hidden border-r border-slate-200 px-12 py-10 lg:flex lg:flex-col dark:border-navy-800">
-        <Link to="/" className="relative"><Logo /></Link>
-        <div className="relative my-auto max-w-md">
-          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-slate-500 dark:text-navy-300">EAC trade compliance</p>
-          <h2 className="mt-4 font-serif text-[36px] font-semibold leading-[1.1] tracking-[-0.02em]">
-            Export documents that clear the border — and prove they are <em className="font-medium text-stamp">genuine</em>.
-          </h2>
-          <ol className="mt-9 divide-y divide-slate-200 border-y border-slate-200 text-[14px] dark:divide-navy-800 dark:border-navy-800">
+    <div className="grid min-h-dvh lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)]">
+      <aside className="relative isolate hidden overflow-hidden bg-navy-900 text-white lg:flex lg:flex-col">
+        <img src={photo.src} alt={photo.alt} className="absolute inset-0 -z-20 size-full object-cover" />
+        <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-t from-navy-950 via-navy-950/65 to-navy-950/35" />
+        <div aria-hidden className="absolute inset-x-0 top-0 -z-10 h-44 bg-gradient-to-b from-navy-950/75 to-transparent" />
+        <div className="flex items-center justify-between px-12 pt-10">
+          <Link to="/"><Logo light /></Link>
+          <div className="stamp rotate-[-6deg] !border-white/80 !text-white [box-shadow:none]">Anchored ✓</div>
+        </div>
+        <div className="mt-auto max-w-xl px-12 pb-10">
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-navy-200">{c.eyebrow}</p>
+          <h2 className="mt-4 font-serif text-[40px] font-semibold leading-[1.08] tracking-[-0.02em]">{c.title}</h2>
+          <ol className="mt-8 grid gap-4 border-t border-white/20 pt-6 text-[14px] xl:grid-cols-3">
             {[
-              ['Validated before submission', 'Tariff codes, rules of origin, tax IDs and permits checked for your corridor.'],
-              ['Authentic from issue', 'Every PDF is signed and anchored on a public blockchain. Any edit is detected.'],
-              ['Verifiable by anyone', 'Customs, banks and buyers confirm a document in seconds — no account needed.'],
+              ['Validated', 'Codes, origin rules, tax IDs and permits checked for your corridor.'],
+              ['Sealed', 'Every PDF signed and anchored on a public blockchain.'],
+              ['Verifiable', 'Customs, banks and buyers check it in seconds.'],
             ].map(([t, d], i) => (
-              <li key={t} className="grid grid-cols-[2.5rem_minmax(0,1fr)] gap-3 py-4">
-                <span className="font-mono text-[12px] text-stamp">{String(i + 1).padStart(2, '0')}</span>
-                <span><span className="block font-serif text-[16px] font-medium">{t}</span> <span className="text-slate-600 dark:text-navy-300">{d}</span></span>
+              <li key={t}>
+                <span className="font-mono text-[11px] text-[#f3b4ad]">{String(i + 1).padStart(2, '0')}</span>
+                <span className="mt-1 block font-serif text-[17px] font-medium">{t}</span>
+                <span className="mt-0.5 block text-[13px] leading-snug text-navy-100">{d}</span>
               </li>
             ))}
           </ol>
+          <div className="mt-8 flex items-center justify-between gap-4 font-mono text-[10.5px] text-white/60">
+            <span className="shrink-0 whitespace-nowrap uppercase tracking-[0.18em]">{photo.place || 'Rwanda · Kenya · Uganda · Tanzania · Burundi'}</span>
+            <a href={photo.source} target="_blank" rel="noreferrer" className="truncate hover:underline">Photo: {photo.author} · {photo.license}</a>
+          </div>
         </div>
-        <p className="relative font-mono text-[11px] uppercase tracking-[0.2em] text-slate-500 dark:text-navy-400">Rwanda · Kenya · Uganda · Tanzania · Burundi</p>
       </aside>
       <div className="flex flex-col bg-surface dark:bg-navy-950">
-        <header className="flex items-center justify-between px-6 py-5 sm:px-10">
-          <Link to="/" className="lg:invisible"><Logo /></Link>
+        {/* phones: a strip of the same photograph */}
+        <div className="relative h-36 overflow-hidden lg:hidden">
+          <img src={photo.sm} alt={photo.alt} className="size-full object-cover" />
+          <div aria-hidden className="absolute inset-0 bg-navy-950/45" />
+          <Link to="/" className="absolute left-5 top-4"><Logo light /></Link>
+          <span className="absolute bottom-2 right-3 font-mono text-[9.5px] text-white/75">Photo: {photo.author} · {photo.license}</span>
+        </div>
+        <header className="flex items-center justify-end px-6 py-5 sm:px-10">
           <ThemeToggle />
         </header>
-        <div className="flex flex-1 items-start justify-center px-6 pb-16 pt-4 sm:pt-12">
-          <div className="w-full max-w-[400px]">
-            <h1 className="font-serif text-[30px] font-semibold tracking-[-0.02em]">{title}</h1>
+        <div className="flex flex-1 items-start justify-center px-6 pb-16 sm:pt-6">
+          <div className="w-full max-w-[420px]">
+            <h1 className="font-serif text-[32px] font-semibold tracking-[-0.02em]">{title}</h1>
             <p className="mt-1.5 text-[14px] text-slate-500 dark:text-navy-300">{subtitle}</p>
             <div className="mt-7">{children}</div>
             <p className="mt-6 text-[13px] text-slate-500 dark:text-navy-300">{footer}</p>
@@ -118,7 +139,7 @@ export function Register() {
   }
 
   return (
-    <Shell title="Join the pilot" subtitle="For exporters, freight forwarders and customs brokers." footer={<>Already have an account? <Link className="font-medium text-brand-700 hover:underline dark:text-brand-300" to="/login">Sign in</Link></>}>
+    <Shell photo={PHOTOS.teaPicker} copy="signup" title="Join the pilot" subtitle="For exporters, freight forwarders and customs brokers." footer={<>Already have an account? <Link className="font-medium text-brand-700 hover:underline dark:text-brand-300" to="/login">Sign in</Link></>}>
       <form onSubmit={submit} className="space-y-4">
         {error && <Alert tone="error">{error}</Alert>}
         <OAuthButtons verb="Sign up" />
@@ -156,7 +177,7 @@ export function ForgotPassword() {
     }
   }
   return (
-    <Shell title="Reset your password" subtitle="We will email you a link that works for one hour." footer={<Link className="font-medium text-brand-700 hover:underline dark:text-brand-300" to="/login">Back to sign in</Link>}>
+    <Shell photo={PHOTOS.shipMombasa} title="Reset your password" subtitle="We will email you a link that works for one hour." footer={<Link className="font-medium text-brand-700 hover:underline dark:text-brand-300" to="/login">Back to sign in</Link>}>
       {sent ? (
         <Alert tone="success">{sent}</Alert>
       ) : (
@@ -191,7 +212,7 @@ export function ResetPassword() {
     }
   }
   return (
-    <Shell title="Choose a new password" subtitle="You will be signed out on every other device." footer={<Link className="font-medium text-brand-700 hover:underline dark:text-brand-300" to="/forgot-password">Request a new link</Link>}>
+    <Shell photo={PHOTOS.shipMombasa} title="Choose a new password" subtitle="You will be signed out on every other device." footer={<Link className="font-medium text-brand-700 hover:underline dark:text-brand-300" to="/forgot-password">Request a new link</Link>}>
       <form onSubmit={submit} className="space-y-4">
         {error && <Alert tone="error">{error}</Alert>}
         <Field label="New password" hint="At least 10 characters."><input className="input" type="password" required minLength={10} autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} /></Field>
@@ -226,6 +247,7 @@ export function AcceptInvite() {
   }
   return (
     <Shell
+      photo={PHOTOS.kigaliSkyline}
       title={info.data ? `Join ${info.data.org}` : 'Join your team'}
       subtitle={info.data ? `${info.data.inviter} invited ${info.data.email} as ${info.data.role}.` : 'Accept your invitation to SealChain.'}
       footer={<>Already have an account? <Link className="font-medium text-brand-700 hover:underline dark:text-brand-300" to="/login">Sign in</Link></>}
@@ -271,7 +293,7 @@ export function SignupComplete() {
     }
   }
   return (
-    <Shell title="One last step" subtitle={info.data ? `Signed in with ${info.data.providerName} as ${info.data.email}.` : 'Tell us about your business.'} footer={<Link className="font-medium text-brand-700 hover:underline dark:text-brand-300" to="/login">Cancel</Link>}>
+    <Shell photo={PHOTOS.teaFields} copy="signup" title="One last step" subtitle={info.data ? `Signed in with ${info.data.providerName} as ${info.data.email}.` : 'Tell us about your business.'} footer={<Link className="font-medium text-brand-700 hover:underline dark:text-brand-300" to="/login">Cancel</Link>}>
       {info.isError || !token ? (
         <Alert tone="error">{info.error instanceof ApiError ? info.error.message : 'This sign-up link is invalid. Please start again.'}</Alert>
       ) : (
