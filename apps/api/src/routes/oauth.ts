@@ -47,6 +47,11 @@ export async function oauthRoutes(api: FastifyInstance, { db, cfg }: Deps) {
 
   // ----------------------------------------------------------------- start
   api.get<{ Params: { provider: string }; Querystring: { next?: string; invite?: string; link?: string } }>('/auth/oauth/:provider/start', RATE, async (req, reply) => {
+    // A browser landing here for a provider we haven't configured gets sent back with a message, not an error page.
+    const known = req.params.provider === 'google' || req.params.provider === 'apple';
+    if (known && !enabledProviders(cfg).includes(req.params.provider as ProviderId)) {
+      return fail(reply, `Sign in with ${PROVIDERS[req.params.provider as ProviderId].name} isn’t available yet. Please use your email and password for now.`);
+    }
     const p = provider(req.params.provider);
     // "Connect Google" from settings: link to the signed-in user, whatever the provider email is.
     const linkUser = req.query.link === '1' && req.auth?.via === 'session' ? req.auth.user.id : null;
