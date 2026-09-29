@@ -95,7 +95,7 @@ export function QrGlyph({ className }: { className?: string }) {
  */
 export function CorridorMap({ className, highlight, compact }: { className?: string; highlight?: string | null; compact?: boolean }) {
   const { width, height, countries, lakes, places, posts, routes } = MAP;
-  const LABEL_SIDE: Record<string, 'start' | 'end'> = { kigali: 'end', bujumbura: 'end', akanyaru: 'end', gatuna: 'end', kagitumba: 'start' };
+  const LABEL_SIDE: Record<string, 'start' | 'end'> = { kigali: 'end', bujumbura: 'end', akanyaru: 'end', gatuna: 'end' };
   const halo = 'paint-order:stroke;stroke:var(--color-paper-card);stroke-width:3.5px;stroke-linejoin:round';
   return (
     <svg viewBox={`0 0 ${width} ${height}`} className={cx('w-full', className)} role="img" aria-label="Map of East Africa showing SealChain's road corridors from Kigali to Kampala, Nairobi, Mombasa, Dar es Salaam and Bujumbura">
@@ -104,8 +104,8 @@ export function CorridorMap({ className, highlight, compact }: { className?: str
         <path key={c.code} d={c.d} className={cx(c.eac ? 'fill-paper-card' : 'fill-paper-tint', c.code === 'RW' ? 'stroke-ink' : 'stroke-[var(--color-border-strong)]')} strokeWidth={c.code === 'RW' ? 1.4 : 0.8} strokeLinejoin="round" />
       ))}
       {lakes.map((l) => <path key={l.name} d={l.d} className="fill-[var(--color-sea)] stroke-[var(--color-border-strong)]" strokeWidth={0.4} />)}
-      {!compact && countries.map((c) => (
-        <text key={c.code} x={c.label[0]} y={c.label[1]} textAnchor="middle" className={cx('font-plexmono uppercase', c.eac ? 'fill-ink' : 'fill-slate-400')} fontSize={c.eac ? 11.5 : 10} letterSpacing={2.2} style={{ opacity: c.eac ? 0.75 : 0.9 }}>{c.name}</text>
+      {!compact && countries.filter((c) => c.label).map((c) => (
+        <text key={c.code} x={c.label![0]} y={c.label![1]} textAnchor="middle" className={cx('font-plexmono uppercase', c.eac ? 'fill-ink' : 'fill-slate-400')} fontSize={c.eac ? 11.5 : 10} letterSpacing={2.2} style={{ opacity: c.eac ? 0.75 : 0.9 }}>{c.name}</text>
       ))}
       {!compact && lakes.filter((l) => l.label).map((l) => (
         <text key={l.name} x={l.label![0]} y={l.label![1]} textAnchor="middle" className="fill-[var(--color-sea-ink)] font-serif italic" fontSize={12}>{l.name}</text>
@@ -127,7 +127,7 @@ export function CorridorMap({ className, highlight, compact }: { className?: str
         </g>
       ))}
       {!compact && <text x={width - 10} y={height - 10} textAnchor="end" className="fill-slate-500 font-plexmono" fontSize={9.5}>Map data: Natural Earth (public domain) · routes indicative</text>}
-      {!compact && <text x={width - 60} y={height * 0.62} textAnchor="middle" className="fill-[var(--color-sea-ink)] font-serif italic" fontSize={13} letterSpacing={1}>Indian Ocean</text>}
+      {!compact && <text x={width - 62} y={height * 0.78} textAnchor="middle" className="fill-[var(--color-sea-ink)] font-serif italic" fontSize={13} letterSpacing={1}>Indian Ocean</text>}
     </svg>
   );
 }
@@ -183,7 +183,7 @@ export function AppWindow({ className }: { className?: string }) {
         <span className="ml-3 flex-1 truncate rounded-[2px] bg-paper-card px-2 py-0.5 font-plexmono text-[10px] text-slate-500">app.sealchain · /app/shipments</span>
       </div>
       <div className="grid grid-cols-[110px_minmax(0,1fr)]">
-        <div className="space-y-1.5 border-r border-paper-rule bg-slate-100 p-3">
+        <div className="space-y-1.5 border-r border-paper-rule bg-paper-tint p-3">
           <div className="mb-3 flex items-center gap-1.5"><img src="/brand/sealchain-seal-64.png" alt="" className="size-5" /><span className="font-serif text-[11px] font-semibold">SealChain</span></div>
           {['Dashboard', 'Shipments', 'Check', 'Address book', 'Team'].map((t, i) => (
             <p key={t} className={cx('rounded-[2px] px-1.5 py-1 text-[10px]', i === 1 ? 'bg-paper-card font-medium text-ink ring-1 ring-paper-rule' : 'text-slate-500')}>{t}</p>
@@ -277,7 +277,7 @@ export function MerkleDiagram({ className }: { className?: string }) {
         {/* chain block */}
         <rect x="185" y="10" width="150" height="46" rx="2" fill="var(--color-ink)" />
         <text x="260" y="30" textAnchor="middle" fill="var(--color-ink-contrast)" letterSpacing="1.5">ON-CHAIN ROOT</text>
-        <text x="260" y="46" textAnchor="middle" fill="#93a6c4">0xe1ac…31bd</text>
+        <text x="260" y="46" textAnchor="middle" fill="var(--color-ink-contrast)" fillOpacity={0.7}>0xe1ac…31bd</text>
         <line x1="260" y1="56" x2="260" y2="92" stroke="var(--color-ink)" strokeWidth="1.5" />
         {/* level 1 */}
         {[140, 380].map((x) => (

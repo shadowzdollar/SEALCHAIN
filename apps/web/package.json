@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "i18n:check": "node scripts/i18n-check.mjs"
   },
   "dependencies": {
     "@sealchain/core": "workspace:*",

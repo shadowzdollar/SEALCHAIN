@@ -38,13 +38,14 @@ const WANTED = {
   894: ['ZM', 'Zambia', false], 454: ['MW', 'Malawi', false], 508: ['MZ', 'Mozambique', false],
 };
 // Hand-placed label anchors [lon, lat] where the centroid reads poorly.
-const LABEL_AT = { RW: [30.0, -1.6], BI: [29.9, -3.2], UG: [32.4, 1.6], KE: [37.9, 0.6], TZ: [34.6, -6.2], CD: [28.3, -2.6], SS: [31.6, 3.4], ET: [39.4, 3.3], SO: [41.6, 1.2], ZM: [30.6, -8.9], MW: [33.9, -9.0], MZ: [39.8, -9.0] };
+// null = too small or too crowded to label (cities and posts carry those areas).
+const LABEL_AT = { RW: null, BI: null, UG: [32.4, 1.6], KE: [37.9, 0.6], TZ: [34.6, -6.2], CD: [28.35, -5.0], SS: [31.6, 3.4], ET: [39.4, 3.3], SO: [41.6, 1.2], ZM: [30.6, -8.9], MW: null, MZ: null };
 
 const outCountries = countries
   .filter((f) => WANTED[Number(f.id)])
   .map((f) => {
     const [code, name, eac] = WANTED[Number(f.id)];
-    return { code, name, eac, d: path(f), label: pt(LABEL_AT[code]) };
+    return { code, name, eac, d: path(f), label: LABEL_AT[code] ? pt(LABEL_AT[code]) : null };
   })
   .filter((c) => c.d);
 
@@ -70,7 +71,6 @@ const PLACES = {
 };
 const POSTS = {
   gatuna: ['Gatuna', [30.012, -1.428]],
-  kagitumba: ['Kagitumba', [30.46, -1.05]],
   malaba: ['Malaba', [34.2817, 0.6376]],
   rusumo: ['Rusumo', [30.7833, -2.3833]],
   akanyaru: ['Akanyaru-Haut', [29.78, -2.78]],

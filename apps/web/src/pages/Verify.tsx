@@ -66,21 +66,9 @@ const VERDICT: Record<string, { key: 'authentic' | 'pending' | 'superseded' | 'r
   },
 };
 
+/** Public verifier. The language is the site-wide choice (see locale.tsx). */
 export function Verify() {
-  const [lang, setLangState] = useState<Lang>(detectLang);
-  const setLang = (l: Lang) => {
-    setLangState(l);
-    try {
-      localStorage.setItem('sc-lang', l);
-    } catch {
-      /* ignore */
-    }
-  };
-  return (
-    <LangContext.Provider value={{ lang, setLang }}>
-      <VerifyPage />
-    </LangContext.Provider>
-  );
+  return <VerifyPage />;
 }
 
 export function LanguageSelect() {

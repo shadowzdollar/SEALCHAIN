@@ -1,5 +1,6 @@
 /** Navigation structure for the public site: mega menu and footer. */
 import type { LucideIcon } from 'lucide-react';
+import { msg } from '../locale';
 import {
   Activity,
   BadgeCheck,
@@ -45,141 +46,141 @@ export interface Menu {
 export const MENUS: Menu[] = [
   {
     id: 'product',
-    label: 'Product',
+    label: msg('Product'),
     groups: [
       {
-        title: 'Prepare',
+        title: msg('Prepare'),
         items: [
-          { label: 'Document generation', to: '/product#generate', desc: 'Invoice, certificate of origin and packing list from one record.', icon: FileCheck2 },
-          { label: 'Pre-submission checks', to: '/product#validate', desc: 'Corridor rules, HS codes, tax IDs and permits checked before print.', icon: ListChecks },
+          { label: msg('Document generation'), to: '/product#generate', desc: msg('Invoice, certificate of origin and packing list from one record.'), icon: FileCheck2 },
+          { label: msg('Pre-submission checks'), to: '/product#validate', desc: msg('Corridor rules, HS codes, tax IDs and permits checked before print.'), icon: ListChecks },
         ],
       },
       {
-        title: 'Protect',
+        title: msg('Protect'),
         items: [
-          { label: 'Blockchain anchoring', to: '/product#anchor', desc: 'Every PDF fingerprinted, signed and anchored at issue.', icon: Fingerprint },
-          { label: 'Authority endorsement', to: '/solutions/authorities', desc: 'Issuing authorities endorse certificates on the same record.', icon: Stamp },
+          { label: msg('Blockchain anchoring'), to: '/product#anchor', desc: msg('Every PDF fingerprinted, signed and anchored at issue.'), icon: Fingerprint },
+          { label: msg('Authority endorsement'), to: '/solutions/authorities', desc: msg('Issuing authorities endorse certificates on the same record.'), icon: Stamp },
         ],
       },
       {
-        title: 'Check',
+        title: msg('Check'),
         items: [
-          { label: 'Public verifier', to: '/verify', desc: 'Anyone scans the QR code or drops the file. No account.', icon: ScanLine },
-          { label: 'Fraud screening', to: '/product#screen', desc: 'Altered copies, fabricated references and editing traces.', icon: FileSearch },
+          { label: msg('Public verifier'), to: '/verify', desc: msg('Anyone scans the QR code or drops the file. No account.'), icon: ScanLine },
+          { label: msg('Fraud screening'), to: '/product#screen', desc: msg('Altered copies, fabricated references and editing traces.'), icon: FileSearch },
         ],
       },
     ],
-    featured: { eyebrow: 'Try it now', title: 'Verify a document', body: 'Drop any SealChain PDF and see its record, signature and on-chain proof in seconds.', to: '/verify', cta: 'Open the verifier', art: 'verify' },
+    featured: { eyebrow: msg('Try it now'), title: msg('Verify a document'), body: msg('Drop any SealChain PDF and see its record, signature and on-chain proof in seconds.'), to: '/verify', cta: msg('Open the verifier'), art: 'verify' },
   },
   {
     id: 'solutions',
-    label: 'Solutions',
+    label: msg('Solutions'),
     groups: [
       {
-        title: 'By role',
+        title: msg('By role'),
         items: [
-          { label: 'Exporters & SMEs', to: '/solutions/exporters', desc: 'Get documents right the first time and clear the border faster.', icon: Package },
-          { label: 'Issuing authorities', to: '/solutions/authorities', desc: 'Review and endorse certificates of origin digitally.', icon: Landmark },
-          { label: 'Banks, buyers & insurers', to: '/solutions/verifiers', desc: 'Confirm a document is genuine before you pay or finance.', icon: Banknote },
+          { label: msg('Exporters & SMEs'), to: '/solutions/exporters', desc: msg('Get documents right the first time and clear the border faster.'), icon: Package },
+          { label: msg('Issuing authorities'), to: '/solutions/authorities', desc: msg('Review and endorse certificates of origin digitally.'), icon: Landmark },
+          { label: msg('Banks, buyers & insurers'), to: '/solutions/verifiers', desc: msg('Confirm a document is genuine before you pay or finance.'), icon: Banknote },
         ],
       },
       {
-        title: 'By corridor',
+        title: msg('By corridor'),
         items: [
-          { label: 'Rwanda → Kenya', to: '/corridors#RW-KE', desc: 'Gatuna or Kagitumba to Malaba and Busia.', icon: Map },
-          { label: 'Rwanda → Uganda', to: '/corridors#RW-UG', desc: 'Gatuna, Kagitumba or Cyanika.', icon: Map },
-          { label: 'Rwanda → Tanzania & Burundi', to: '/corridors', desc: 'Rusumo, Akanyaru-Haut and Nemba.', icon: Map },
+          { label: msg('Rwanda → Kenya'), to: '/corridors#RW-KE', desc: msg('Gatuna or Kagitumba to Malaba and Busia.'), icon: Map },
+          { label: msg('Rwanda → Uganda'), to: '/corridors#RW-UG', desc: msg('Gatuna, Kagitumba or Cyanika.'), icon: Map },
+          { label: msg('Rwanda → Tanzania & Burundi'), to: '/corridors', desc: msg('Rusumo, Akanyaru-Haut and Nemba.'), icon: Map },
         ],
       },
     ],
-    featured: { eyebrow: 'Corridors', title: 'Built for the EAC', body: 'Rule sets for four corridors out of Rwanda, each showing when it was last verified.', to: '/corridors', cta: 'See all corridors', art: 'map' },
+    featured: { eyebrow: msg('Corridors'), title: msg('Built for the EAC'), body: msg('Rule sets for four corridors out of Rwanda, each showing when it was last verified.'), to: '/corridors', cta: msg('See all corridors'), art: 'map' },
   },
   {
     id: 'developers',
-    label: 'Developers',
+    label: msg('Developers'),
     groups: [
       {
-        title: 'Build',
+        title: msg('Build'),
         items: [
-          { label: 'API overview', to: '/developers', desc: 'Create shipments, issue documents and share bundles.', icon: Terminal },
-          { label: 'Webhooks', to: '/developers#webhooks', desc: 'Signed events when documents are issued, anchored or tampered with.', icon: Webhook },
-          { label: 'Independent verification', to: '/developers#independent', desc: 'Check a document without trusting SealChain at all.', icon: BadgeCheck },
+          { label: msg('API overview'), to: '/developers', desc: msg('Create shipments, issue documents and share bundles.'), icon: Terminal },
+          { label: msg('Webhooks'), to: '/developers#webhooks', desc: msg('Signed events when documents are issued, anchored or tampered with.'), icon: Webhook },
+          { label: msg('Independent verification'), to: '/developers#independent', desc: msg('Check a document without trusting SealChain at all.'), icon: BadgeCheck },
         ],
       },
       {
-        title: 'Operate',
+        title: msg('Operate'),
         items: [
-          { label: 'System status', to: '/status', desc: 'Live health of the API, verification and anchoring.', icon: Activity },
-          { label: 'Changelog', to: '/changelog', desc: 'What shipped, and when.', icon: History },
+          { label: msg('System status'), to: '/status', desc: msg('Live health of the API, verification and anchoring.'), icon: Activity },
+          { label: msg('Changelog'), to: '/changelog', desc: msg('What shipped, and when.'), icon: History },
         ],
       },
     ],
-    featured: { eyebrow: 'API', title: 'Five calls to a verified shipment', body: 'Create, validate, issue, download and share — the same engine as the web app.', to: '/developers', cta: 'Read the guide', art: 'code' },
+    featured: { eyebrow: msg('API'), title: msg('Five calls to a verified shipment'), body: msg('Create, validate, issue, download and share — the same engine as the web app.'), to: '/developers', cta: msg('Read the guide'), art: 'code' },
   },
   {
     id: 'resources',
-    label: 'Resources',
+    label: msg('Resources'),
     groups: [
       {
-        title: 'Learn',
+        title: msg('Learn'),
         items: [
-          { label: 'Help centre', to: '/help', desc: 'Step-by-step guides for exporters, buyers and officers.', icon: LifeBuoy },
-          { label: 'Security & trust', to: '/security', desc: 'How documents, keys and your data are protected.', icon: Lock },
-          { label: 'Questions & answers', to: '/pricing#faq', desc: 'Pricing, pilots, verification and data.', icon: BookOpen },
+          { label: msg('Help centre'), to: '/help', desc: msg('Step-by-step guides for exporters, buyers and officers.'), icon: LifeBuoy },
+          { label: msg('Security & trust'), to: '/security', desc: msg('How documents, keys and your data are protected.'), icon: Lock },
+          { label: msg('Questions & answers'), to: '/pricing#faq', desc: msg('Pricing, pilots, verification and data.'), icon: BookOpen },
         ],
       },
       {
-        title: 'Company',
+        title: msg('Company'),
         items: [
-          { label: 'About SealChain', to: '/about', desc: 'Why we are building trust into trade paperwork.', icon: Building2 },
-          { label: 'Contact us', to: '/contact', desc: 'Join the pilot, onboard an authority or ask anything.', icon: Mail },
+          { label: msg('About SealChain'), to: '/about', desc: msg('Why we are building trust into trade paperwork.'), icon: Building2 },
+          { label: msg('Contact us'), to: '/contact', desc: msg('Join the pilot, onboard an authority or ask anything.'), icon: Mail },
         ],
       },
     ],
-    featured: { eyebrow: 'Pilot', title: 'Join the paid pilot', body: 'We are onboarding exporters on EAC corridors from Rwanda now.', to: '/contact?topic=pilot', cta: 'Talk to us', art: 'seal' },
+    featured: { eyebrow: msg('Pilot'), title: msg('Join the paid pilot'), body: msg('We are onboarding exporters on EAC corridors from Rwanda now.'), to: '/contact?topic=pilot', cta: msg('Talk to us'), art: 'seal' },
   },
 ];
 
 export const FOOTER: Array<{ title: string; links: Array<{ label: string; to: string }> }> = [
   {
-    title: 'Product',
+    title: msg('Product'),
     links: [
-      { label: 'Overview', to: '/product' },
-      { label: 'Document generation', to: '/product#generate' },
-      { label: 'Anchoring', to: '/product#anchor' },
-      { label: 'Fraud screening', to: '/product#screen' },
-      { label: 'Pricing', to: '/pricing' },
-      { label: 'Verify a document', to: '/verify' },
+      { label: msg('Overview'), to: '/product' },
+      { label: msg('Document generation'), to: '/product#generate' },
+      { label: msg('Anchoring'), to: '/product#anchor' },
+      { label: msg('Fraud screening'), to: '/product#screen' },
+      { label: msg('Pricing'), to: '/pricing' },
+      { label: msg('Verify a document'), to: '/verify' },
     ],
   },
   {
-    title: 'Solutions',
+    title: msg('Solutions'),
     links: [
-      { label: 'Exporters & SMEs', to: '/solutions/exporters' },
-      { label: 'Issuing authorities', to: '/solutions/authorities' },
-      { label: 'Banks, buyers & insurers', to: '/solutions/verifiers' },
-      { label: 'Corridors', to: '/corridors' },
+      { label: msg('Exporters & SMEs'), to: '/solutions/exporters' },
+      { label: msg('Issuing authorities'), to: '/solutions/authorities' },
+      { label: msg('Banks, buyers & insurers'), to: '/solutions/verifiers' },
+      { label: msg('Corridors'), to: '/corridors' },
     ],
   },
   {
-    title: 'Developers',
+    title: msg('Developers'),
     links: [
-      { label: 'API overview', to: '/developers' },
-      { label: 'Webhooks', to: '/developers#webhooks' },
-      { label: 'Independent verification', to: '/developers#independent' },
-      { label: 'System status', to: '/status' },
-      { label: 'Changelog', to: '/changelog' },
+      { label: msg('API overview'), to: '/developers' },
+      { label: msg('Webhooks'), to: '/developers#webhooks' },
+      { label: msg('Independent verification'), to: '/developers#independent' },
+      { label: msg('System status'), to: '/status' },
+      { label: msg('Changelog'), to: '/changelog' },
     ],
   },
   {
-    title: 'Company',
+    title: msg('Company'),
     links: [
-      { label: 'About', to: '/about' },
-      { label: 'Help centre', to: '/help' },
-      { label: 'Security & trust', to: '/security' },
-      { label: 'Contact', to: '/contact' },
-      { label: 'Privacy', to: '/legal/privacy' },
-      { label: 'Terms', to: '/legal/terms' },
+      { label: msg('About'), to: '/about' },
+      { label: msg('Help centre'), to: '/help' },
+      { label: msg('Security & trust'), to: '/security' },
+      { label: msg('Contact'), to: '/contact' },
+      { label: msg('Privacy'), to: '/legal/privacy' },
+      { label: msg('Terms'), to: '/legal/terms' },
     ],
   },
 ];

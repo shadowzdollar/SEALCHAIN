@@ -4,6 +4,7 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-route
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import './index.css';
 import { AuthProvider, useAuth } from './auth';
+import { LangProvider } from './locale';
 import { AppLayout } from './components/Layout';
 import { PageLoader } from './components/ui';
 import { Landing } from './pages/Landing';
@@ -89,6 +90,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <LangProvider>
         <BrowserRouter>
           <Routes>
             <Route element={<MarketingLayout />}>
@@ -154,6 +156,7 @@ createRoot(document.getElementById('root')!).render(
             </Route>
           </Routes>
         </BrowserRouter>
+        </LangProvider>
       </AuthProvider>
     </QueryClientProvider>
   </StrictMode>,

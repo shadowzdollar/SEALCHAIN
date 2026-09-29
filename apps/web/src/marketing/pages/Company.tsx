@@ -267,7 +267,7 @@ export function CreditsPage() {
   const list = Object.values(PHOTOS) as Photo[];
   return (
     <>
-      <PageHero eyebrow="Photo credits" title="The pictures on this site." body="Photographs come from Wikimedia Commons under the licences shown. They have been resized and recompressed for the web; no other changes were made." />
+      <PageHero eyebrow="Photo credits" title="The pictures on this site." body="Photographs come from Wikimedia Commons under the licences shown. They have been resized and recompressed for the web; no other changes were made. Map geography: Natural Earth 1:50m countries and lakes (public domain, naturalearthdata.com); routes on the map are indicative." />
       <section className={cx('mx-auto grid max-w-[1680px] gap-10 py-20 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4', PAGE_X)}>
         {list.map((p) => (
           <figure key={p.src}>
