@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import {
+  BarChart3,
   BookUser,
+  Building2,
   ChevronDown,
   ChevronRight,
   CreditCard,
   FileSearch,
   LayoutDashboard,
+  LifeBuoy,
+  CircleHelp,
   LogOut,
   Menu,
   Moon,
@@ -20,21 +24,23 @@ import {
   X,
 } from 'lucide-react';
 import { useAuth, useMeta } from '../auth';
+import { NotificationBell } from '../pages/Notifications';
+import { guideForRoute } from '../help/guides';
 import { cx } from './ui';
 
-/** Circular "S" seal — the same mark as on the printed documents. */
-export function LogoMark({ className = 'size-8', light }: { className?: string; light?: boolean }) {
+/** The SealChain seal: a wax seal with an open document, ringed by a chain. */
+export function LogoMark({ className = 'size-9' }: { className?: string; light?: boolean }) {
   return (
-    <span
+    <img
+      src="/brand/sealchain-seal-128.png"
+      srcSet="/brand/sealchain-seal-64.png 1x, /brand/sealchain-seal-128.png 2x, /brand/sealchain-seal-256.png 4x"
+      alt=""
       aria-hidden
-      className={cx(
-        'flex shrink-0 items-center justify-center rounded-full border-[1.5px] font-serif text-[15px] font-semibold leading-none',
-        light ? 'border-white text-white' : 'border-navy-900 text-navy-900 dark:border-slate-100 dark:text-slate-100',
-        className,
-      )}
-    >
-      S
-    </span>
+      width={36}
+      height={36}
+      className={cx('shrink-0 select-none object-contain drop-shadow-[0_1px_1px_rgba(11,31,58,0.18)]', className)}
+      draggable={false}
+    />
   );
 }
 
@@ -128,14 +134,14 @@ export function AnchorChip() {
 
 const CRUMB: Record<string, string> = {
   app: 'Home', shipments: 'Shipments', new: 'New shipment', edit: 'Edit', check: 'Check a document', parties: 'Address book',
-  team: 'Team & settings', billing: 'Billing', compliance: 'Compliance console', authority: 'Endorsement requests',
+  team: 'Team & settings', company: 'Company profile', reports: 'Reports', notifications: 'Notifications', billing: 'Billing', sandbox: 'Test checkout', return: 'Payment', compliance: 'Compliance console', authority: 'Endorsement requests',
 };
 
 function Breadcrumbs() {
   const { pathname } = useLocation();
   const parts = pathname.split('/').filter(Boolean);
   const crumbs = parts.map((p, i) => ({
-    label: CRUMB[p] ?? (p.startsWith('shp_') ? 'Shipment' : p),
+    label: CRUMB[p] ?? (p.startsWith('shp_') ? 'Shipment' : p.startsWith('pay_') ? 'Payment' : p),
     to: '/' + parts.slice(0, i + 1).join('/'),
   }));
   return (
@@ -206,6 +212,17 @@ function UserMenu() {
   );
 }
 
+/** "?" in the top bar: opens the guide for the current page (or the help centre). */
+function ContextHelp() {
+  const { pathname } = useLocation();
+  const g = guideForRoute(pathname.replace(/\/(shp|pay)_[a-z0-9]+.*/, ''));
+  return (
+    <Link to={g ? `/help/${g.slug}` : '/help'} className="rounded-md p-2 text-slate-600 hover:bg-slate-100 dark:text-navy-200 dark:hover:bg-navy-800" title={g ? `Help: ${g.title}` : 'Help centre'} aria-label={g ? `Help: ${g.title}` : 'Help centre'}>
+      <CircleHelp className="size-[18px]" />
+    </Link>
+  );
+}
+
 function TopSearch() {
   const navigate = useNavigate();
   const [q, setQ] = useState('');
@@ -241,8 +258,10 @@ export function AppLayout() {
             <NavItem to="/app" end icon={<LayoutDashboard />}>Dashboard</NavItem>
             <NavItem to="/app/shipments" icon={<Package />}>Shipments</NavItem>
             <NavItem to="/app/check" icon={<FileSearch />}>Check a document</NavItem>
+            <NavItem to="/app/reports" icon={<BarChart3 />}>Reports</NavItem>
           </Section>
           <Section label="Organisation">
+            <NavItem to="/app/company" icon={<Building2 />}>Company profile</NavItem>
             <NavItem to="/app/parties" icon={<BookUser />}>Address book</NavItem>
             <NavItem to="/app/team" icon={<Users />}>Team & settings</NavItem>
             <NavItem to="/app/billing" icon={<CreditCard />}>Billing</NavItem>
@@ -256,6 +275,7 @@ export function AppLayout() {
       )}
       <Section label="Public">
         <NavItem to="/verify" icon={<ScanLine />}>Verifier</NavItem>
+        <NavItem to="/help" icon={<LifeBuoy />}>Help centre</NavItem>
       </Section>
     </nav>
   );
@@ -295,6 +315,8 @@ export function AppLayout() {
         <div className="min-w-0 flex-1"><Breadcrumbs /></div>
         <TopSearch />
         <AnchorChip />
+        <ContextHelp />
+        <NotificationBell />
         <UserMenu />
       </header>
       <main className="mx-auto max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8 lg:py-7">

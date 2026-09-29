@@ -37,7 +37,7 @@ export function ProductPage() {
       <nav className="sticky top-16 z-30 border-b border-paper-rule bg-paper/95 backdrop-blur" aria-label="On this page">
         <div className={cx('mx-auto flex max-w-[1680px] gap-6 overflow-x-auto py-3 text-[13.5px]', PAGE_X)}>
           {[['generate', 'Generate'], ['validate', 'Validate'], ['anchor', 'Anchor'], ['endorse', 'Endorse'], ['verify', 'Verify'], ['screen', 'Screen'], ['more', 'And more']].map(([id, l]) => (
-            <a key={id} href={`#${id}`} className="shrink-0 text-slate-600 hover:text-navy-900">{l}</a>
+            <a key={id} href={`#${id}`} className="shrink-0 text-slate-600 hover:text-ink">{l}</a>
           ))}
         </div>
       </nav>
@@ -91,7 +91,7 @@ export function ProductPage() {
               [<Globe2 key="i" />, 'Works anywhere', 'Installable on phones; light on data for border connections.'],
             ].map(([icon, t, d]) => (
               <div key={t as string} className="bg-paper-card p-6">
-                <span className="text-navy-900 [&>svg]:size-5 [&>svg]:stroke-[1.6]">{icon}</span>
+                <span className="text-ink [&>svg]:size-5 [&>svg]:stroke-[1.6]">{icon}</span>
                 <p className="mt-4 font-serif text-[18px] font-medium">{t}</p>
                 <p className="mt-1.5 text-[14px] leading-relaxed text-slate-600">{d}</p>
               </div>

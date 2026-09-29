@@ -9,6 +9,8 @@
  * verify():  given a document (by public id or by hash), report integrity,
  *            issuer signature, Merkle inclusion, and a *live* on-chain check.
  */
+import type { PaymentService } from './payments';
+import type { NotificationService } from './notifications';
 import crypto from 'node:crypto';
 import {
   DOCUMENT_KIND_LABEL,
@@ -39,6 +41,8 @@ export interface Deps {
   anchor: AnchorService;
   mailer: Mailer;
   webhooks: WebhookService;
+  payments: PaymentService;
+  notifications: NotificationService;
 }
 
 export class HttpError extends Error {
@@ -198,6 +202,10 @@ export function revokeDocument(deps: Deps, ctx: AuthContext, documentId: string,
     audit(deps.db, ctx, 'document.revoke', 'document', documentId, { reason });
   });
   deps.webhooks.dispatch(ctx.org.id, 'document.revoked', { documentId, number: doc.number, shipmentId: doc.shipment_id, reason });
+  deps.notifications.notify(ctx.org.id, 'document.revoked', {
+    title: `${doc.number} was revoked`, body: `${ctx.user.name} revoked ${doc.number}. Reason: ${reason}`,
+    link: `/app/shipments/${doc.shipment_id}`, severity: 'warning', actorUserId: ctx.user.id,
+  });
 }
 
 // ------------------------------------------------------------ verification

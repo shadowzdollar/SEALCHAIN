@@ -56,7 +56,7 @@ export function Faq({ items = FAQS, className }: { items?: typeof FAQS; classNam
         <div key={f.q}>
           <dt>
             <button onClick={() => setOpen(open === i ? null : i)} className="flex w-full items-center justify-between gap-6 py-5 text-left" aria-expanded={open === i}>
-              <span className="font-serif text-[18px] font-medium text-navy-900">{f.q}</span>
+              <span className="font-serif text-[18px] font-medium text-ink">{f.q}</span>
               {open === i ? <Minus className="size-4 shrink-0 text-stamp" /> : <Plus className="size-4 shrink-0 text-slate-500" />}
             </button>
           </dt>
@@ -88,7 +88,7 @@ export function Receipt({ className, shipments }: { className?: string; shipment
         <div className="flex justify-between"><dt className="text-slate-600">Corrections &amp; re-issues</dt><dd>0.00</dd></div>
         <div className="flex justify-between"><dt className="text-slate-600">Verification by anyone</dt><dd>0.00</dd></div>
       </dl>
-      <div className="mt-5 flex items-baseline justify-between border-t-2 border-navy-900 pt-4">
+      <div className="mt-5 flex items-baseline justify-between border-t-2 border-ink pt-4">
         <span className="font-serif text-[18px] font-medium">{shipments === undefined ? 'From' : 'Total'}</span>
         <span className="font-serif text-[32px] font-semibold tabular-nums">${shipments === undefined ? monthly : total.toLocaleString(undefined, { maximumFractionDigits: 2 })}<span className="text-[15px] font-normal text-slate-500"> /mo</span></span>
       </div>
@@ -124,11 +124,11 @@ export function PricingShowcase() {
                 <label htmlFor="ship-count" className="font-serif text-[19px] font-medium">Shipments per month</label>
                 <span className="font-serif text-[34px] font-semibold tabular-nums leading-none">{n}</span>
               </div>
-              <input id="ship-count" type="range" min={1} max={60} value={n} onChange={(e) => setN(Number(e.target.value))} className="mt-5 w-full accent-[#0b1f3a]" />
+              <input id="ship-count" type="range" min={1} max={60} value={n} onChange={(e) => setN(Number(e.target.value))} className="mt-5 w-full accent-[var(--color-ink)]" />
               <div className="mt-1 flex justify-between font-plexmono text-[10.5px] text-slate-400"><span>1</span><span>15</span><span>30</span><span>45</span><span>60</span></div>
               <div className="mt-5 flex flex-wrap gap-2">
                 {PRESETS.map((p) => (
-                  <button key={p} onClick={() => setN(p)} className={cx('rounded-[3px] border px-3 py-1.5 font-plexmono text-[12px] transition-colors', n === p ? 'border-navy-900 bg-navy-900 text-white' : 'border-paper-rule text-slate-600 hover:border-navy-300')}>{p} / month</button>
+                  <button key={p} onClick={() => setN(p)} className={cx('rounded-[3px] border px-3 py-1.5 font-plexmono text-[12px] transition-colors', n === p ? 'border-ink bg-ink text-ink-contrast' : 'border-paper-rule text-slate-600 hover:border-navy-300')}>{p} / month</button>
                 ))}
               </div>
             </div>
@@ -148,19 +148,19 @@ export function PricingShowcase() {
 
         <div className="mt-20 grid gap-px overflow-hidden rounded-[3px] border border-paper-rule bg-paper-rule sm:grid-cols-2 lg:grid-cols-4">
           {plans.map((p) => (
-            <Link key={p.name} to={p.to} className={cx('group flex flex-col p-6 transition-colors', p.featured ? 'bg-navy-900 text-white' : 'bg-paper-card hover:bg-white')}>
+            <Link key={p.name} to={p.to} className={cx('group flex flex-col p-6 transition-colors', p.featured ? 'bg-ink text-ink-contrast' : 'bg-paper-card hover:bg-paper')}>
               <div className="flex items-center justify-between">
                 <span className="font-serif text-[21px] font-semibold">{p.name}</span>
                 {p.featured && <span className="rounded-[2px] bg-stamp px-1.5 py-0.5 font-plexmono text-[10px] uppercase tracking-[0.12em] text-white">Open</span>}
               </div>
-              <span className={cx('mt-1 text-[13px]', p.featured ? 'text-navy-200' : 'text-slate-500')}>{p.who}</span>
+              <span className={cx('mt-1 text-[13px]', p.featured ? 'opacity-75' : 'text-slate-500')}>{p.who}</span>
               <span className="mt-6 font-serif text-[34px] font-semibold leading-none">{p.price}</span>
-              <span className={cx('mt-1.5 text-[13px]', p.featured ? 'text-navy-200' : 'text-slate-600')}>{p.unit}</span>
+              <span className={cx('mt-1.5 text-[13px]', p.featured ? 'opacity-75' : 'text-slate-600')}>{p.unit}</span>
               <span className="mt-6 inline-flex items-center gap-1.5 text-[14px] font-medium">{p.cta} <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" /></span>
             </Link>
           ))}
         </div>
-        <p className="mt-5 text-[13px] text-slate-500">Full comparison and questions on the <Link to="/pricing" className="font-medium text-navy-900 underline underline-offset-4">pricing page</Link>.</p>
+        <p className="mt-5 text-[13px] text-slate-500">Full comparison and questions on the <Link to="/pricing" className="font-medium text-ink underline underline-offset-4">pricing page</Link>.</p>
       </div>
     </section>
   );
@@ -190,9 +190,9 @@ export function FactsStrip() {
 /** Icon + title + body item used in feature grids. */
 export function Feature({ icon, title, children, n }: { icon: ReactNode; title: ReactNode; children: ReactNode; n?: string }) {
   return (
-    <article className="border-t-2 border-navy-900 pt-5">
+    <article className="border-t-2 border-ink pt-5">
       <div className="flex items-center justify-between">
-        <span className="text-navy-900 [&>svg]:size-5 [&>svg]:stroke-[1.6]">{icon}</span>
+        <span className="text-ink [&>svg]:size-5 [&>svg]:stroke-[1.6]">{icon}</span>
         {n && <span className="font-plexmono text-[12px] text-slate-500">{n}</span>}
       </div>
       <h3 className="mt-5 font-serif text-[23px] font-medium tracking-[-0.01em]">{title}</h3>

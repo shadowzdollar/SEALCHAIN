@@ -11,7 +11,8 @@
     "typecheck": "tsc -p tsconfig.json",
     "anchor:preflight": "tsx src/scripts/preflight.ts",
     "anchor:wallet": "tsx src/scripts/wallet.ts",
-    "backup": "tsx src/scripts/backup.ts"
+    "backup": "tsx src/scripts/backup.ts",
+    "go-live": "tsx src/scripts/go-live.ts"
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.2",

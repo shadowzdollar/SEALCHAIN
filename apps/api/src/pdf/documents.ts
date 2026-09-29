@@ -4,6 +4,7 @@
  * with one another. Every page carries a verification footer with a QR code
  * pointing at the public verification page for that exact document.
  */
+import fs from 'node:fs';
 import { PDFDocument } from 'pdf-lib';
 import QRCode from 'qrcode';
 import {
@@ -43,6 +44,13 @@ export const KIND_CODE: Record<DocumentKind, string> = {
   simplified_certificate_of_origin: 'SC',
 };
 
+/** The SealChain seal, embedded in every footer. Read once per process. */
+let sealPng: Uint8Array | undefined;
+function sealImage(): Uint8Array {
+  sealPng ??= new Uint8Array(fs.readFileSync(new URL('./assets/sealchain-seal.png', import.meta.url)));
+  return sealPng;
+}
+
 export async function renderDocument(kind: DocumentKind, s: Shipment, meta: IssueMeta): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
   const issued = new Date(meta.issuedAt);
@@ -57,6 +65,7 @@ export async function renderDocument(kind: DocumentKind, s: Shipment, meta: Issu
 
   const qrPng = await QRCode.toBuffer(meta.verifyUrl, { type: 'png', margin: 1, width: 240, errorCorrectionLevel: 'M' });
   const qr = await doc.embedPng(qrPng);
+  const seal = await doc.embedPng(sealImage());
 
   const c = await Canvas.create(doc);
   switch (kind) {
@@ -86,6 +95,7 @@ export async function renderDocument(kind: DocumentKind, s: Shipment, meta: Issu
     c.text(`Verify authenticity: scan the QR code or visit ${meta.verifyUrl}`, x, top + 31, { size: 7.5, maxWidth: c.width - x - MARGIN - 60 });
     c.text('The SHA-256 fingerprint of this file is anchored on a public blockchain at issuance. Any alteration after issuance makes verification fail.', x, top + 43, { size: 6.5, color: MUTED, maxWidth: c.width - x - MARGIN - 60 });
     c.text(`Page ${i + 1} of ${c.pages.length}`, c.width - MARGIN - 60, top + 9, { size: 7, color: MUTED, maxWidth: 60, align: 'right' });
+    c.image(seal, c.width - MARGIN - 44, top + 22, 44, 44);
   });
 
   return doc.save();

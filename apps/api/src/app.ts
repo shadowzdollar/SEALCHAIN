@@ -14,6 +14,13 @@ import { HttpError, type Deps } from './services/documents';
 import { IssuerSigner } from './services/signing';
 import { Mailer } from './services/mailer';
 import { WebhookService } from './services/webhooks';
+import { PaymentService } from './services/payments';
+import { NotificationService } from './services/notifications';
+import { notificationRoutes } from './routes/notifications';
+import { orgRoutes } from './routes/org';
+import { securityRoutes } from './routes/security';
+import { reportRoutes } from './routes/reports';
+import { billingRoutes } from './routes/billing';
 import { webhookRoutes } from './routes/webhooks';
 import { teamRoutes } from './routes/team';
 import { sharingRoutes } from './routes/sharing';
@@ -42,9 +49,11 @@ export async function buildApp(cfg: Config, opts: { logger?: boolean; startAncho
     trustProxy: true,
   });
   const anchor = new AnchorService(db, createAnchorBackend(cfg, db), cfg.anchor, app.log as never);
-  const mailer = new Mailer(db, cfg.mail, app.log as never);
+  const mailer = new Mailer(db, cfg.mail, app.log as never, cfg.publicWebUrl);
   const webhooks = new WebhookService(db, app.log as never);
-  const deps: Deps = { db, cfg, signer, anchor, mailer, webhooks };
+  const notifications = new NotificationService(db, cfg, mailer);
+  const payments = new PaymentService(db, cfg, mailer, notifications);
+  const deps: Deps = { db, cfg, signer, anchor, mailer, webhooks, payments, notifications };
   // Tell each organisation when its documents are confirmed on-chain.
   anchor.onConfirmed = (batchId) => {
     const batch = db.get<{ root: string; tx_hash: string | null; chain_id: number | null; anchored_at: string; backend: string }>('SELECT root, tx_hash, chain_id, anchored_at, backend FROM anchor_batches WHERE id = ?', batchId);
@@ -55,6 +64,11 @@ export async function buildApp(cfg: Config, opts: { logger?: boolean; startAncho
     }
     for (const [orgId, documents] of byOrg) {
       webhooks.dispatch(orgId, 'document.anchored', { batchId, root: batch.root, backend: batch.backend, chainId: batch.chain_id, txHash: batch.tx_hash, anchoredAt: batch.anchored_at, documents });
+      notifications.notify(orgId, 'document.anchored', {
+        title: documents.length === 1 ? `${documents[0]!.number} is anchored on-chain` : `${documents.length} documents anchored on-chain`,
+        body: `${documents.map((d) => d.number).join(', ')} — anyone can now verify ${documents.length === 1 ? 'it' : 'them'} against the public blockchain.`,
+        link: '/app/shipments', severity: 'success',
+      });
     }
   };
 
@@ -97,6 +111,11 @@ export async function buildApp(cfg: Config, opts: { logger?: boolean; startAncho
   await app.register(async (api) => {
     await metaRoutes(api, deps);
     await publicRoutes(api, deps);
+    await billingRoutes(api, deps);
+    await notificationRoutes(api, deps);
+    await orgRoutes(api, deps);
+    await securityRoutes(api, deps);
+    await reportRoutes(api, deps);
     await authRoutes(api, deps);
     await teamRoutes(api, deps);
     await sharingRoutes(api, deps);

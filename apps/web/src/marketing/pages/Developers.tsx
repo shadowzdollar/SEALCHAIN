@@ -90,11 +90,11 @@ export function DevelopersPage() {
         <div className={cx('mx-auto max-w-[1680px] py-24', PAGE_X)}>
           <SectionHeading eyebrow="Reference" title="Key endpoints." body="Paths are relative to /api. Authenticated endpoints accept an API key or a session; public endpoints are rate-limited." />
           <div className="mt-10 overflow-x-auto">
-            <table className="w-full min-w-[560px] border-t-2 border-navy-900 text-[14px]">
+            <table className="w-full min-w-[560px] border-t-2 border-ink text-[14px]">
               <tbody className="divide-y divide-paper-rule">
                 {ENDPOINTS.map(([m, p, d]) => (
                   <tr key={m + p}>
-                    <td className="w-20 py-3"><span className={cx('rounded-[2px] px-1.5 py-0.5 font-plexmono text-[11px]', m === 'GET' ? 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200' : 'bg-brand-50 text-navy-900 ring-1 ring-brand-200')}>{m}</span></td>
+                    <td className="w-20 py-3"><span className={cx('rounded-[2px] px-1.5 py-0.5 font-plexmono text-[11px]', m === 'GET' ? 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200' : 'bg-brand-50 text-ink ring-1 ring-brand-200')}>{m}</span></td>
                     <td className="py-3 pr-4 font-plexmono text-[13px]">{p}</td>
                     <td className="py-3 text-slate-600">{d}</td>
                   </tr>

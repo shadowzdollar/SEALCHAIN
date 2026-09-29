@@ -7,6 +7,7 @@ import { Alert, Badge, Button, Card, Field, Modal, PageHeader, PageLoader, Tabs 
 import { date, relative } from '../format';
 import { useSearchParams } from 'react-router';
 import { AppleIcon, GoogleIcon } from '../components/OAuthButtons';
+import { SessionsCard, TwoFactorCard } from '../components/AccountSecurity';
 
 interface TeamResp {
   members: Array<{ id: string; name: string; email: string; role: 'owner' | 'member' | 'compliance'; createdAt: string }>;
@@ -128,8 +129,14 @@ export function Team() {
 
       {tab === 'security' && (
         <div className="grid items-start gap-6 lg:grid-cols-2">
-          <SignInMethods />
-          <ChangePassword />
+          <div className="space-y-6">
+            <TwoFactorCard />
+            <SessionsCard />
+          </div>
+          <div className="space-y-6">
+            <SignInMethods />
+            <ChangePassword />
+          </div>
         </div>
       )}
 

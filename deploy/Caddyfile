@@ -1,0 +1,10 @@
+# Public entry point: HTTPS certificates are obtained and renewed automatically.
+# DOMAIN comes from the environment (see docker-compose.prod.yml).
+{$DOMAIN} {
+	encode zstd gzip
+	reverse_proxy app:4100
+	log {
+		output stdout
+		format console
+	}
+}

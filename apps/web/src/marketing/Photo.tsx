@@ -64,5 +64,5 @@ export function PhotoBand({ photo, children, className, align = 'left', minH = '
 
 /** Link to the full photo credits page, for footers of photo-heavy sections. */
 export function CreditsLink({ className }: { className?: string }) {
-  return <Link to="/credits" className={cx('font-plexmono text-[10.5px] uppercase tracking-[0.12em] text-slate-500 hover:text-navy-900', className)}>Photo credits</Link>;
+  return <Link to="/credits" className={cx('font-plexmono text-[10.5px] uppercase tracking-[0.12em] text-slate-500 hover:text-ink', className)}>Photo credits</Link>;
 }

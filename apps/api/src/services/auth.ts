@@ -45,12 +45,18 @@ export function newToken(): { token: string; hash: string } {
   return { token, hash: tokenHash(token) };
 }
 
-export function createSession(db: Db, userId: string, days: number): { token: string; expiresAt: Date } {
+export function createSession(db: Db, userId: string, days: number, meta: { userAgent?: string } = {}): { token: string; expiresAt: Date } {
   const token = crypto.randomBytes(32).toString('base64url');
   const expiresAt = new Date(Date.now() + days * 86_400_000);
-  db.insert('sessions', { token_hash: tokenHash(token), user_id: userId, expires_at: expiresAt.toISOString(), created_at: nowIso() });
+  db.insert('sessions', {
+    token_hash: tokenHash(token), user_id: userId, expires_at: expiresAt.toISOString(), created_at: nowIso(),
+    user_agent: meta.userAgent?.slice(0, 300) ?? null, last_seen_at: nowIso(),
+  });
   return { token, expiresAt };
 }
+
+/** First 16 hex chars of the token hash: a stable, non-secret session id. */
+export const sessionId = (token: string) => tokenHash(token).slice(0, 16);
 
 export function destroySession(db: Db, token: string) {
   db.run('DELETE FROM sessions WHERE token_hash = ?', tokenHash(token));
@@ -59,16 +65,21 @@ export function destroySession(db: Db, token: string) {
 export function resolveSession(db: Db, token: string | undefined): AuthContext | null {
   if (!token) return null;
   if (token.startsWith(API_KEY_PREFIX)) return resolveApiKey(db, token);
+  const hash = tokenHash(token);
   const row = db.get<Record<string, string>>(
-    `SELECT u.id, u.email, u.name, u.role, o.id AS org_id, o.name AS org_name, o.country, o.plan, o.kind, s.expires_at
+    `SELECT u.id, u.email, u.name, u.role, o.id AS org_id, o.name AS org_name, o.country, o.plan, o.kind, s.expires_at, s.last_seen_at
        FROM sessions s JOIN users u ON u.id = s.user_id JOIN orgs o ON o.id = u.org_id
       WHERE s.token_hash = ?`,
-    tokenHash(token),
+    hash,
   );
   if (!row) return null;
   if (new Date(row.expires_at!).getTime() < Date.now()) {
     destroySession(db, token);
     return null;
+  }
+  // "Last active" for the sessions list, written at most every five minutes.
+  if (!row.last_seen_at || Date.now() - new Date(row.last_seen_at).getTime() > 5 * 60_000) {
+    db.run('UPDATE sessions SET last_seen_at = ? WHERE token_hash = ?', nowIso(), hash);
   }
   return {
     user: { id: row.id!, email: row.email!, name: row.name!, role: row.role as Role },

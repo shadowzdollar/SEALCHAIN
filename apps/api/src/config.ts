@@ -6,6 +6,20 @@ import { DEFAULT_FX_PER_USD, type Currency } from '@sealchain/core';
 const here = path.dirname(fileURLToPath(import.meta.url));
 export const REPO_ROOT = path.resolve(here, '../../..');
 
+/**
+ * Environment files (real environment variables always win):
+ *   .env        the production server's settings — read in production and by `pnpm go-live`
+ *   .env.local  optional overrides for local development, e.g. to try Google sign-in on localhost
+ * Tests read neither, so credentials on a developer machine can't change results.
+ */
+export function loadEnvFiles(opts: { production?: boolean } = {}) {
+  if (process.env.VITEST) return;
+  const production = opts.production ?? process.env.NODE_ENV === 'production';
+  const file = path.join(REPO_ROOT, production ? '.env' : '.env.local');
+  if (fs.existsSync(file)) process.loadEnvFile(file);
+}
+loadEnvFiles();
+
 function env(name: string, fallback?: string): string | undefined {
   const v = process.env[name];
   return v === undefined || v === '' ? fallback : v;
@@ -89,6 +103,22 @@ export function loadConfig() {
       perShipmentCents: num('PER_SHIPMENT_CENTS', 300),
     },
     fx,
+    payments: {
+      /** flutterwave when keys are present; sandbox in development; none (manual only) otherwise. */
+      provider: (env('PAYMENT_PROVIDER') ?? (env('FLW_SECRET_KEY') ? 'flutterwave' : nodeEnv === 'production' ? 'none' : 'sandbox')) as 'flutterwave' | 'sandbox' | 'none',
+      /** Currency the payer is charged in; mobile money in Rwanda requires RWF. */
+      currency: env('PAYMENT_CURRENCY', 'RWF')! as Currency,
+      flutterwave: env('FLW_SECRET_KEY')
+        ? {
+            secretKey: env('FLW_SECRET_KEY')!,
+            webhookHash: env('FLW_WEBHOOK_HASH'),
+            apiBase: env('FLW_API_BASE', 'https://api.flutterwave.com/v3')!.replace(/\/$/, ''),
+            paymentOptions: env('FLW_PAYMENT_OPTIONS', 'mobilemoneyrwanda,card')!,
+          }
+        : undefined,
+      /** Shown on the billing page for paying by transfer, e.g. MoMo pay code and bank details. */
+      manualInstructions: env('MANUAL_PAYMENT_INSTRUCTIONS'),
+    },
     oauth: {
       /** Where providers send users back; must be the public origin that serves /api. */
       redirectBase: env('OAUTH_REDIRECT_BASE', env('PUBLIC_WEB_URL', 'http://localhost:5174'))!.replace(/\/$/, ''),

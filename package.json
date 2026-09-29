@@ -18,7 +18,8 @@
     "seed": "pnpm --filter @sealchain/api seed",
     "e2e": "node scripts/e2e.mjs",
     "backup": "pnpm --filter @sealchain/api backup",
-    "anchor:preflight": "pnpm --filter @sealchain/api anchor:preflight"
+    "anchor:preflight": "pnpm --filter @sealchain/api anchor:preflight",
+    "go-live": "pnpm --filter @sealchain/api go-live --"
   },
   "devDependencies": {
     "concurrently": "^10.0.5"

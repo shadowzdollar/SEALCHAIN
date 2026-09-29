@@ -21,6 +21,13 @@ export async function verifyRoutes(api: FastifyInstance, deps: Deps) {
   const record = (req: FastifyRequest, doc: DocumentRow | undefined, method: string, outcome: string) => {
     if (doc && req.auth?.org.id === doc.org_id) return;
     recordVerification(db, doc?.id ?? null, method, outcome, req.ip);
+    if (doc && outcome !== 'tampered') {
+      deps.notifications.notify(doc.org_id, 'document.verified', {
+        title: `${doc.number} was verified`,
+        body: `Someone outside your organisation checked ${doc.number}${method.includes('hash') || method === 'file' ? ' and compared the file' : ''}. Result: ${outcome.replace(/_/g, ' ')}.`,
+        link: `/app/shipments/${doc.shipment_id}`, dedupeKey: `verified:${doc.id}`,
+      });
+    }
     if (doc && outcome === 'tampered') void alertTampered(deps, doc, 'public verification').catch((err) => req.log.error({ err }, 'tamper alert failed'));
   };
 

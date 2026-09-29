@@ -240,7 +240,15 @@ export async function shipmentRoutes(api: FastifyInstance, deps: Deps) {
   api.get<{ Querystring: { period?: string } }>('/billing', auth, async (req) => {
     const all = periods(db, req.auth!.org.id);
     const period = req.query.period && /^\d{4}-\d{2}$/.test(req.query.period) ? req.query.period : all[0];
-    return { periods: all, statement: statement(db, cfg, req.auth!.org.id, period) };
+    const intents = db.all<{ id: string; status: string; charge_amount: number; charge_currency: string; created_at: string; failure_reason: string | null }>(
+      'SELECT id, status, charge_amount, charge_currency, created_at, failure_reason FROM payment_intents WHERE org_id = ? AND period = ? ORDER BY created_at DESC LIMIT 10', req.auth!.org.id, period ?? '',
+    );
+    return {
+      periods: all,
+      statement: statement(db, cfg, req.auth!.org.id, period),
+      payment: { ...deps.payments.info(), canPay: req.auth!.user.role !== 'member' },
+      attempts: intents.map((i) => ({ id: i.id, status: i.status, chargeAmount: i.charge_amount, chargeCurrency: i.charge_currency, createdAt: i.created_at, failureReason: i.failure_reason })),
+    };
   });
 }
 

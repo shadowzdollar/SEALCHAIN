@@ -123,6 +123,13 @@ For a pilot, anchor to a public chain instead: deploy the contract with
 `RPC_URL=… DEPLOYER_KEY=… pnpm --filter @sealchain/contracts deploy remote`,
 then set the variables in [`.env.example`](.env.example).
 
+## Going live
+
+Everything that needs an outside account — domain, public-chain anchoring,
+email, Google/Apple sign-in — is listed in [`docs/GO_LIVE.md`](docs/GO_LIVE.md).
+Run `pnpm go-live` to see what is configured and what is still missing;
+`deploy/` holds the production Docker Compose file with automatic HTTPS.
+
 ## Repository layout
 
 ```
@@ -177,3 +184,10 @@ version exists), `revoked` (with the issuer's reason), `tampered` and
 
 See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) and
 [`docs/DECISIONS.md`](docs/DECISIONS.md).
+
+
+
+
+
+
+

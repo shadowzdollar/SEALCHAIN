@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { BookmarkPlus, Copy, FileSpreadsheet, Plus, Sparkles, Trash2, Wand2 } from 'lucide-react';
-import { ITEMS_CSV_TEMPLATE, demoShipment, formatHs, parseItemsCsv, lineTotal, type Finding, type OriginCriterion, type Party, type QuantityUnit, type Shipment, type ShipmentItem } from '@sealchain/core';
+import { BookmarkPlus, Copy, FileSpreadsheet, Plus, Sparkles, Trash2 } from 'lucide-react';
+import { ITEMS_CSV_TEMPLATE, formatHs, parseItemsCsv, lineTotal, type Finding, type OriginCriterion, type Party, type QuantityUnit, type Shipment, type ShipmentItem } from '@sealchain/core';
 import { ApiError, api, type CorridorInfo, type ShipmentDetail, type Suggestion, type ValidationReport } from '../api';
 import { useAuth, useMeta } from '../auth';
 import { Alert, Badge, Button, Card, Field, PageHeader, PageLoader, cx } from '../components/ui';
@@ -24,16 +24,21 @@ const INCOTERM_HINT: Record<string, string> = {
   FAS: 'Sea only', FOB: 'Sea only', CFR: 'Sea only', CIF: 'Sea only',
 };
 
-/** Sensible defaults per destination country (demo consignee details are fictional). */
-const DEST: Record<string, { city: string; address: string; taxId: string }> = {
-  KE: { city: 'Nairobi', address: 'Enterprise Road, Industrial Area', taxId: 'P051234567X' },
-  UG: { city: 'Kampala', address: 'Plot 4, Jinja Road', taxId: '1000123456' },
-  TZ: { city: 'Dar es Salaam', address: 'Nyerere Road, Plot 12', taxId: '123456789' },
-  BI: { city: 'Bujumbura', address: 'Boulevard du Peuple Murundi', taxId: '4000123456' },
+/** Usual final destination per destination country. */
+const DEST: Record<string, { city: string }> = {
+  KE: { city: 'Nairobi' },
+  UG: { city: 'Kampala' },
+  TZ: { city: 'Dar es Salaam' },
+  BI: { city: 'Bujumbura' },
 };
 
 let itemSeq = 0;
 const newItemId = () => `l${Date.now().toString(36)}${(itemSeq++).toString(36)}`;
+
+interface OrgProfile {
+  settings: { defaultCorridor: string | null; defaultCurrency: string | null; defaultIncoterm: string | null; defaultPaymentTerms: string | null };
+  exporter: { id: string; party: Party } | null;
+}
 
 function emptyItem(): ShipmentItem {
   return {
@@ -118,6 +123,8 @@ export function ShipmentEditor() {
 
   const existing = useQuery({ queryKey: ['shipment', id], queryFn: () => api.get<ShipmentDetail>(`/shipments/${id}`), enabled: editing });
   const parties = useQuery({ queryKey: ['parties'], queryFn: () => api.get<Array<{ id: string; role: 'exporter' | 'consignee'; party: Party }>>('/parties') });
+  const org = useQuery({ queryKey: ['org'], queryFn: () => api.get<OrgProfile>('/org'), enabled: !editing });
+  const [numbering, setNumbering] = useState(false);
 
   const [draft, setDraft] = useState<Draft | null>(null);
   const [report, setReport] = useState<ValidationReport | null>(null);
@@ -138,13 +145,18 @@ export function ShipmentEditor() {
         const { id: _id, ...rest } = existing.data.data;
         setDraft(rest);
       }
-    } else if (meta.data && parties.data) {
-      const d = newDraft(meta.data.corridors[0], me?.org.name ?? '');
-      const savedExporter = parties.data.find((p) => p.role === 'exporter');
-      if (savedExporter) d.exporter = savedExporter.party;
+    } else if (meta.data && parties.data && org.data) {
+      const st = org.data.settings;
+      const d = newDraft(meta.data.corridors.find((c) => c.id === st.defaultCorridor) ?? meta.data.corridors[0], me?.org.name ?? '');
+      if (st.defaultCurrency) d.currency = st.defaultCurrency as Draft['currency'];
+      if (st.defaultIncoterm) d.incoterm = st.defaultIncoterm as Draft['incoterm'];
+      if (st.defaultPaymentTerms) d.paymentTerms = st.defaultPaymentTerms;
+      // The company profile is the default exporter.
+      const savedExporter = org.data.exporter?.party ?? parties.data.find((p) => p.role === 'exporter')?.party;
+      if (savedExporter) d.exporter = savedExporter;
       setDraft(d);
     }
-  }, [draft, editing, existing.data, meta.data, parties.data, me]);
+  }, [draft, editing, existing.data, meta.data, parties.data, org.data, me]);
 
   const corridor = meta.data?.corridors.find((c) => c.id === draft?.corridorId);
 
@@ -215,28 +227,6 @@ export function ShipmentEditor() {
         subtitle="Everything on the invoice, certificate of origin and packing list comes from this one record."
         actions={
           <>
-            {!editing && (
-              <Button
-                variant="ghost"
-                icon={<Wand2 className="size-4" />}
-                onClick={() => {
-                  const { id: _id, ...demo } = demoShipment({ corridorId: draft.corridorId });
-                  const dest = corridor && DEST[corridor.destination];
-                  if (corridor && dest && corridor.destination !== 'KE') {
-                    demo.consignee = { ...demo.consignee, country: corridor.destination as Party['country'], city: dest.city, taxId: dest.taxId, address: dest.address };
-                    demo.finalDestination = dest.city;
-                    demo.incotermPlace = dest.city;
-                    demo.exitPoint = corridor.exitPoints.road?.[0];
-                    demo.entryPoint = corridor.entryPoints.road?.[0];
-                    demo.transportRef = demo.transportRef?.split(' / ')[0];
-                  }
-                  setDraft({ ...demo, exporter: { ...demo.exporter } });
-                  setShowAll(true);
-                }}
-              >
-                Fill with example
-              </Button>
-            )}
             <Button onClick={() => save.mutate()} loading={save.isPending}>
               {editing ? 'Save changes' : 'Save & review'}
             </Button>
@@ -340,7 +330,25 @@ export function ShipmentEditor() {
           <Section title="Invoice & terms">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <Field label="Invoice number" required {...fe('invoiceNumber')}>
-                <input className={cx('input', bad('invoiceNumber') && 'input-error')} value={draft.invoiceNumber} onChange={(e) => set('invoiceNumber', e.target.value)} placeholder="INV-2026-0091" />
+                <div className="flex gap-2">
+                  <input className={cx('input', bad('invoiceNumber') && 'input-error')} value={draft.invoiceNumber} onChange={(e) => set('invoiceNumber', e.target.value)} placeholder="INV-2026-0091" />
+                  <button
+                    type="button"
+                    disabled={numbering}
+                    title="Use the next number from your company's invoice sequence"
+                    className="shrink-0 rounded-[3px] border border-slate-300 bg-white px-2.5 text-[12px] font-medium text-slate-700 hover:border-slate-400 disabled:opacity-60 dark:border-navy-600 dark:bg-navy-900 dark:text-slate-200"
+                    onClick={async () => {
+                      setNumbering(true);
+                      try {
+                        set('invoiceNumber', (await api.post<{ number: string }>('/org/invoice-number', {})).number);
+                      } finally {
+                        setNumbering(false);
+                      }
+                    }}
+                  >
+                    Next number
+                  </button>
+                </div>
               </Field>
               <Field label="Invoice date" required {...fe('invoiceDate')}>
                 <input className={cx('input', bad('invoiceDate') && 'input-error')} type="date" value={draft.invoiceDate} onChange={(e) => set('invoiceDate', e.target.value)} />

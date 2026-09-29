@@ -6,6 +6,7 @@ import type { Config } from '../config';
 import { nowIso, type Db } from '../db';
 import type { Mailer } from './mailer';
 import type { WebhookService } from './webhooks';
+import type { NotificationService } from './notifications';
 
 const WINDOW_MS = 60 * 60_000;
 
@@ -18,10 +19,15 @@ function shouldSend(db: Db, key: string): boolean {
 
 /** Someone presented an altered copy of one of this organisation's documents. */
 export async function alertTampered(
-  deps: { db: Db; cfg: Config; mailer: Mailer; webhooks: WebhookService },
+  deps: { db: Db; cfg: Config; mailer: Mailer; webhooks: WebhookService; notifications: NotificationService },
   doc: { id: string; org_id: string; number: string; shipment_id: string },
   via: 'public verification' | 'a document check by another SealChain user',
 ) {
+  deps.notifications.notify(doc.org_id, 'document.tampered', {
+    title: `Altered copy of ${doc.number} detected`,
+    body: `Someone presented a copy of ${doc.number} that does not match what you issued (via ${via}). Your original remains valid.`,
+    link: `/app/shipments/${doc.shipment_id}`, severity: 'critical', dedupeKey: `tampered:${doc.id}`,
+  });
   if (!shouldSend(deps.db, `tampered:${doc.id}`)) return;
   deps.webhooks.dispatch(doc.org_id, 'document.tampered', { documentId: doc.id, number: doc.number, shipmentId: doc.shipment_id, detectedVia: via, detectedAt: nowIso() });
   const owners = deps.db.all<{ email: string }>(
@@ -35,7 +41,7 @@ export async function alertTampered(
         `Someone presented a copy of ${doc.number} that does not match what you issued (detected through ${via}).\n\n` +
         `This usually means the document was edited after you sent it — possibly to change quantities, values, names or origin.\n` +
         `Your original remains valid and verifiable. Consider warning your buyer and, if needed, revoking and re-issuing.\n\n` +
-        `Shipment: ${deps.cfg.publicWebUrl}/app/shipments/${doc.shipment_id}\n`,
+        `${deps.cfg.publicWebUrl}/app/shipments/${doc.shipment_id}\n`,
     });
   }
 }

@@ -63,9 +63,36 @@
   --color-paper-rule: #e2dac8;
   --color-paper-tint: #eee8da;
   --color-stamp: #b42318;
+  /* Ink: the "printed" colour. Navy on paper; cream on the dark (night) paper. */
+  --color-ink: #0b1f3a;
+  --color-ink-contrast: #ffffff;
+  --color-border-strong: #b9ae97;
+  --color-sea: #d8e2e5;
+  --color-sea-ink: #5b7482;
 
   --color-accent-500: #0ea5e9;
   --color-surface: #f8f5ee;
+}
+
+/* Night paper: the same design printed in cream ink on deep navy stock. */
+.dark {
+  --color-paper: #06142a;
+  --color-paper-card: #0b1f3a;
+  --color-paper-rule: #1f3553;
+  --color-paper-tint: #10263f;
+  --color-ink: #f1ece1;
+  --color-ink-contrast: #0b1f3a;
+  --color-border-strong: #33506f;
+  --color-sea: #0e2944;
+  --color-sea-ink: #86a2bb;
+  --color-stamp: #e0685d;
+}
+/* Body copy on the public site: warm greys lifted for the dark paper. */
+.dark .marketing {
+  --color-slate-400: #7d8ba0;
+  --color-slate-500: #9aa6b8;
+  --color-slate-600: #b3bdcb;
+  --color-slate-700: #cfd6df;
 }
 
 @layer base {

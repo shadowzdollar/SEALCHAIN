@@ -56,7 +56,7 @@ function ProductTour() {
               role="tab"
               aria-selected={tab === x.id}
               onClick={() => setTab(x.id)}
-              className={cx('-mb-px flex shrink-0 items-center gap-2 border-b-2 px-4 py-3 text-[14px] transition-colors', tab === x.id ? 'border-stamp font-medium text-navy-900' : 'border-transparent text-slate-500 hover:text-navy-900')}
+              className={cx('-mb-px flex shrink-0 items-center gap-2 border-b-2 px-4 py-3 text-[14px] transition-colors', tab === x.id ? 'border-stamp font-medium text-ink' : 'border-transparent text-slate-500 hover:text-ink')}
             >
               <span className="font-plexmono text-[11px] text-stamp">{String(i + 1).padStart(2, '0')}</span> {x.label}
             </button>
@@ -71,7 +71,7 @@ function ProductTour() {
                 <li key={p} className="flex items-start gap-2.5 text-[15px] text-slate-700"><span className="mt-2 size-1.5 shrink-0 rounded-full bg-stamp" />{p}</li>
               ))}
             </ul>
-            <Link to={t.to} className="mt-8 inline-flex items-center gap-1.5 text-[14px] font-medium text-navy-900 underline-offset-4 hover:underline">Learn more <ArrowRight className="size-4" /></Link>
+            <Link to={t.to} className="mt-8 inline-flex items-center gap-1.5 text-[14px] font-medium text-ink underline-offset-4 hover:underline">Learn more <ArrowRight className="size-4" /></Link>
           </div>
           <div className="paper-grid flex min-h-[400px] items-center justify-center rounded-[3px] border border-paper-rule p-6 sm:p-10">{t.art}</div>
         </div>
@@ -141,7 +141,7 @@ export function Landing() {
             Invoices, certificates and packing lists decide how fast goods move and what duty is paid. SealChain makes sure they’re right — and that anyone can prove they’re real.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link to="/product" className="inline-flex h-11 items-center gap-2 rounded-[3px] bg-paper px-6 text-[14px] font-medium text-navy-900 hover:bg-white">See the product <ArrowRight className="size-4" /></Link>
+            <Link to="/product" className="inline-flex h-11 items-center gap-2 rounded-[3px] bg-[#f8f5ee] px-6 text-[14px] font-medium text-[#0b1f3a] hover:bg-[#fffdf8]">See the product <ArrowRight className="size-4" /></Link>
             <Link to="/corridors" className="inline-flex h-11 items-center rounded-[3px] border border-white/30 px-6 text-[14px] font-medium text-white hover:bg-white/10">Our corridors</Link>
           </div>
         </div>
@@ -158,7 +158,7 @@ export function Landing() {
           ].map((m) => (
             <article key={m.t}>
               <PhotoPrint photo={m.photo} tilt={m.tilt} ratio="aspect-[4/3]" />
-              <div className="mt-8 flex items-baseline justify-between border-t-2 border-navy-900 pt-4">
+              <div className="mt-8 flex items-baseline justify-between border-t-2 border-ink pt-4">
                 <h3 className="font-serif text-[24px] font-medium">{m.t}</h3>
                 <span className="font-plexmono text-[12px] text-stamp">{m.n}</span>
               </div>
@@ -187,7 +187,7 @@ export function Landing() {
               <div className="relative aspect-[16/10] overflow-hidden border-b border-paper-rule">
                 <img src={a.photo.sm} alt={a.photo.alt} loading="lazy" className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.03] [filter:saturate(0.92)]" />
                 <Credit photo={a.photo} light plain className="absolute bottom-2 right-3 max-w-[60%] truncate [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]" />
-                <span className="absolute bottom-3 left-3 flex size-10 items-center justify-center rounded-full bg-paper-card text-navy-900 shadow [&>svg]:size-[18px] [&>svg]:stroke-[1.6]">{a.icon}</span>
+                <span className="absolute bottom-3 left-3 flex size-10 items-center justify-center rounded-full bg-paper-card text-ink shadow [&>svg]:size-[18px] [&>svg]:stroke-[1.6]">{a.icon}</span>
               </div>
               <div className="flex flex-1 flex-col p-7">
               <h3 className="font-serif text-[22px] font-medium">{a.t}</h3>
@@ -212,7 +212,7 @@ export function Landing() {
                 ['Rwanda → Burundi', 'Akanyaru-Haut · Nemba', 'RW-BI'],
               ].map(([c, b, id]) => (
                 <li key={c}>
-                  <Link to={`/corridors#${id}`} className="flex items-center justify-between gap-4 py-3.5 hover:text-navy-700">
+                  <Link to={`/corridors#${id}`} className="flex items-center justify-between gap-4 py-3.5 hover:text-ink/75">
                     <span className="font-serif text-[17px] font-medium">{c}</span>
                     <span className="text-right text-[13.5px] text-slate-500">{b}</span>
                   </Link>
@@ -262,7 +262,7 @@ export function Landing() {
                 { icon: <Webhook />, t: 'Signed webhooks', d: 'HMAC signatures with replay protection.' },
               ].map((x) => (
                 <li key={x.t} className="flex gap-3">
-                  <span className="mt-0.5 text-navy-900 [&>svg]:size-[18px] [&>svg]:stroke-[1.6]">{x.icon}</span>
+                  <span className="mt-0.5 text-ink [&>svg]:size-[18px] [&>svg]:stroke-[1.6]">{x.icon}</span>
                   <div><p className="font-medium">{x.t}</p><p className="mt-0.5 text-[14px] text-slate-600">{x.d}</p></div>
                 </li>
               ))}
@@ -291,7 +291,7 @@ curl -H "Authorization: Bearer $KEY" \\
 
       {/* ---------------------------------------------------------- faq */}
       <section className="mx-auto grid max-w-[1680px] gap-12 px-5 py-24 sm:px-8 lg:px-12 2xl:px-16 lg:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)]">
-        <SectionHeading eyebrow="Questions" title="Asked at the border, answered here." body={<>Something else? <Link to="/contact" className="font-medium text-navy-900 underline underline-offset-4">Ask us directly</Link>.</>} />
+        <SectionHeading eyebrow="Questions" title="Asked at the border, answered here." body={<>Something else? <Link to="/contact" className="font-medium text-ink underline underline-offset-4">Ask us directly</Link>.</>} />
         <Faq items={FAQS.slice(0, 5)} />
       </section>
     </>

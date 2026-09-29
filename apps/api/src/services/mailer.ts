@@ -9,6 +9,7 @@
  */
 import type { Config } from '../config';
 import { newId, nowIso, type Db } from '../db';
+import { renderEmailHtml } from './emailTemplate';
 
 export interface Mail {
   to: string;
@@ -19,7 +20,7 @@ export interface Mail {
 type Logger = { info: (o: object, m?: string) => void; error: (o: object, m?: string) => void };
 
 export class Mailer {
-  constructor(private db: Db, private cfg: Config['mail'], private log: Logger) {}
+  constructor(private db: Db, private cfg: Config['mail'], private log: Logger, private webUrl = 'http://localhost:5174') {}
 
   async send(mail: Mail): Promise<string> {
     const id = newId('msg', 16);
@@ -34,7 +35,7 @@ export class Mailer {
         const res = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: { authorization: `Bearer ${this.cfg.apiKey}`, 'content-type': 'application/json' },
-          body: JSON.stringify({ from: this.cfg.from, to: [mail.to], subject: mail.subject, text: mail.body }),
+          body: JSON.stringify({ from: this.cfg.from, to: [mail.to], subject: mail.subject, text: mail.body, html: renderEmailHtml({ subject: mail.subject, body: mail.body, webUrl: this.webUrl }) }),
         });
         if (!res.ok) throw new Error(`Resend ${res.status}: ${(await res.text()).slice(0, 200)}`);
       } else {

@@ -34,8 +34,8 @@ export function statement(db: Db, cfg: Config, orgId: string, period = currentPe
       WHERE u.org_id = ? AND u.period = ? ORDER BY u.created_at`,
     orgId, period,
   );
-  const payments = db.all<{ id: string; amount_cents: number; method: string; reference: string | null; created_at: string }>(
-    'SELECT id, amount_cents, method, reference, created_at FROM payments WHERE org_id = ? AND period = ? ORDER BY created_at', orgId, period,
+  const payments = db.all<{ id: string; amount_cents: number; method: string; reference: string | null; created_at: string; currency_charged: string | null; amount_charged: number | null }>(
+    'SELECT id, amount_cents, method, reference, created_at, currency_charged, amount_charged FROM payments WHERE org_id = ? AND period = ? ORDER BY created_at', orgId, period,
   );
   const subscriptionCents = active ? cfg.billing.monthlyFeeCents : 0;
   const usageCents = events.reduce((s, e) => s + e.amount_cents, 0);

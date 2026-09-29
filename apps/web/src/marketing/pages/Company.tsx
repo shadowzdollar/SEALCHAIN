@@ -75,6 +75,13 @@ export function AboutPage() {
 
 // -------------------------------------------------------------- Changelog
 const CHANGES: Array<{ tag: 'New' | 'Improved'; title: string; body: string; to?: string }> = [
+  { tag: 'New', title: 'Pay your statement online', body: 'Owners can pay the monthly statement by MTN MoMo, Airtel Money or card, in Rwandan francs, and download a PDF receipt for every payment.', to: '/help/billing-and-payment' },
+  { tag: 'New', title: 'Notifications', body: 'A bell in the app tells you when buyers, banks or officers check your documents, open shared links, or when documents are anchored — with a choice of which ones also arrive by email.' },
+  { tag: 'New', title: 'Two-step sign-in and device sessions', body: 'Protect your account with an authenticator app and recovery codes, and sign out devices you don’t recognise.', to: '/help/two-step-sign-in' },
+  { tag: 'New', title: 'Company profile and invoice numbering', body: 'Set your company details and shipment defaults once; take invoice numbers from a sequence that never repeats.', to: '/help/set-up-your-company' },
+  { tag: 'New', title: 'Reports and exports', body: 'Monthly shipments, export value, duty protected and verifications, with CSV exports of shipments, the document register and verifications.' },
+  { tag: 'New', title: 'Help centre', body: 'Step-by-step guides for exporters, buyers, banks and officers.', to: '/help' },
+  { tag: 'Improved', title: 'Branded emails', body: 'Invitations, alerts and receipts now arrive as clear, branded emails with a button for the next step.' },
   { tag: 'New', title: 'A new public site', body: 'Product, solutions, pricing, corridors, security and developer pages, a live status page and a contact form that reaches our team.', to: '/product' },
   { tag: 'Improved', title: 'Paper-and-ink design', body: 'The whole app now reads like the documents it produces: paper backgrounds, serif headings and a clearer layout.' },
   { tag: 'New', title: 'Rwanda → Tanzania and Rwanda → Burundi', body: 'Four corridors from Rwanda now have maintained rule sets, including border posts, tax ID formats and permits.', to: '/corridors' },
@@ -174,7 +181,7 @@ function LegalShell({ title, updated, children }: { title: string; updated: stri
           <p className="mt-3 text-[14px] text-slate-500">Last updated {updated}</p>
         </div>
       </section>
-      <article className={cx('mx-auto max-w-3xl py-14 text-[15.5px] leading-relaxed text-slate-700 [&_h2]:mt-10 [&_h2]:font-serif [&_h2]:text-[22px] [&_h2]:font-medium [&_h2]:text-navy-900 [&_li]:mt-1.5 [&_p]:mt-4 [&_ul]:mt-3 [&_ul]:list-disc [&_ul]:pl-5', PAGE_X)}>
+      <article className={cx('mx-auto max-w-3xl py-14 text-[15.5px] leading-relaxed text-slate-700 [&_h2]:mt-10 [&_h2]:font-serif [&_h2]:text-[22px] [&_h2]:font-medium [&_h2]:text-ink [&_li]:mt-1.5 [&_p]:mt-4 [&_ul]:mt-3 [&_ul]:list-disc [&_ul]:pl-5', PAGE_X)}>
         <div className="rounded-[3px] border border-amber-300 bg-amber-50 p-4 text-[14px] text-amber-900">
           Pilot draft — this text is under legal review and may change before general availability. Questions? <Link to="/contact" className="underline">Contact us</Link>.
         </div>
@@ -266,7 +273,7 @@ export function CreditsPage() {
           <figure key={p.src}>
             <PhotoPrint photo={p} tape={false} />
             <figcaption className="mt-3 text-[13.5px] leading-snug text-slate-600">
-              <p className="text-navy-900">{p.alt}</p>
+              <p className="text-ink">{p.alt}</p>
               <p className="mt-1">{p.author} · {p.licenseUrl ? <a href={p.licenseUrl} target="_blank" rel="noreferrer" className="underline">{p.license}</a> : p.license} · <a href={p.source} target="_blank" rel="noreferrer" className="underline">Source</a></p>
             </figcaption>
           </figure>

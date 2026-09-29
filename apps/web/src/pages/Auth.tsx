@@ -81,20 +81,42 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(params.get('oauth_error'));
   const [busy, setBusy] = useState(false);
+  // Set when the password (or Google/Apple, via ?challenge=) was right and a code is needed.
+  const [challenge, setChallenge] = useState<string | null>(params.get('challenge'));
 
   async function submit(e: FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError(null);
     try {
-      const me = await api.post<Me>('/auth/login', { email, password });
-      qc.setQueryData(['me'], { user: me.user, org: me.org });
+      const res = await api.post<Me & { twoFactorRequired?: boolean; challenge?: string }>('/auth/login', { email, password });
+      if (res.twoFactorRequired && res.challenge) {
+        setChallenge(res.challenge);
+        return;
+      }
+      qc.setQueryData(['me'], { user: res.user, org: res.org });
       navigate(params.get('next') || '/app', { replace: true });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not sign in');
     } finally {
       setBusy(false);
     }
+  }
+
+  if (challenge) {
+    return (
+      <SecondStep
+        challenge={challenge}
+        onRestart={() => {
+          setChallenge(null);
+          setPassword('');
+        }}
+        onDone={(me, next) => {
+          qc.setQueryData(['me'], { user: me.user, org: me.org });
+          navigate(next || params.get('next') || '/app', { replace: true });
+        }}
+      />
+    );
   }
 
   return (
@@ -109,6 +131,72 @@ export function Login() {
           <input className="input" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
         </Field>
         <Button type="submit" size="lg" className="w-full" loading={busy}>Sign in</Button>
+      </form>
+    </Shell>
+  );
+}
+
+/** Authenticator-app code (or a recovery code) after the first factor. */
+function SecondStep({ challenge, onDone, onRestart }: { challenge: string; onDone: (me: Me, next?: string | null) => void; onRestart: () => void }) {
+  const [code, setCode] = useState('');
+  const [recovery, setRecovery] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [left, setLeft] = useState<{ me: Me; next?: string | null; count: number } | null>(null);
+
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await api.post<Me & { next?: string | null; recoveryCodesLeft?: number }>('/auth/login/2fa', { challenge, code });
+      // Warn when recovery codes are running out before moving on.
+      if (res.recoveryCodesLeft !== undefined && res.recoveryCodesLeft <= 3) setLeft({ me: res, next: res.next, count: res.recoveryCodesLeft });
+      else onDone(res, res.next);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Could not verify the code');
+      if (err instanceof ApiError && (err.status === 429 || err.code === 'challenge_expired')) setTimeout(onRestart, 2500);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (left) {
+    return (
+      <Shell title="Recovery code used" subtitle="You are signed in." footer={null}>
+        <Alert tone="warning" title={`${left.count} recovery code${left.count === 1 ? '' : 's'} left`}>
+          Create new recovery codes in Team &amp; settings → Security, and keep them somewhere safe.
+        </Alert>
+        <Button size="lg" className="mt-6 w-full" onClick={() => onDone(left.me, left.next)}>Continue</Button>
+      </Shell>
+    );
+  }
+
+  return (
+    <Shell
+      title="Two-step sign-in"
+      subtitle={recovery ? 'Enter one of the recovery codes you saved when you turned on two-step sign-in.' : 'Enter the 6-digit code from your authenticator app.'}
+      footer={<button type="button" onClick={onRestart} className="font-medium text-brand-700 hover:underline dark:text-brand-300">Start over</button>}
+    >
+      <form onSubmit={submit} className="space-y-4">
+        {error && <Alert tone="error">{error}</Alert>}
+        <Field label={recovery ? 'Recovery code' : 'Authentication code'}>
+          <input
+            className="input h-12 text-center font-mono text-[22px] tracking-[0.35em]"
+            inputMode={recovery ? 'text' : 'numeric'}
+            autoComplete="one-time-code"
+            autoFocus
+            required
+            maxLength={recovery ? 12 : 6}
+            placeholder={recovery ? 'XXXX-XXXX' : '000000'}
+            value={code}
+            onChange={(e) => setCode(recovery ? e.target.value.toUpperCase() : e.target.value.replace(/\D/g, ''))}
+          />
+        </Field>
+        <Button type="submit" size="lg" className="w-full" loading={busy}>Verify</Button>
+        <button type="button" onClick={() => { setRecovery((v) => !v); setCode(''); setError(null); }} className="w-full text-center text-[13px] text-slate-500 hover:text-slate-900 dark:text-navy-300 dark:hover:text-white">
+          {recovery ? 'Use my authenticator app instead' : 'Lost your phone? Use a recovery code'}
+        </button>
       </form>
     </Shell>
   );
@@ -202,7 +290,9 @@ export function ResetPassword() {
     setBusy(true);
     setError(null);
     try {
-      const me = await api.post<Me>('/auth/password/reset', { token, password });
+      const me = await api.post<Me & { twoFactorRequired?: boolean; challenge?: string }>('/auth/password/reset', { token, password });
+      // Two-step sign-in still applies after a reset.
+      if (me.twoFactorRequired && me.challenge) return navigate(`/login?challenge=${me.challenge}`, { replace: true });
       qc.setQueryData(['me'], { user: me.user, org: me.org });
       navigate('/app', { replace: true });
     } catch (err) {

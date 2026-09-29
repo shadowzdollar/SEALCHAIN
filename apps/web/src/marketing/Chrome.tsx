@@ -15,9 +15,9 @@ import { CorridorMap, QrGlyph, Stamp } from './Illustrations';
 export const PAGE_X = 'px-5 sm:px-8 lg:px-12 2xl:px-16';
 
 export const INK_BTN =
-  'inline-flex h-11 items-center justify-center gap-2 rounded-[3px] bg-navy-900 px-6 text-[14px] font-medium text-white shadow-[0_1px_0_rgba(0,0,0,0.25)] transition-colors hover:bg-navy-800';
+  'inline-flex h-11 items-center justify-center gap-2 rounded-[3px] bg-ink px-6 text-[14px] font-medium text-ink-contrast shadow-[0_1px_0_rgba(0,0,0,0.25)] transition-opacity hover:opacity-90';
 export const PAPER_BTN =
-  'inline-flex h-11 items-center justify-center gap-2 rounded-[3px] border border-paper-rule bg-paper-card px-6 text-[14px] font-medium text-navy-900 shadow-[0_1px_0_rgba(11,31,58,0.06)] transition-colors hover:border-navy-300';
+  'inline-flex h-11 items-center justify-center gap-2 rounded-[3px] border border-paper-rule bg-paper-card px-6 text-[14px] font-medium text-ink shadow-[0_1px_0_rgba(11,31,58,0.06)] transition-colors hover:border-navy-300';
 
 export interface StatusResponse {
   overall: 'operational' | 'degraded' | 'down';
@@ -124,11 +124,11 @@ function MegaPanel({ menu, onNavigate }: { menu: Menu; onNavigate: () => void })
                 {g.items.map((it) => (
                   <li key={it.label}>
                     <Link to={it.to} onClick={onNavigate} className="group flex gap-3 rounded-[3px] p-2.5 -mx-2.5 transition-colors hover:bg-paper">
-                      <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-[3px] border border-paper-rule bg-paper text-navy-900 group-hover:border-navy-900">
+                      <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-[3px] border border-paper-rule bg-paper text-ink group-hover:border-ink">
                         <it.icon className="size-4" strokeWidth={1.7} />
                       </span>
                       <span>
-                        <span className="block text-[14px] font-medium text-navy-900">{it.label}</span>
+                        <span className="block text-[14px] font-medium text-ink">{it.label}</span>
                         <span className="mt-0.5 block text-[12.5px] leading-snug text-slate-500">{it.desc}</span>
                       </span>
                     </Link>
@@ -141,9 +141,9 @@ function MegaPanel({ menu, onNavigate }: { menu: Menu; onNavigate: () => void })
         <Link to={menu.featured.to} onClick={onNavigate} className="group block rounded-[3px] border border-paper-rule bg-paper p-4 transition-colors hover:border-navy-300">
           <FeaturedArt art={menu.featured.art} />
           <Eyebrow className="mt-4 !text-[10.5px]">{menu.featured.eyebrow}</Eyebrow>
-          <p className="mt-1.5 font-serif text-[19px] font-medium text-navy-900">{menu.featured.title}</p>
+          <p className="mt-1.5 font-serif text-[19px] font-medium text-ink">{menu.featured.title}</p>
           <p className="mt-1 text-[13px] leading-snug text-slate-600">{menu.featured.body}</p>
-          <p className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-medium text-navy-900">{menu.featured.cta} <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" /></p>
+          <p className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-medium text-ink">{menu.featured.cta} <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" /></p>
         </Link>
       </div>
     </div>
@@ -157,12 +157,12 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
     <div className="fixed inset-0 z-50 flex flex-col bg-paper lg:hidden">
       <div className="flex h-16 items-center justify-between border-b border-paper-rule px-5">
         <Link to="/" onClick={onClose}><Logo /></Link>
-        <button onClick={onClose} className="rounded p-2 text-navy-900" aria-label="Close menu"><X className="size-5" /></button>
+        <button onClick={onClose} className="rounded p-2 text-ink" aria-label="Close menu"><X className="size-5" /></button>
       </div>
       <nav className="flex-1 overflow-y-auto px-5 py-3">
         {MENUS.map((m) => (
           <div key={m.id} className="border-b border-paper-rule">
-            <button onClick={() => setSection((s) => (s === m.id ? null : m.id))} className="flex w-full items-center justify-between py-4 font-serif text-[20px] font-medium text-navy-900" aria-expanded={section === m.id}>
+            <button onClick={() => setSection((s) => (s === m.id ? null : m.id))} className="flex w-full items-center justify-between py-4 font-serif text-[20px] font-medium text-ink" aria-expanded={section === m.id}>
               {m.label} <ChevronDown className={cx('size-5 transition-transform', section === m.id && 'rotate-180')} />
             </button>
             {section === m.id && (
@@ -170,7 +170,7 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
                 {m.groups.flatMap((g) => g.items).map((it) => (
                   <li key={it.label}>
                     <Link to={it.to} onClick={onClose} className="flex items-center gap-3 py-2 text-[15px] text-slate-700">
-                      <it.icon className="size-4 text-navy-900" strokeWidth={1.7} /> {it.label}
+                      <it.icon className="size-4 text-ink" strokeWidth={1.7} /> {it.label}
                     </Link>
                   </li>
                 ))}
@@ -178,7 +178,7 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
             )}
           </div>
         ))}
-        <Link to="/pricing" onClick={onClose} className="block border-b border-paper-rule py-4 font-serif text-[20px] font-medium text-navy-900">Pricing</Link>
+        <Link to="/pricing" onClick={onClose} className="block border-b border-paper-rule py-4 font-serif text-[20px] font-medium text-ink">Pricing</Link>
       </nav>
       <div className="grid gap-3 border-t border-paper-rule p-5">
         {me ? (
@@ -239,24 +239,24 @@ function Header() {
               onMouseEnter={() => hover(m.id)}
               onClick={() => setOpen((o) => (o === m.id ? null : m.id))}
               aria-expanded={open === m.id}
-              className={cx('flex items-center gap-1 rounded-[3px] px-3 py-2 text-[14px] transition-colors', open === m.id ? 'bg-paper-tint text-navy-900' : 'text-slate-600 hover:text-navy-900')}
+              className={cx('flex items-center gap-1 rounded-[3px] px-3 py-2 text-[14px] transition-colors', open === m.id ? 'bg-paper-tint text-ink' : 'text-slate-600 hover:text-ink')}
             >
               {m.label} <ChevronDown className={cx('size-3.5 transition-transform', open === m.id && 'rotate-180')} />
             </button>
           ))}
-          <Link to="/pricing" onMouseEnter={() => hover(null)} className="rounded-[3px] px-3 py-2 text-[14px] text-slate-600 hover:text-navy-900">Pricing</Link>
+          <Link to="/pricing" onMouseEnter={() => hover(null)} className="rounded-[3px] px-3 py-2 text-[14px] text-slate-600 hover:text-ink">Pricing</Link>
         </nav>
         <div className="flex items-center gap-2 sm:gap-3">
-          <Link to="/verify" className="hidden px-2 text-[14px] text-slate-600 hover:text-navy-900 xl:block">Verify</Link>
+          <Link to="/verify" className="hidden px-2 text-[14px] text-slate-600 hover:text-ink xl:block">Verify</Link>
           {me ? (
-            <Link to="/app" className="inline-flex h-9 items-center rounded-[3px] bg-navy-900 px-4 text-[13px] font-medium text-white hover:bg-navy-800">Open SealChain</Link>
+            <Link to="/app" className="inline-flex h-9 items-center rounded-[3px] bg-ink px-4 text-[13px] font-medium text-ink-contrast hover:opacity-90">Open SealChain</Link>
           ) : (
             <>
-              <Link to="/login" className="hidden px-2 text-[14px] font-medium text-navy-900 hover:text-navy-700 sm:block">Sign in</Link>
-              <Link to="/register" className="hidden h-9 items-center rounded-[3px] bg-navy-900 px-4 text-[13px] font-medium text-white hover:bg-navy-800 sm:inline-flex">Start a shipment</Link>
+              <Link to="/login" className="hidden px-2 text-[14px] font-medium text-ink hover:text-ink/75 sm:block">Sign in</Link>
+              <Link to="/register" className="hidden h-9 items-center rounded-[3px] bg-ink px-4 text-[13px] font-medium text-ink-contrast hover:opacity-90 sm:inline-flex">Start a shipment</Link>
             </>
           )}
-          <button onClick={() => setMobile(true)} className="rounded p-2 text-navy-900 lg:hidden" aria-label="Open menu"><MenuIcon className="size-5" /></button>
+          <button onClick={() => setMobile(true)} className="rounded p-2 text-ink lg:hidden" aria-label="Open menu"><MenuIcon className="size-5" /></button>
         </div>
       </div>
       {active && (
@@ -283,7 +283,7 @@ export function CtaBand() {
           <p className="mt-4 max-w-xl text-[16px] leading-relaxed text-navy-200">Create your first shipment in minutes, or talk to us about onboarding your cooperative, agency or authority.</p>
         </div>
         <div className="flex flex-wrap gap-3 lg:justify-end">
-          <Link to="/register" className="inline-flex h-11 items-center gap-2 rounded-[3px] bg-paper px-6 text-[14px] font-medium text-navy-900 hover:bg-white">Start a shipment <ArrowRight className="size-4" /></Link>
+          <Link to="/register" className="inline-flex h-11 items-center gap-2 rounded-[3px] bg-[#f8f5ee] px-6 text-[14px] font-medium text-[#0b1f3a] hover:bg-[#fffdf8]">Start a shipment <ArrowRight className="size-4" /></Link>
           <Link to="/contact" className="inline-flex h-11 items-center rounded-[3px] border border-white/25 px-6 text-[14px] font-medium text-white hover:bg-white/10">Talk to us</Link>
         </div>
       </div>
@@ -321,7 +321,7 @@ function Footer() {
                 <p className="font-plexmono text-[11px] uppercase tracking-[0.18em] text-slate-500">{col.title}</p>
                 <ul className="mt-4 space-y-2.5">
                   {col.links.map((l) => (
-                    <li key={l.label}><Link to={l.to} className="text-[14px] text-slate-700 hover:text-navy-900 hover:underline hover:underline-offset-4">{l.label}</Link></li>
+                    <li key={l.label}><Link to={l.to} className="text-[14px] text-slate-700 hover:text-ink hover:underline hover:underline-offset-4">{l.label}</Link></li>
                   ))}
                 </ul>
               </div>
@@ -335,11 +335,11 @@ function Footer() {
           <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p>© {new Date().getFullYear()} SealChain · Rwanda · Kenya · Uganda · Tanzania · Burundi</p>
             <div className="flex gap-5">
-              <Link to="/legal/privacy" className="hover:text-navy-900">Privacy</Link>
-              <Link to="/legal/terms" className="hover:text-navy-900">Terms</Link>
-              <Link to="/security" className="hover:text-navy-900">Security</Link>
-              <Link to="/status" className="hover:text-navy-900">Status</Link>
-              <Link to="/credits" className="hover:text-navy-900">Photo credits</Link>
+              <Link to="/legal/privacy" className="hover:text-ink">Privacy</Link>
+              <Link to="/legal/terms" className="hover:text-ink">Terms</Link>
+              <Link to="/security" className="hover:text-ink">Security</Link>
+              <Link to="/status" className="hover:text-ink">Status</Link>
+              <Link to="/credits" className="hover:text-ink">Photo credits</Link>
             </div>
           </div>
         </div>
@@ -380,7 +380,7 @@ function useForceLight() {
 export function MarketingLayout({ cta = true }: { cta?: boolean }) {
   useForceLight();
   return (
-    <div className="min-h-dvh overflow-x-clip bg-paper font-plex text-navy-900 selection:bg-navy-900 selection:text-paper">
+    <div className="min-h-dvh overflow-x-clip bg-paper font-plex text-ink selection:bg-ink selection:text-paper">
       <ScrollManager />
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-navy-900 focus:px-3 focus:py-2 focus:text-white">Skip to content</a>
       <Announcement />

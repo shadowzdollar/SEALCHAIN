@@ -21,7 +21,8 @@ import { audit, requireAuth, requireAuthority, requireCompliance } from '../serv
 import { HttpError, type Deps, type DocumentRow, DOC_COLUMNS } from '../services/documents';
 import type { EndRow, EndorsementRecord } from '../services/endorsement';
 
-export async function endorsementRoutes(api: FastifyInstance, { db, signer, anchor, mailer, cfg, webhooks }: Deps) {
+export async function endorsementRoutes(api: FastifyInstance, deps: Deps) {
+  const { db, signer, anchor, mailer, cfg, webhooks } = deps;
   const orgEmails = (orgId: string) =>
     db.all<{ email: string }>("SELECT email FROM users WHERE org_id = ? AND password_hash != 'disabled'", orgId).map((u) => u.email);
 
@@ -87,9 +88,10 @@ export async function endorsementRoutes(api: FastifyInstance, { db, signer, anch
       status: 'pending', request_note: body.note ?? null, created_by: req.auth!.user.id, created_at: nowIso(),
     });
     for (const to of orgEmails(authority.id)) {
-      await mailer.send({ to, subject: `Endorsement requested: ${doc.number}`, body: `${req.auth!.org.name} requests endorsement of ${doc.number}.\n\nReview it: ${cfg.publicWebUrl}/app/authority\n` });
+      await mailer.send({ to, subject: `Endorsement requested: ${doc.number}`, body: `${req.auth!.org.name} requests endorsement of ${doc.number}.\n\nReview it in your authority workspace:\n${cfg.publicWebUrl}/app/authority\n` });
     }
     audit(db, req.auth, 'endorsement.request', 'document', doc.id, { authority: authority.id });
+    deps.notifications.notify(authority.id, 'endorsement.requested', { title: `Endorsement requested: ${doc.number}`, body: `${req.auth!.org.name} asks you to endorse ${doc.number}.`, link: '/app/authority' });
     return reply.code(201).send({ id, status: 'pending', authority: authority.name });
   });
 
@@ -193,6 +195,11 @@ export async function endorsementRoutes(api: FastifyInstance, { db, signer, anch
       });
     }
     audit(db, req.auth, `endorsement.${body.decision}`, 'endorsement', e.id, { document: doc.number, note: body.note });
+    deps.notifications.notify(e.requester_org_id, 'endorsement.decided', {
+      title: `${doc.number} ${body.decision === 'endorse' ? 'endorsed' : 'not endorsed'} by ${req.auth!.org.name}`,
+      body: body.decision === 'endorse' ? 'Anyone verifying the certificate now sees the endorsement.' : `Reason: ${body.note}`,
+      link: `/app/shipments/${e.shipment_id}`, severity: body.decision === 'endorse' ? 'success' : 'warning',
+    });
     webhooks.dispatch(e.requester_org_id, 'endorsement.decided', {
       endorsementId: e.id, documentId: doc.id, number: doc.number, shipmentId: e.shipment_id,
       authority: req.auth!.org.name, decision: body.decision === 'endorse' ? 'endorsed' : 'rejected', reason: body.decision === 'reject' ? body.note : undefined, decidedAt,

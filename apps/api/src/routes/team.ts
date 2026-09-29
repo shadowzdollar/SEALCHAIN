@@ -25,12 +25,14 @@ import {
 } from '../services/auth';
 import { HttpError, type Deps } from '../services/documents';
 
+import { createChallenge, hasTwoFactor } from '../services/twofactor';
 const RATE = { config: { rateLimit: { max: 10, timeWindow: '1 minute' } } };
 const INVITE_DAYS = 7;
 const RESET_MINUTES = 60;
 const password = z.string().min(10, 'Use at least 10 characters').max(200);
 
-export async function teamRoutes(api: FastifyInstance, { db, cfg, mailer }: Deps) {
+export async function teamRoutes(api: FastifyInstance, deps: Deps) {
+  const { db, cfg, mailer } = deps;
   const setCookie = (reply: FastifyReply, token: string, expires: Date) =>
     reply.setCookie(SESSION_COOKIE, token, { path: '/', httpOnly: true, sameSite: 'lax', secure: cfg.isProd, expires });
 
@@ -120,10 +122,11 @@ export async function teamRoutes(api: FastifyInstance, { db, cfg, mailer }: Deps
       db.insert('users', { id: userId, org_id: inv.org_id, email: inv.email, name: body.name, password_hash: hashPassword(body.password), role: inv.role, created_at: nowIso() });
       db.run('UPDATE invites SET accepted_at = ? WHERE token_hash = ?', nowIso(), hash);
     });
-    const { token, expiresAt } = createSession(db, userId, cfg.sessionDays);
+    const { token, expiresAt } = createSession(db, userId, cfg.sessionDays, { userAgent: req.headers['user-agent'] });
     setCookie(reply, token, expiresAt);
     const ctx = resolveSession(db, token)!;
     audit(db, ctx, 'team.join', 'user', userId);
+    deps.notifications.notify(inv.org_id, 'team.joined', { title: `${body.name} joined your team`, body: `${body.name} (${inv.email}) accepted the invitation as ${inv.role}.`, link: '/app/team', actorUserId: userId });
     return reply.code(201).send({ ...ctx, token });
   });
 
@@ -156,7 +159,12 @@ export async function teamRoutes(api: FastifyInstance, { db, cfg, mailer }: Deps
       db.run('UPDATE password_resets SET used_at = ? WHERE token_hash = ?', nowIso(), hash);
       db.run('DELETE FROM sessions WHERE user_id = ?', row.user_id); // sign out everywhere
     });
-    const { token, expiresAt } = createSession(db, row.user_id, cfg.sessionDays);
+    // A reset proves control of the mailbox, not of the authenticator.
+    if (hasTwoFactor(db, row.user_id)) {
+      audit(db, null, 'auth.password.reset', 'user', row.user_id);
+      return { twoFactorRequired: true, challenge: createChallenge(db, row.user_id, '/app') };
+    }
+    const { token, expiresAt } = createSession(db, row.user_id, cfg.sessionDays, { userAgent: req.headers['user-agent'] });
     setCookie(reply, token, expiresAt);
     const ctx = resolveSession(db, token)!;
     audit(db, ctx, 'auth.password.reset', 'user', row.user_id);

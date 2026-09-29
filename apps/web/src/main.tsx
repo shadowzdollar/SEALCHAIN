@@ -19,7 +19,10 @@ import { ShipmentView } from './pages/ShipmentView';
 import { Verify } from './pages/Verify';
 import { Check } from './pages/Check';
 import { Parties } from './pages/Parties';
-import { Billing } from './pages/Billing';
+import { Billing, PaymentReturn, SandboxCheckout } from './pages/Billing';
+import { NotificationsPage } from './pages/Notifications';
+import { Company } from './pages/Company';
+import { Reports } from './pages/Reports';
 
 const Compliance = lazy(() => import('./pages/Compliance').then((m) => ({ default: m.Compliance })));
 
@@ -40,6 +43,8 @@ const PrivacyPage = page(() => import('./marketing/pages/Company'), 'PrivacyPage
 const TermsPage = page(() => import('./marketing/pages/Company'), 'TermsPage');
 const NotFoundPage = page(() => import('./marketing/pages/Company'), 'NotFoundPage');
 const CreditsPage = page(() => import('./marketing/pages/Company'), 'CreditsPage');
+const HelpIndex = page(() => import('./marketing/pages/Help'), 'HelpIndex');
+const HelpArticle = page(() => import('./marketing/pages/Help'), 'HelpArticle');
 
 const lazyEl = (C: LazyExoticComponent<() => ReactNode>) => (
   <Suspense fallback={<div className="min-h-[60vh]" />}>
@@ -102,6 +107,8 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/legal/privacy" element={lazyEl(PrivacyPage)} />
               <Route path="/legal/terms" element={lazyEl(TermsPage)} />
               <Route path="/credits" element={lazyEl(CreditsPage)} />
+              <Route path="/help" element={lazyEl(HelpIndex)} />
+              <Route path="/help/:slug" element={lazyEl(HelpArticle)} />
               <Route path="*" element={lazyEl(NotFoundPage)} />
             </Route>
             <Route path="/login" element={<Login />} />
@@ -129,7 +136,12 @@ createRoot(document.getElementById('root')!).render(
               <Route path="shipments/:id/edit" element={<ShipmentEditor />} />
               <Route path="check" element={<Check />} />
               <Route path="parties" element={<Parties />} />
+              <Route path="notifications" element={<NotificationsPage />} />
+              <Route path="company" element={<Company />} />
+              <Route path="reports" element={<Reports />} />
               <Route path="billing" element={<Billing />} />
+              <Route path="billing/sandbox/:id" element={<SandboxCheckout />} />
+              <Route path="billing/return" element={<PaymentReturn />} />
               <Route path="team" element={<Team />} />
               <Route
                 path="compliance"

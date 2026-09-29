@@ -20,7 +20,7 @@ const TOPICS = [
 
 const COUNTRIES = ['Rwanda', 'Kenya', 'Uganda', 'Tanzania', 'Burundi', 'DR Congo', 'South Sudan', 'Other'];
 
-const FIELD = 'block h-11 w-full rounded-[3px] border border-paper-rule bg-paper-card px-3 text-[15px] text-navy-900 placeholder:text-slate-400 focus:border-navy-900 focus:outline-none focus:ring-2 focus:ring-navy-900/10';
+const FIELD = 'block h-11 w-full rounded-[3px] border border-paper-rule bg-paper-card px-3 text-[15px] text-ink placeholder:text-slate-400 focus:border-ink focus:outline-none focus:ring-2 focus:ring-navy-900/10';
 
 export function ContactPage() {
   const [params] = useSearchParams();
@@ -49,9 +49,9 @@ export function ContactPage() {
             ].map((x) => (
               <li key={x.t}>
                 <Link to={x.to} className="group flex items-start gap-3 py-4">
-                  <span className="mt-0.5 text-navy-900 [&>svg]:size-[18px] [&>svg]:stroke-[1.6]">{x.icon}</span>
+                  <span className="mt-0.5 text-ink [&>svg]:size-[18px] [&>svg]:stroke-[1.6]">{x.icon}</span>
                   <span className="flex-1"><span className="block font-medium">{x.t}</span><span className="text-[14px] text-slate-600">{x.d}</span></span>
-                  <ArrowRight className="mt-1 size-4 text-slate-400 transition-transform group-hover:translate-x-0.5 group-hover:text-navy-900" />
+                  <ArrowRight className="mt-1 size-4 text-slate-400 transition-transform group-hover:translate-x-0.5 group-hover:text-ink" />
                 </Link>
               </li>
             ))}
@@ -64,7 +64,7 @@ export function ContactPage() {
             <div className="flex min-h-[420px] flex-col items-center justify-center text-center">
               <Stamp className="rotate-[-5deg]">Received</Stamp>
               <h2 className="mt-8 font-serif text-[28px] font-semibold">Thank you, {form.name.split(' ')[0]}.</h2>
-              <p className="mt-3 max-w-sm text-[15px] text-slate-600">We’ve received your message and will reply to <span className="font-medium text-navy-900">{form.email}</span>.</p>
+              <p className="mt-3 max-w-sm text-[15px] text-slate-600">We’ve received your message and will reply to <span className="font-medium text-ink">{form.email}</span>.</p>
               <p className="mt-6 font-plexmono text-[12px] text-slate-500">Reference {send.data.id}</p>
             </div>
           ) : (

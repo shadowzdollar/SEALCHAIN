@@ -385,6 +385,89 @@ const MIGRATIONS: string[] = [
   );
   CREATE INDEX contact_requests_open ON contact_requests(handled_at, created_at);
   `,
+  /* 12 — online payments against the monthly statement */ `
+  CREATE TABLE payment_intents (
+    id TEXT PRIMARY KEY,
+    org_id TEXT NOT NULL REFERENCES orgs(id),
+    period TEXT NOT NULL,
+    provider TEXT NOT NULL,
+    credit_cents INTEGER NOT NULL,
+    charge_amount REAL NOT NULL,
+    charge_currency TEXT NOT NULL,
+    status TEXT NOT NULL,
+    checkout_url TEXT,
+    provider_tx_id TEXT,
+    payment_type TEXT,
+    failure_reason TEXT,
+    payment_id TEXT,
+    created_by TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    completed_at TEXT
+  );
+  CREATE INDEX payment_intents_org ON payment_intents(org_id, created_at);
+  ALTER TABLE payments ADD COLUMN currency_charged TEXT;
+  ALTER TABLE payments ADD COLUMN amount_charged REAL;
+  `,
+  /* 13 — in-app notifications and per-user email preferences */ `
+  CREATE TABLE notifications (
+    id TEXT PRIMARY KEY,
+    org_id TEXT NOT NULL REFERENCES orgs(id),
+    type TEXT NOT NULL,
+    severity TEXT NOT NULL DEFAULT 'info',
+    title TEXT NOT NULL,
+    body TEXT,
+    link TEXT,
+    dedupe_key TEXT,
+    count INTEGER NOT NULL DEFAULT 1,
+    actor_user_id TEXT,
+    created_at TEXT NOT NULL
+  );
+  CREATE INDEX notifications_org ON notifications(org_id, created_at);
+  CREATE INDEX notifications_dedupe ON notifications(org_id, dedupe_key, created_at);
+  CREATE TABLE notification_reads (
+    notification_id TEXT NOT NULL REFERENCES notifications(id) ON DELETE CASCADE,
+    user_id TEXT NOT NULL,
+    read_at TEXT NOT NULL,
+    PRIMARY KEY (notification_id, user_id)
+  );
+  CREATE TABLE notification_prefs (
+    user_id TEXT NOT NULL,
+    type TEXT NOT NULL,
+    email INTEGER NOT NULL,
+    PRIMARY KEY (user_id, type)
+  );
+  `,
+  /* 14 — organisation profile defaults, invoice numbering, onboarding */ `
+  CREATE TABLE org_settings (
+    org_id TEXT PRIMARY KEY REFERENCES orgs(id),
+    invoice_prefix TEXT,
+    invoice_next INTEGER NOT NULL DEFAULT 1,
+    default_corridor TEXT,
+    default_currency TEXT,
+    default_incoterm TEXT,
+    default_payment_terms TEXT,
+    website TEXT,
+    onboarding_dismissed_at TEXT,
+    updated_at TEXT NOT NULL
+  );
+  `,
+  /* 15 — two-step sign-in (TOTP) and session management */ `
+  ALTER TABLE users ADD COLUMN totp_secret TEXT;
+  ALTER TABLE users ADD COLUMN totp_pending_secret TEXT;
+  ALTER TABLE users ADD COLUMN totp_enabled_at TEXT;
+  ALTER TABLE users ADD COLUMN totp_last_step INTEGER;
+  ALTER TABLE users ADD COLUMN recovery_codes TEXT;
+  ALTER TABLE sessions ADD COLUMN user_agent TEXT;
+  ALTER TABLE sessions ADD COLUMN last_seen_at TEXT;
+  CREATE INDEX sessions_user ON sessions(user_id);
+  CREATE TABLE login_challenges (
+    token_hash TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id),
+    next TEXT,
+    attempts INTEGER NOT NULL DEFAULT 0,
+    expires_at TEXT NOT NULL
+  );
+  `,
 ];
 
 export class Db {

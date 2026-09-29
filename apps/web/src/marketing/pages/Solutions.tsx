@@ -148,7 +148,7 @@ export function SolutionsPage() {
           <p className="font-plexmono text-[11px] uppercase tracking-[0.18em] text-slate-500">Other solutions</p>
           <div className="mt-5 grid gap-4 sm:grid-cols-3">
             {OTHERS.map((o) => (
-              <Link key={o.id} to={`/solutions/${o.id}`} className={cx('flex items-center gap-3 rounded-[3px] border p-4 text-[15px] transition-colors [&>svg]:size-[18px] [&>svg]:stroke-[1.6]', o.id === segment ? 'border-navy-900 bg-paper-card font-medium' : 'border-paper-rule hover:border-navy-300')}>
+              <Link key={o.id} to={`/solutions/${o.id}`} className={cx('flex items-center gap-3 rounded-[3px] border p-4 text-[15px] transition-colors [&>svg]:size-[18px] [&>svg]:stroke-[1.6]', o.id === segment ? 'border-ink bg-paper-card font-medium' : 'border-paper-rule hover:border-navy-300')}>
                 {o.icon} {o.label}
               </Link>
             ))}

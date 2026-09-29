@@ -7,6 +7,7 @@ import { Badge, Button, Card, EmptyState, PageHeader, PageLoader, Stat } from '.
 import { StatusBadge, AnchorBadge } from './Shipments';
 import { money, num, relative } from '../format';
 import { ActivityFeed } from '../components/Sharing';
+import { OnboardingCard } from '../components/Onboarding';
 
 interface Dash {
   shipments: { draft: number; issued: number };
@@ -40,6 +41,8 @@ export function Dashboard() {
           </Link>
         }
       />
+
+      <OnboardingCard />
 
       {d && (
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">

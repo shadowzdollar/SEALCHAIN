@@ -1,0 +1,51 @@
+# Production: the SealChain app behind Caddy (automatic HTTPS).
+#
+#   cp .env.example .env    # fill it in (see docs/GO_LIVE.md)
+#   docker compose -f deploy/docker-compose.prod.yml --env-file .env up -d --build
+#   docker compose -f deploy/docker-compose.prod.yml exec app node --import tsx src/scripts/go-live.ts
+#
+# Point your domain's A/AAAA records at this server before starting, so Caddy
+# can obtain the certificate. Anchoring uses the public chain configured in .env.
+services:
+  app:
+    build: ..
+    restart: unless-stopped
+    env_file: ../.env
+    environment:
+      NODE_ENV: production
+      DATA_DIR: /data
+      PORT: "4100"
+    volumes: ["sealchain-data:/data"]
+    expose: ["4100"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4100/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on: [app]
+    environment:
+      DOMAIN: ${DOMAIN:?Set DOMAIN in .env, e.g. DOMAIN=app.sealchain.rw}
+    ports: ["80:80", "443:443", "443:443/udp"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+  # Daily online SQLite backup into the data volume (keeps the newest 14).
+  # Copy /data/backups off the server as well — see docs/GO_LIVE.md.
+  backup:
+    build: ..
+    restart: unless-stopped
+    env_file: ../.env
+    environment: { NODE_ENV: production, DATA_DIR: /data }
+    volumes: ["sealchain-data:/data"]
+    entrypoint: ["/bin/sh", "-c", "while true; do node --import tsx src/scripts/backup.ts /data/backups; sleep 86400; done"]
+
+volumes:
+  sealchain-data:
+  caddy-data:
+  caddy-config:

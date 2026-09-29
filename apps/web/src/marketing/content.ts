@@ -11,6 +11,7 @@ import {
   Fingerprint,
   History,
   Landmark,
+  LifeBuoy,
   ListChecks,
   Lock,
   Mail,
@@ -122,6 +123,7 @@ export const MENUS: Menu[] = [
       {
         title: 'Learn',
         items: [
+          { label: 'Help centre', to: '/help', desc: 'Step-by-step guides for exporters, buyers and officers.', icon: LifeBuoy },
           { label: 'Security & trust', to: '/security', desc: 'How documents, keys and your data are protected.', icon: Lock },
           { label: 'Questions & answers', to: '/pricing#faq', desc: 'Pricing, pilots, verification and data.', icon: BookOpen },
         ],
@@ -173,6 +175,7 @@ export const FOOTER: Array<{ title: string; links: Array<{ label: string; to: st
     title: 'Company',
     links: [
       { label: 'About', to: '/about' },
+      { label: 'Help centre', to: '/help' },
       { label: 'Security & trust', to: '/security' },
       { label: 'Contact', to: '/contact' },
       { label: 'Privacy', to: '/legal/privacy' },

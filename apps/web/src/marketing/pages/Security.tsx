@@ -46,7 +46,7 @@ export function SecurityPage() {
               [<ListChecks key="6" />, 'Audit trail', 'Issues, revocations, endorsements, rule changes and key management are written to an audit log.'],
             ].map(([icon, t, d]) => (
               <div key={t as string} className="bg-paper-card p-6">
-                <span className="text-navy-900 [&>svg]:size-5 [&>svg]:stroke-[1.6]">{icon}</span>
+                <span className="text-ink [&>svg]:size-5 [&>svg]:stroke-[1.6]">{icon}</span>
                 <p className="mt-4 font-serif text-[18px] font-medium">{t}</p>
                 <p className="mt-1.5 text-[14px] leading-relaxed text-slate-600">{d}</p>
               </div>
@@ -67,7 +67,7 @@ export function SecurityPage() {
             <div><dt className="font-plexmono text-[11px] uppercase tracking-[0.14em] text-slate-500">Public key (hex)</dt><dd className="mt-1"><Hash value={meta?.issuerKey.publicKey} full /></dd></div>
             <div><dt className="font-plexmono text-[11px] uppercase tracking-[0.14em] text-slate-500">Anchoring network</dt><dd className="mt-1">{meta?.anchor.networkName ?? '—'}{meta?.anchor.contract ? <> · <Hash value={meta.anchor.contract} /></> : null}</dd></div>
           </dl>
-          <a href="/api/keys" className="mt-5 inline-block font-plexmono text-[12px] text-navy-900 underline underline-offset-4">GET /api/keys</a>
+          <a href="/api/keys" className="mt-5 inline-block font-plexmono text-[12px] text-ink underline underline-offset-4">GET /api/keys</a>
         </div>
       </section>
 

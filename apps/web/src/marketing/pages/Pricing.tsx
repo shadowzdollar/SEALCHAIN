@@ -85,7 +85,7 @@ export function PricingPage() {
 
           <div className="mt-14 grid gap-6 text-left lg:grid-cols-3">
             {plans.map((p) => (
-              <div key={p.name} className={cx('relative flex flex-col rounded-[3px] border bg-paper-card p-7', p.featured ? 'border-navy-900 shadow-[0_18px_40px_-24px_rgba(11,31,58,0.5)]' : 'border-paper-rule')}>
+              <div key={p.name} className={cx('relative flex flex-col rounded-[3px] border bg-paper-card p-7', p.featured ? 'border-ink shadow-[0_18px_40px_-24px_rgba(11,31,58,0.5)]' : 'border-paper-rule')}>
                 {p.featured && <span className="absolute -top-3 left-7 rounded-[2px] bg-stamp px-2 py-0.5 font-plexmono text-[10.5px] uppercase tracking-[0.14em] text-white">Pilot open</span>}
                 <p className="font-serif text-[24px] font-semibold">{p.name}</p>
                 <p className="mt-1 text-[14px] text-slate-500">{p.who}</p>
@@ -112,7 +112,7 @@ export function PricingPage() {
       <section className={cx('mx-auto max-w-[1680px] py-24', PAGE_X)}>
         <SectionHeading eyebrow="Compare" title="What each plan includes." />
         <div className="mt-10 overflow-x-auto">
-          <table className="w-full min-w-[640px] border-t-2 border-navy-900 text-[14px]">
+          <table className="w-full min-w-[640px] border-t-2 border-ink text-[14px]">
             <thead>
               <tr className="border-b border-paper-rule">
                 <th className="w-1/2 py-4 text-left font-normal" />
@@ -140,7 +140,7 @@ export function PricingPage() {
 
       <section id="faq" className="scroll-mt-20 border-t border-paper-rule bg-paper-card">
         <div className={cx('mx-auto grid max-w-[1680px] gap-12 py-24 lg:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)]', PAGE_X)}>
-          <SectionHeading eyebrow="Questions" title="Pricing and the pilot." body={<>Can’t find your answer? <Link to="/contact" className="font-medium text-navy-900 underline underline-offset-4">Contact us</Link>.</>} />
+          <SectionHeading eyebrow="Questions" title="Pricing and the pilot." body={<>Can’t find your answer? <Link to="/contact" className="font-medium text-ink underline underline-offset-4">Contact us</Link>.</>} />
           <Faq items={[...PRICING_FAQS, ...FAQS.slice(3)]} />
         </div>
       </section>

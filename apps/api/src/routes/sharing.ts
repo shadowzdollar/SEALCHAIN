@@ -28,7 +28,8 @@ interface LinkRow {
   created_at: string;
 }
 
-export async function sharingRoutes(api: FastifyInstance, { db, cfg }: Deps) {
+export async function sharingRoutes(api: FastifyInstance, deps: Deps) {
+  const { db, cfg } = deps;
   const clientHash = (ip: string) => crypto.createHash('sha256').update(`sealchain-share:${ip}`).digest('hex').slice(0, 16);
 
   const activeLink = (token: string) => {
@@ -82,7 +83,10 @@ export async function sharingRoutes(api: FastifyInstance, { db, cfg }: Deps) {
         WHERE d.shipment_id = ? AND d.version = ? ORDER BY d.kind`,
       link.shipment_id, row.issued_version,
     );
-    if (req.auth?.org.id !== link.org_id) db.insert('share_views', { id: newId('shv', 16), link_id: link.id, action: 'view', client_hash: clientHash(req.ip), created_at: nowIso() });
+    if (req.auth?.org.id !== link.org_id) {
+      db.insert('share_views', { id: newId('shv', 16), link_id: link.id, action: 'view', client_hash: clientHash(req.ip), created_at: nowIso() });
+      deps.notifications.notify(link.org_id, 'share.viewed', { title: `${link.label} opened your shared documents`, body: `The share link for ${s.reference || s.invoiceNumber} was opened.`, link: `/app/shipments/${link.shipment_id}`, dedupeKey: `share:${link.id}` });
+    }
     return {
       sharedBy: org.name,
       recipient: link.label,

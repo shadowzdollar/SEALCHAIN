@@ -24,6 +24,7 @@ import {
   type ProviderId,
 } from '../services/oidc';
 
+import { createChallenge, hasTwoFactor } from '../services/twofactor';
 const RATE = { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } };
 const STATE_MINUTES = 10;
 
@@ -36,8 +37,8 @@ export async function oauthRoutes(api: FastifyInstance, { db, cfg }: Deps) {
     return p;
   };
 
-  const signIn = (reply: FastifyReply, userId: string) => {
-    const { token, expiresAt } = createSession(db, userId, cfg.sessionDays);
+  const signIn = (reply: FastifyReply, userId: string, userAgent?: string) => {
+    const { token, expiresAt } = createSession(db, userId, cfg.sessionDays, { userAgent });
     reply.setCookie(SESSION_COOKIE, token, { path: '/', httpOnly: true, sameSite: 'lax', secure: cfg.isProd, expires: expiresAt });
     return token;
   };
@@ -138,7 +139,8 @@ export async function oauthRoutes(api: FastifyInstance, { db, cfg }: Deps) {
     if (known) {
       if (known.password_hash === 'disabled') return fail(reply, 'This account has been removed from its organisation.');
       link(known.user_id);
-      signIn(reply, known.user_id);
+      if (hasTwoFactor(db, known.user_id)) return reply.redirect(`${web}/login?challenge=${createChallenge(db, known.user_id, st.next)}`, 302);
+      signIn(reply, known.user_id, req.headers['user-agent']);
       audit(db, null, 'auth.oauth.login', 'user', known.user_id, { provider: p });
       return reply.redirect(`${web}${st.next}`, 302);
     }
@@ -157,7 +159,7 @@ export async function oauthRoutes(api: FastifyInstance, { db, cfg }: Deps) {
         db.run('UPDATE invites SET accepted_at = ? WHERE token_hash = ?', nowIso(), st.invite_hash);
         link(userId);
       });
-      signIn(reply, userId);
+      signIn(reply, userId, req.headers['user-agent']);
       audit(db, null, 'team.join', 'user', userId, { provider: p });
       return reply.redirect(`${web}/app`, 302);
     }
@@ -168,7 +170,8 @@ export async function oauthRoutes(api: FastifyInstance, { db, cfg }: Deps) {
       if (existing) {
         if (existing.password_hash === 'disabled') return fail(reply, 'This account has been removed from its organisation.');
         link(existing.id);
-        signIn(reply, existing.id);
+        if (hasTwoFactor(db, existing.id)) return reply.redirect(`${web}/login?challenge=${createChallenge(db, existing.id, st.next)}`, 302);
+        signIn(reply, existing.id, req.headers['user-agent']);
         audit(db, null, 'auth.oauth.link', 'user', existing.id, { provider: p });
         return reply.redirect(`${web}${st.next}`, 302);
       }
@@ -210,7 +213,7 @@ export async function oauthRoutes(api: FastifyInstance, { db, cfg }: Deps) {
       db.insert('user_identities', { provider: row.provider, subject: row.subject, user_id: userId, email: row.email, created_at: nowIso(), last_login_at: nowIso() });
       db.run('DELETE FROM oauth_pending WHERE token_hash = ?', tokenHash(body.token));
     });
-    const token = signIn(reply, userId);
+    const token = signIn(reply, userId, req.headers['user-agent']);
     const ctx = resolveSession(db, token)!;
     audit(db, ctx, 'auth.register', 'user', userId, { provider: row.provider });
     return reply.code(201).send({ ...ctx, next: row.next });
