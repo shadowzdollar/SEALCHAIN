@@ -8,6 +8,8 @@ import { Eyebrow, INK_BTN, PAPER_BTN, SectionHeading } from '../marketing/Chrome
 import { FactsStrip, Faq, FAQS, Feature, PricingShowcase } from '../marketing/Blocks';
 import { Credit, PhotoBand, PhotoPrint } from '../marketing/Photo';
 import { PHOTOS } from '../marketing/photos';
+import { PreflightDemo, VerifyDrop } from '../marketing/LiveDemos';
+import { Hero } from '../marketing/Hero';
 import { AppWindow, CodeSheet, CorridorMap, DocumentStack, EndorsementCard, MerkleDiagram, PhoneVerifier, ScreeningCard, ValidationCard } from '../marketing/Illustrations';
 
 const TOUR: Array<{ id: string; label: string; title: string; body: string; points: string[]; art: ReactNode; to: string }> = [
@@ -149,29 +151,7 @@ export function Landing() {
   const { tr, trx } = useTr();
   return (
     <>
-      {/* ----------------------------------------------------------- hero */}
-      <section className="paper-grid border-b border-paper-rule">
-        <div className="mx-auto grid grid-cols-1 max-w-[1680px] items-center gap-16 px-5 pb-24 pt-16 sm:px-8 lg:px-12 2xl:px-16 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:pb-32 lg:pt-24">
-          <div className="min-w-0">
-            <Eyebrow>{tr('Rwanda · Kenya · Uganda · Tanzania · Burundi')}</Eyebrow>
-            <h1 className="mt-5 font-serif text-[44px] font-semibold leading-[1.04] tracking-[-0.02em] sm:text-[60px] lg:text-[66px]">
-              {trx('Your container shouldn’t wait at the border for a {typo}.', { typo: <em className="font-medium text-stamp">{tr('typo')}</em> })}
-            </h1>
-            <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-slate-600">
-              {tr('SealChain builds the export documents your shipment needs, catches errors while they’re cheap to fix, and seals each one with proof that it hasn’t been altered since issue.')}
-            </p>
-            <div className="mt-9 flex flex-wrap gap-3">
-              <Link to="/register" className={INK_BTN}>{tr('Start your first shipment')} <ArrowRight className="size-4" /></Link>
-              <Link to="/verify" className={PAPER_BTN}>{tr('Verify a document')}</Link>
-            </div>
-            <p className="mt-6 text-[13px] text-slate-500">{tr('Verification is always free — no account needed.')}</p>
-          </div>
-          <div className="relative mx-auto w-full min-w-0 max-w-[640px] lg:ml-auto lg:mr-0">
-            <PhotoPrint photo={PHOTOS.portCranes} size="lg" priority tilt={-4} className="w-[74%]" caption={tr('Port of Mombasa')} />
-            <DocumentStack className="-mt-40 mr-0 w-[86%] sm:-mt-52 lg:ml-auto" />
-          </div>
-        </div>
-      </section>
+      <Hero />
 
       {/* ----------------------------------------------------- built on */}
       <div className="border-b border-paper-rule">
@@ -194,6 +174,8 @@ export function Landing() {
           </Feature>
         </div>
       </section>
+
+      <PreflightDemo />
 
       <PhotoBand photo={PHOTOS.portTruck}>
         <div className="mx-auto flex min-h-[520px] max-w-[1680px] flex-col justify-center px-5 py-20 sm:px-8 lg:px-12 2xl:px-16">
@@ -239,7 +221,7 @@ export function Landing() {
         <SectionHeading eyebrow={tr('Who it’s for')} title={tr('One record, three kinds of trust.')} body={tr('Exporters prepare, authorities endorse, and everyone downstream verifies — all against the same anchored document.')} />
         <div className="mt-12 grid gap-6 lg:grid-cols-3">
           {AUDIENCES.map((a) => (
-            <Link key={a.t} to={a.to} className="group flex flex-col overflow-hidden rounded-[3px] border border-paper-rule bg-paper-card transition-colors hover:border-navy-300">
+            <Link key={a.t} to={a.to} className="lift group flex flex-col overflow-hidden rounded-[3px] border border-paper-rule bg-paper-card transition-colors hover:border-navy-300">
               <div className="relative aspect-[16/10] overflow-hidden border-b border-paper-rule">
                 <img src={a.photo.sm} alt={a.photo.alt} loading="lazy" className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.03] [filter:saturate(0.92)]" />
                 <Credit photo={a.photo} light plain className="absolute bottom-2 right-3 max-w-[60%] truncate [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]" />
@@ -307,6 +289,19 @@ curl -H "Authorization: Bearer $KEY" \\
             <Link to="/developers" className="mt-6 inline-flex items-center gap-1.5 text-[14px] font-medium underline-offset-4 hover:underline">{tr('Developer guide')} <ArrowRight className="size-4" /></Link>
           </div>
         </div>
+      </section>
+
+      {/* ------------------------------------------------ verify drop */}
+      <section className="mx-auto grid max-w-[1680px] grid-cols-1 items-center gap-12 px-5 py-24 sm:px-8 lg:grid-cols-2 lg:px-12 2xl:px-16">
+        <div className="min-w-0">
+          <SectionHeading
+            eyebrow={tr('For buyers, banks and border officers')}
+            title={tr('Received a certificate? Check it in two seconds.')}
+            body={tr('Any document issued through SealChain can be checked by anyone, for free, without an account. Changing a single character in the file changes its fingerprint.')}
+          />
+          <Link to="/verify" className="mt-8 inline-flex items-center gap-1.5 text-[14px] font-medium underline-offset-4 hover:underline">{tr('Scan a QR code or enter a document number instead')} <ArrowRight className="size-4" /></Link>
+        </div>
+        <VerifyDrop />
       </section>
 
       <PricingShowcase />

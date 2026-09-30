@@ -54,7 +54,7 @@ export function PhotoPrint({ photo, className, ratio = 'aspect-[4/3]', tilt = 0,
 export function PhotoBand({ photo, children, className, align = 'left', minH = 'min-h-[520px]' }: { photo: Photo; children: ReactNode; className?: string; align?: 'left' | 'center'; minH?: string }) {
   return (
     <section className={cx('relative isolate overflow-hidden bg-navy-900 text-white', minH, className)}>
-      <img src={photo.src} alt={photo.alt} loading="lazy" decoding="async" className="absolute inset-0 -z-20 size-full object-cover" />
+      <img src={photo.src} alt={photo.alt} loading="lazy" decoding="async" className="kenburns absolute inset-0 -z-20 size-full object-cover" />
       <div aria-hidden className={cx('absolute inset-0 -z-10', align === 'left' ? 'bg-gradient-to-r from-navy-950/92 via-navy-900/70 to-navy-900/10' : 'bg-navy-950/65')} />
       {children}
       <Credit photo={photo} light className="absolute bottom-3 right-4" />

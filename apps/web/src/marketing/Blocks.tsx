@@ -8,6 +8,7 @@ import { INK_BTN } from './Chrome';
 import { msg, useTr } from '../locale';
 import { PhotoPrint } from './Photo';
 import { PHOTOS } from './photos';
+import { useCountUp } from './motion';
 
 export function usePricing() {
   const billing = useMeta().data?.billing;
@@ -171,6 +172,11 @@ export function PricingShowcase() {
 }
 
 /** Figures that come from the running product, never invented. */
+function FactNumber({ value }: { value: string }) {
+  const [ref, shown] = useCountUp(value);
+  return <p ref={ref} className="font-serif text-[44px] font-semibold leading-none tracking-[-0.02em] tabular-nums">{shown}</p>;
+}
+
 export function FactsStrip() {
   const meta = useMeta().data;
   const { tr } = useTr();
@@ -184,7 +190,7 @@ export function FactsStrip() {
     <div className="grid grid-cols-2 border-y border-paper-rule lg:grid-cols-4">
       {facts.map((f, i) => (
         <div key={f.l} className={cx('px-5 py-8 sm:px-8', i % 2 === 1 && 'border-l border-paper-rule', i >= 2 && 'border-t border-paper-rule lg:border-t-0', i === 2 && 'lg:border-l')}>
-          <p className="font-serif text-[44px] font-semibold leading-none tracking-[-0.02em]">{f.n}</p>
+          <FactNumber value={f.n} />
           <p className="mt-3 max-w-[16rem] text-[13.5px] leading-snug text-slate-600">{f.l}</p>
         </div>
       ))}

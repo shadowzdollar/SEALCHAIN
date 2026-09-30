@@ -111,10 +111,11 @@ export function CorridorMap({ className, highlight, compact }: { className?: str
         <text key={l.name} x={l.label![0]} y={l.label![1]} textAnchor="middle" className="fill-[var(--color-sea-ink)] font-serif italic" fontSize={12}>{l.name}</text>
       ))}
       {Object.entries(routes).map(([id, d]) => (
-        <path key={id} d={d} fill="none" className="stroke-ink transition-opacity" strokeWidth={2.4} strokeDasharray="7 5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: !highlight || highlight === id ? 1 : 0.18 }} />
+        <path key={id} d={d} fill="none" className="route-flow stroke-ink transition-opacity" strokeWidth={2.4} strokeDasharray="7 5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: !highlight || highlight === id ? 1 : 0.18 }} />
       ))}
       {Object.entries(posts).map(([k, p]) => (
         <g key={k} style={{ opacity: !highlight || ROUTE_POSTS[highlight]?.includes(k) ? 1 : 0.25 }}>
+          {!compact && <circle cx={p.at[0]} cy={p.at[1]} r={4.5} fill="none" className="post-pulse stroke-stamp" strokeWidth={1.5} />}
           <circle cx={p.at[0]} cy={p.at[1]} r={4.5} className="fill-paper-card stroke-stamp" strokeWidth={2} />
           {!compact && <text x={p.at[0] + (LABEL_SIDE[k] === 'end' ? -8 : 8)} y={p.at[1] + 4} textAnchor={LABEL_SIDE[k] ?? 'start'} className="fill-stamp font-plexmono" fontSize={10.5} style={{ cssText: halo } as never}>{p.name}</text>}
         </g>
