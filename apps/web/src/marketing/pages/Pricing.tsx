@@ -3,7 +3,8 @@ import { Link } from 'react-router';
 import { ArrowRight, Check, Minus } from 'lucide-react';
 import { cx } from '../../components/ui';
 import { Eyebrow, INK_BTN, PAGE_X, PAPER_BTN, SectionHeading } from '../Chrome';
-import { FAQS, Faq, usePricing } from '../Blocks';
+import { FAQS, Faq, TicketCard, usePricing } from '../Blocks';
+import { DelayCalculator } from '../PageExtras';
 
 const PRICING_FAQS = [
   { q: 'When is the per-shipment fee charged?', a: 'Once, when a shipment’s documents are first issued. Corrections and re-issues of the same shipment are free, and drafts are never charged.' },
@@ -83,19 +84,9 @@ export function PricingPage() {
           <h1 className="mx-auto mt-5 max-w-3xl font-serif text-[40px] font-semibold leading-[1.06] tracking-[-0.02em] sm:text-[52px]">Pay for what you ship. <em className="font-medium text-stamp">Verify</em> for free.</h1>
           <p className="mx-auto mt-5 max-w-xl text-[17px] leading-relaxed text-slate-600">Simple pilot pricing while we onboard exporters on EAC corridors. No contract, no minimum term.</p>
 
-          <div className="mt-14 grid gap-6 text-left lg:grid-cols-3">
-            {plans.map((p) => (
-              <div key={p.name} className={cx('relative flex flex-col rounded-[3px] border bg-paper-card p-7', p.featured ? 'border-ink shadow-[0_18px_40px_-24px_rgba(11,31,58,0.5)]' : 'border-paper-rule')}>
-                {p.featured && <span className="absolute -top-3 left-7 rounded-[2px] bg-stamp px-2 py-0.5 font-plexmono text-[10.5px] uppercase tracking-[0.14em] text-white">Pilot open</span>}
-                <p className="font-serif text-[24px] font-semibold">{p.name}</p>
-                <p className="mt-1 text-[14px] text-slate-500">{p.who}</p>
-                <p className="mt-6 font-serif text-[44px] font-semibold leading-none tracking-[-0.02em]">{p.price}</p>
-                <p className="mt-2 text-[13.5px] text-slate-600">{p.unit}</p>
-                <ul className="mt-6 flex-1 space-y-2.5 border-t border-paper-rule pt-6">
-                  {p.points.map((x) => <li key={x} className="flex gap-2.5 text-[14px] text-slate-700"><Check className="mt-0.5 size-4 shrink-0 text-emerald-700" />{x}</li>)}
-                </ul>
-                <Link to={p.cta.to} className={cx(p.featured ? INK_BTN : PAPER_BTN, 'mt-8 w-full')}>{p.cta.label}</Link>
-              </div>
+          <div className="mt-14 grid grid-cols-1 gap-6 text-left md:grid-cols-3">
+            {plans.map((p, i) => (
+              <TicketCard key={p.name} gate={['A1', 'B2', 'C3'][i]!} plan={{ name: p.name, who: p.who, price: p.price, unit: p.unit, to: p.cta.to, cta: p.cta.label, featured: p.featured, perks: p.points }} />
             ))}
           </div>
 
@@ -108,6 +99,8 @@ export function PricingPage() {
           </div>
         </div>
       </section>
+
+      <DelayCalculator monthly={monthly} perShipment={perShipment} />
 
       <section className={cx('mx-auto max-w-[1680px] py-24', PAGE_X)}>
         <SectionHeading eyebrow="Compare" title="What each plan includes." />

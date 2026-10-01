@@ -36,6 +36,11 @@ export function HelpIndex() {
               className="block h-14 w-full rounded-[3px] border border-paper-rule bg-paper-card pl-12 pr-4 text-[16px] text-ink shadow-[0_8px_24px_-14px_rgba(11,31,58,0.3)] placeholder:text-slate-400 focus:border-ink focus:outline-none"
             />
           </label>
+          <div className="mt-5 flex flex-wrap justify-center gap-2">
+            {['certificate of origin', 'share', 'verify', 'two-step', 'invoice', 'payment'].map((x) => (
+              <button key={x} type="button" onClick={() => setQ(x)} className={cx('rounded-full border px-3.5 py-1.5 text-[13px] transition-colors', q === x ? 'border-ink bg-ink text-ink-contrast' : 'border-paper-rule bg-paper-card text-slate-600 hover:border-ink/40')}>{x}</button>
+            ))}
+          </div>
         </div>
       </section>
 

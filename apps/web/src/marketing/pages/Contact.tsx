@@ -59,10 +59,11 @@ export function ContactPage() {
           <PhotoPrint photo={PHOTOS.kigaliSkyline} tilt={-2} className="mt-12 hidden max-w-sm lg:block" caption="Kigali, Rwanda" />
         </div>
 
-        <div className="relative rounded-[2px] border border-paper-rule bg-paper-card p-6 shadow-[0_12px_32px_-14px_rgba(11,31,58,0.2)] sm:p-9">
+        <div className="relative overflow-hidden rounded-[28px] border border-paper-rule bg-paper-card p-6 shadow-[0_40px_80px_-40px_rgba(11,31,58,0.45)] sm:p-9">
           {send.isSuccess ? (
             <div className="flex min-h-[420px] flex-col items-center justify-center text-center">
-              <Stamp className="rotate-[-5deg]">Received</Stamp>
+              <span aria-hidden className="envelope-fly text-[54px]">✉️</span>
+              <Stamp className="stamp-thump rotate-[-5deg]">Received</Stamp>
               <h2 className="mt-8 font-serif text-[28px] font-semibold">Thank you, {form.name.split(' ')[0]}.</h2>
               <p className="mt-3 max-w-sm text-[15px] text-slate-600">We’ve received your message and will reply to <span className="font-medium text-ink">{form.email}</span>.</p>
               <p className="mt-6 font-plexmono text-[12px] text-slate-500">Reference {send.data.id}</p>

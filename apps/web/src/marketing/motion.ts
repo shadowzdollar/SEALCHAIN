@@ -34,11 +34,24 @@ export function useMarketingMotion() {
       });
       main.querySelectorAll('.kenburns').forEach((el) => io.observe(el));
     };
+    // Elements kept by React across a navigation (same page component, new
+    // route) may still be waiting to reveal: watch them again.
+    const rewatch = () => main.querySelectorAll('.rv:not(.in)').forEach((el) => io.observe(el));
     tag();
+    rewatch();
     // Lazy sections (query results, FAQ, etc.) arrive after first paint.
-    const mo = new MutationObserver(() => tag());
+    const mo = new MutationObserver(() => { tag(); rewatch(); });
     mo.observe(main, { childList: true, subtree: true });
-    return () => { io.disconnect(); mo.disconnect(); };
+    // Safety net: never leave on-screen content invisible.
+    const sweep = () => main.querySelectorAll<HTMLElement>('.rv:not(.in)').forEach((el) => {
+      const r = el.getBoundingClientRect();
+      if (r.top < window.innerHeight && r.bottom > 0) el.classList.add('in');
+    });
+    const t1 = window.setTimeout(sweep, 1200);
+    const onScroll = () => { window.clearTimeout(t2); t2 = window.setTimeout(sweep, 250); };
+    let t2 = 0;
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => { io.disconnect(); mo.disconnect(); window.clearTimeout(t1); window.clearTimeout(t2); window.removeEventListener('scroll', onScroll); };
   }, [pathname]);
 }
 

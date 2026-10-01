@@ -8,7 +8,8 @@ import { renderReceipt } from '../pdf/receipt';
 
 const RATE = { config: { rateLimit: { max: 20, timeWindow: '1 minute' } } };
 
-const publicIntent = (i: { id: string; period: string; status: string; charge_amount: number; charge_currency: string; credit_cents: number; failure_reason: string | null; created_at: string; completed_at: string | null; provider: string; payment_id: string | null }) => ({
+const publicIntent = (i: { id: string; period: string; status: string; charge_amount: number; charge_currency: string; credit_cents: number; failure_reason: string | null; created_at: string; completed_at: string | null; provider: string; payment_id: string | null; purpose?: string; target_plan?: string | null }) => ({
+  purpose: i.purpose ?? 'statement', targetPlan: i.target_plan ?? null,
   id: i.id, period: i.period, status: i.status, provider: i.provider, chargeAmount: i.charge_amount, chargeCurrency: i.charge_currency,
   creditCents: i.credit_cents, failureReason: i.failure_reason, createdAt: i.created_at, completedAt: i.completed_at, paymentId: i.payment_id,
 });

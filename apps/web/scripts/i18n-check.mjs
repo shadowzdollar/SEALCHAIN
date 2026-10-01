@@ -18,14 +18,17 @@ const files = [];
   }
 })(root);
 
-// Verify.tsx and Endorsement.tsx use the verifier's keyed dictionary (i18n.ts), fully translated already.
-const SKIP = new Set(['i18n.ts', path.join('pages', 'Verify.tsx'), path.join('components', 'Endorsement.tsx')]);
+// Verify.tsx and Endorsement.tsx also use the verifier's keyed dictionary (i18n.ts) through t('key');
+// in those files only tr()/trx()/msg() calls are site strings.
+const SKIP = new Set(['i18n.ts']);
+const KEYED = new Set([path.join('pages', 'Verify.tsx'), path.join('components', 'Endorsement.tsx')]);
 const RE = /\b(?:tr|trx|msg|t|tx)\(\s*(['"`])((?:\\.|(?!\1)[\s\S])*?)\1/g;
+const RE_SITE = /\b(?:tr|trx|msg)\(\s*(['"`])((?:\\.|(?!\1)[\s\S])*?)\1/g;
 const keys = new Map();
 for (const f of files) {
   if (SKIP.has(path.relative(root, f))) continue;
   const src = fs.readFileSync(f, 'utf8');
-  for (const m of src.matchAll(RE)) {
+  for (const m of src.matchAll(KEYED.has(path.relative(root, f)) ? RE_SITE : RE)) {
     if (m[1] === '`' && m[2].includes('${')) continue;
     const text = m[2].replace(/\\(['"`\\])/g, '$1').replace(/\\n/g, '\n');
     if (!keys.has(text)) keys.set(text, path.relative(root, f));

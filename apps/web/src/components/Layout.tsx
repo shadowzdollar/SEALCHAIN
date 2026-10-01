@@ -22,6 +22,8 @@ import {
   Sun,
   Users,
   X,
+  Sparkles,
+  UserRound,
 } from 'lucide-react';
 import { useAuth, useMeta } from '../auth';
 import { NotificationBell } from '../pages/Notifications';
@@ -70,7 +72,14 @@ export function useTheme() {
     } catch {
       /* ignore */
     }
+    // Keep every toggle on the page in step (header, profile, verifier…).
+    window.dispatchEvent(new CustomEvent('sc-theme', { detail: dark }));
   }, [dark]);
+  useEffect(() => {
+    const sync = (e: Event) => setDark((e as CustomEvent<boolean>).detail);
+    window.addEventListener('sc-theme', sync);
+    return () => window.removeEventListener('sc-theme', sync);
+  }, []);
   return { dark, toggle: () => setDark((d) => !d) };
 }
 
@@ -134,7 +143,7 @@ export function AnchorChip() {
 
 const CRUMB: Record<string, string> = {
   app: 'Home', shipments: 'Shipments', new: 'New shipment', edit: 'Edit', check: 'Check a document', parties: 'Address book',
-  team: 'Team & settings', company: 'Company profile', reports: 'Reports', notifications: 'Notifications', billing: 'Billing', sandbox: 'Test checkout', return: 'Payment', compliance: 'Compliance console', authority: 'Endorsement requests',
+  team: 'Team & settings', company: 'Company profile', reports: 'Reports', notifications: 'Notifications', billing: 'Billing', plans: 'Plans & subscription', profile: 'Your profile', sandbox: 'Test checkout', return: 'Payment', compliance: 'Compliance console', authority: 'Endorsement requests',
 };
 
 function Breadcrumbs() {
@@ -192,6 +201,7 @@ function UserMenu() {
             <p className="mt-1 truncate text-xs text-slate-500 dark:text-navy-300">{me?.org.name}</p>
           </div>
           <div className="p-1">
+            <Link to="/app/profile" onClick={() => setOpen(false)} className="flex items-center gap-2.5 rounded-md px-3 py-2 text-[13px] hover:bg-slate-100 dark:hover:bg-navy-800"><UserRound className="size-4 text-slate-400" /> Your profile</Link>
             <Link to="/app/team" onClick={() => setOpen(false)} className="flex items-center gap-2.5 rounded-md px-3 py-2 text-[13px] hover:bg-slate-100 dark:hover:bg-navy-800"><Users className="size-4 text-slate-400" /> Team & settings</Link>
             <button onClick={toggle} className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-[13px] hover:bg-slate-100 dark:hover:bg-navy-800">
               {dark ? <Sun className="size-4 text-slate-400" /> : <Moon className="size-4 text-slate-400" />} {dark ? 'Light theme' : 'Dark theme'}
@@ -264,6 +274,7 @@ export function AppLayout() {
             <NavItem to="/app/company" icon={<Building2 />}>Company profile</NavItem>
             <NavItem to="/app/parties" icon={<BookUser />}>Address book</NavItem>
             <NavItem to="/app/team" icon={<Users />}>Team & settings</NavItem>
+            <NavItem to="/app/plans" icon={<Sparkles />}>Plans</NavItem>
             <NavItem to="/app/billing" icon={<CreditCard />}>Billing</NavItem>
           </Section>
           {me?.user.role === 'compliance' && (
@@ -288,7 +299,7 @@ export function AppLayout() {
       <div className="mx-3 mb-1 rounded-[2px] border border-slate-200 bg-white px-3 py-2.5 dark:border-white/10 dark:bg-white/5">
         <p className="truncate font-serif text-[14px] font-medium text-navy-900 dark:text-white">{me?.org.name}</p>
         <p className="mt-0.5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-slate-500 dark:text-navy-300">
-          {authority ? 'Issuing authority' : me?.user.role === 'compliance' ? 'Platform administration' : me?.org.plan === 'pilot' ? 'Pilot plan' : `${me?.org.plan} plan`}
+          {authority ? 'Issuing authority' : me?.user.role === 'compliance' ? 'Platform administration' : `${(me?.org.plan ?? 'pilot').charAt(0).toUpperCase()}${(me?.org.plan ?? 'pilot').slice(1)} plan`}
         </p>
       </div>
       {nav}

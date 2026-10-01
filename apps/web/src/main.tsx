@@ -1,4 +1,5 @@
-import { StrictMode, lazy, Suspense, type LazyExoticComponent, type ReactNode } from 'react';
+import { StrictMode, Suspense, type ComponentType, type LazyExoticComponent, type ReactNode } from 'react';
+import { PageErrorBoundary, lazyPage } from './lazyPage';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -21,15 +22,16 @@ import { Verify } from './pages/Verify';
 import { Check } from './pages/Check';
 import { Parties } from './pages/Parties';
 import { Billing, PaymentReturn, SandboxCheckout } from './pages/Billing';
+import { Plans } from './pages/Plans';
+import { ProfilePage } from './pages/Profile';
 import { NotificationsPage } from './pages/Notifications';
 import { Company } from './pages/Company';
 import { Reports } from './pages/Reports';
 
-const Compliance = lazy(() => import('./pages/Compliance').then((m) => ({ default: m.Compliance })));
+const Compliance = lazyPage(() => import('./pages/Compliance'), 'Compliance');
 
 // Public-site pages load on demand so the app bundle stays small.
-const page = <K extends string>(load: () => Promise<Record<K, () => ReactNode>>, name: K) =>
-  lazy(() => load().then((m) => ({ default: m[name] })));
+const page = lazyPage;
 const ProductPage = page(() => import('./marketing/pages/Product'), 'ProductPage');
 const SolutionsPage = page(() => import('./marketing/pages/Solutions'), 'SolutionsPage');
 const PricingPage = page(() => import('./marketing/pages/Pricing'), 'PricingPage');
@@ -47,11 +49,17 @@ const CreditsPage = page(() => import('./marketing/pages/Company'), 'CreditsPage
 const HelpIndex = page(() => import('./marketing/pages/Help'), 'HelpIndex');
 const HelpArticle = page(() => import('./marketing/pages/Help'), 'HelpArticle');
 
-const lazyEl = (C: LazyExoticComponent<() => ReactNode>) => (
-  <Suspense fallback={<div className="min-h-[60vh]" />}>
-    <C />
-  </Suspense>
-);
+function LazyEl({ C }: { C: LazyExoticComponent<ComponentType> }) {
+  const { pathname } = useLocation();
+  return (
+    <PageErrorBoundary resetKey={pathname}>
+      <Suspense fallback={<div className="min-h-[60vh]" />}>
+        <C />
+      </Suspense>
+    </PageErrorBoundary>
+  );
+}
+const lazyEl = (C: LazyExoticComponent<ComponentType>) => <LazyEl C={C} />;
 
 // Apply the saved theme before first paint.
 try {
@@ -142,15 +150,19 @@ createRoot(document.getElementById('root')!).render(
               <Route path="company" element={<Company />} />
               <Route path="reports" element={<Reports />} />
               <Route path="billing" element={<Billing />} />
+              <Route path="plans" element={<Plans />} />
+              <Route path="profile" element={<ProfilePage />} />
               <Route path="billing/sandbox/:id" element={<SandboxCheckout />} />
               <Route path="billing/return" element={<PaymentReturn />} />
               <Route path="team" element={<Team />} />
               <Route
                 path="compliance"
                 element={
-                  <Suspense fallback={<PageLoader />}>
-                    <Compliance />
-                  </Suspense>
+                  <PageErrorBoundary>
+                    <Suspense fallback={<PageLoader />}>
+                      <Compliance />
+                    </Suspense>
+                  </PageErrorBoundary>
                 }
               />
             </Route>

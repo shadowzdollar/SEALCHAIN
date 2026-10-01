@@ -5,6 +5,7 @@ import { Hash, cx } from '../../components/ui';
 import { INK_BTN, PAGE_X, PAPER_BTN, PageHero, SectionHeading } from '../Chrome';
 import { Feature } from '../Blocks';
 import { MerkleDiagram } from '../Illustrations';
+import { TamperLab } from '../PageExtras';
 
 export function SecurityPage() {
   const meta = useMeta().data;
@@ -17,6 +18,8 @@ export function SecurityPage() {
         actions={<><Link to="/developers#independent" className={INK_BTN}>Verify independently <ArrowRight className="size-4" /></Link><Link to="/contact?topic=other" className={PAPER_BTN}>Report a vulnerability</Link></>}
         art={<MerkleDiagram className="rounded-[3px] border border-paper-rule bg-paper-card p-4" />}
       />
+
+      <TamperLab />
 
       <section className={cx('mx-auto max-w-[1680px] py-24', PAGE_X)}>
         <SectionHeading eyebrow="Principles" title="What we promise, in plain words." />

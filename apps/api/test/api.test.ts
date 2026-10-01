@@ -158,6 +158,18 @@ describe('SealChain API', () => {
     expect(byFile.json().verdict).toBe('authentic');
   });
 
+  it('confirms a document number exists without revealing its particulars', async () => {
+    const co = docs.find((d) => d.kind === 'certificate_of_origin')!;
+    const res = await app.inject({ method: 'GET', url: `/api/verify/number/${encodeURIComponent(co.number.toLowerCase())}` });
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect(body).toMatchObject({ number: co.number, kind: 'certificate_of_origin', status: 'active' });
+    expect(body.summary).toBeUndefined();
+    expect(JSON.stringify(body)).not.toMatch(/consignee|exporter|invoice/i);
+    expect((await app.inject({ method: 'GET', url: '/api/verify/number/SC-NOPE-0000' })).statusCode).toBe(404);
+    expect((await app.inject({ method: 'GET', url: '/api/verify/number/%3Cx%3E' })).statusCode).toBe(400);
+  });
+
   it('detects a tampered copy and pinpoints the change', async () => {
     const doc = await PDFDocument.load(coPdf);
     const page = doc.getPage(0);

@@ -1,16 +1,18 @@
 /** Public home page — printed-document ("paper") aesthetic. */
 import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router';
-import { ArrowRight, Banknote, FileCheck2, Fingerprint, KeyRound, Landmark, Lock, Package, ScanSearch, ShieldCheck, Webhook } from 'lucide-react';
+import { ArrowRight, Banknote, Landmark, Package } from 'lucide-react';
 import { cx } from '../components/ui';
 import { msg, useTr } from '../locale';
-import { Eyebrow, INK_BTN, PAPER_BTN, SectionHeading } from '../marketing/Chrome';
-import { FactsStrip, Faq, FAQS, Feature, PricingShowcase } from '../marketing/Blocks';
+import { SectionHeading } from '../marketing/Chrome';
+import { Faq, FAQS, PricingShowcase } from '../marketing/Blocks';
 import { Credit, PhotoBand, PhotoPrint } from '../marketing/Photo';
 import { PHOTOS } from '../marketing/photos';
 import { PreflightDemo, VerifyDrop } from '../marketing/LiveDemos';
 import { Hero } from '../marketing/Hero';
-import { AppWindow, CodeSheet, CorridorMap, DocumentStack, EndorsementCard, MerkleDiagram, PhoneVerifier, ScreeningCard, ValidationCard } from '../marketing/Illustrations';
+import { DeparturesSection } from '../marketing/Departures';
+import { BorderDay, EasySteps, FriendlyStats, GoodsMarquee, MobileSection, TrustSection } from '../marketing/Sections';
+import { AppWindow, DocumentStack, PhoneVerifier, ScreeningCard, ValidationCard } from '../marketing/Illustrations';
 
 const TOUR: Array<{ id: string; label: string; title: string; body: string; points: string[]; art: ReactNode; to: string }> = [
   {
@@ -21,15 +23,15 @@ const TOUR: Array<{ id: string; label: string; title: string; body: string; poin
   },
   {
     id: 'validate', label: msg('Validate'), title: msg('Catch the errors that stop trucks'),
-    body: msg('Every draft is checked live against the corridor’s rules: tax ID formats, HS codes against descriptions, weights, Incoterms, origin criteria and the permits your goods need.'),
+    body: msg('While you type, every detail is checked against the rules of the border you’ll cross — tax numbers, product codes, weights and the permits your goods need.'),
     points: [msg('Errors block issue; warnings need acknowledgement'), msg('Each rule cites its source and review date'), msg('Duty your buyer saves with a valid certificate')],
     art: <ValidationCard className="w-full max-w-[440px]" />, to: '/product#validate',
   },
   {
-    id: 'anchor', label: msg('Anchor'), title: msg('Sealed the moment it’s issued'),
-    body: msg('Each PDF is fingerprinted and signed with SealChain’s published key. Fingerprints are batched into a Merkle tree and only the root is written to a public blockchain.'),
-    points: [msg('Any change to the file is detectable'), msg('Re-issues supersede — never silently replace'), msg('Proof you can check without trusting us')],
-    art: <MerkleDiagram className="max-w-[520px]" />, to: '/product#anchor',
+    id: 'anchor', label: msg('Seal'), title: msg('Sealed the moment it’s issued'),
+    body: msg('The moment you issue, each document gets a digital seal. If anyone changes even one character later, the seal breaks — and everyone can see it.'),
+    points: [msg('Any change to the file is detectable'), msg('Corrections replace the old copy openly'), msg('Proof you can check without trusting us')],
+    art: <DocumentStack className="max-w-[440px]" />, to: '/product#anchor',
   },
   {
     id: 'verify', label: msg('Verify'), title: msg('Checked in seconds, by anyone'),
@@ -52,7 +54,7 @@ function ProductTour() {
   return (
     <section className="border-y border-paper-rule bg-paper-card">
       <div className="mx-auto max-w-[1680px] px-5 py-24 sm:px-8 lg:px-12 2xl:px-16">
-        <SectionHeading eyebrow={tr('Product tour')} title={tr('From draft to border post — and back.')} body={tr('Five steps, one record. Follow a consignment through SealChain.')} />
+        <SectionHeading eyebrow={tr('Product tour')} title={tr('Take a closer look.')} body={tr('Five things SealChain does for every shipment.')} />
         <div role="tablist" className="mt-10 flex gap-1 overflow-x-auto border-b border-paper-rule">
           {TOUR.map((x, i) => (
             <button
@@ -84,46 +86,11 @@ function ProductTour() {
   );
 }
 
-const CORRIDOR_ROWS: Array<[string, string, string]> = [
-  [msg('Rwanda → Kenya'), msg('Gatuna → Malaba (transit Uganda)'), 'RW-KE'],
-  [msg('Rwanda → Uganda'), 'Gatuna → Katuna', 'RW-UG'],
-  [msg('Rwanda → Tanzania'), 'Rusumo', 'RW-TZ'],
-  [msg('Rwanda → Burundi'), 'Akanyaru-Haut · Nemba', 'RW-BI'],
-];
-
-/** Corridor list beside the real map; hovering a corridor traces its route. */
-function CorridorsSection() {
-  const { tr } = useTr();
-  const [hl, setHl] = useState<string | null>(null);
-  return (
-    <section className="border-y border-paper-rule bg-paper-card">
-      <div className="mx-auto grid max-w-[1680px] items-center gap-12 px-5 py-24 sm:px-8 lg:px-12 2xl:px-16 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-        <div>
-          <SectionHeading eyebrow={tr('Corridors')} title={tr('Built for the EAC, starting from Kigali.')} body={tr('Each corridor carries its own rule set — border posts, tax ID formats, required permits and the simplified-certificate threshold — and shows when our compliance team last verified it.')} />
-          <ul className="mt-8 divide-y divide-paper-rule border-y border-paper-rule" onMouseLeave={() => setHl(null)}>
-            {CORRIDOR_ROWS.map(([c, b, id]) => (
-              <li key={c}>
-                <Link to={`/corridors#${id}`} onMouseEnter={() => setHl(id)} onFocus={() => setHl(id)} className={cx('flex items-center justify-between gap-4 px-2 py-3.5 transition-colors', hl === id ? 'bg-paper-tint' : 'hover:bg-paper-tint')}>
-                  <span className="font-serif text-[17px] font-medium">{tr(c)}</span>
-                  <span className="text-right text-[13.5px] text-slate-500">{tr(b)}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-4 text-[13px] text-slate-500">{tr('Hover a corridor to trace its road route.')}</p>
-        </div>
-        <CorridorMap highlight={hl} className="rounded-[3px] border border-paper-rule" />
-      </div>
-    </section>
-  );
-}
-
-const BUILT_ON = [msg('EAC Rules of Origin'), msg('EAC Common External Tariff'), msg('Ed25519 signatures'), msg('SHA-256 Merkle proofs'), msg('Public blockchain anchoring')];
 
 const MODES = [
   { photo: PHOTOS.truckNileBridge, n: '01', t: msg('By road'), d: msg('Through Gatuna, Kagitumba, Rusumo, Akanyaru-Haut and Nemba. Border posts, transit countries and cargo-tracking requirements are checked for each corridor.'), tilt: -1.5 },
   { photo: PHOTOS.freighter, n: '02', t: msg('By air'), d: msg('Perishables and high-value goods out of Kigali International Airport, with air exit and entry points on every rule set.'), tilt: 1 },
-  { photo: PHOTOS.shipMombasa, n: '03', t: msg('Onward by sea'), d: msg('Through Mombasa and Dar es Salaam. Sea-only Incoterms such as FOB and CIF are flagged when goods don’t actually travel by sea.'), tilt: -1 },
+  { photo: PHOTOS.shipMombasa, n: '03', t: msg('Onward by sea'), d: msg('Through Mombasa and Dar es Salaam to the rest of the world — with the right terms for goods that travel by ship.'), tilt: -1 },
 ];
 
 const AUDIENCES = [
@@ -132,20 +99,7 @@ const AUDIENCES = [
   { icon: <Banknote />, t: msg('Banks, buyers & insurers'), d: msg('Confirm the certificate behind a payment, letter of credit or claim is genuine — in seconds, for free.'), to: '/solutions/verifiers', photo: PHOTOS.kigaliSkyline },
 ];
 
-const STEPS: Array<[string, string]> = [
-  [msg('Issue'), msg('Documents come from one shipment record, so invoice, certificate and packing list always agree.')],
-  [msg('Fingerprint & sign'), msg('The SHA-256 of each exact PDF is signed with SealChain’s published Ed25519 key.')],
-  [msg('Anchor'), msg('Fingerprints are batched into a Merkle tree; only its root is written to the chain.')],
-  [msg('Endorse'), msg('Where the issuing authority is on SealChain, its officers endorse the certificate — and that endorsement is anchored too.')],
-  [msg('Verify'), msg('The verifier recomputes the proof in the browser and can query the chain directly.')],
-];
 
-const SECURITY = [
-  { icon: <Lock />, t: msg('Nothing sensitive on-chain'), d: msg('Only batch fingerprints are public.') },
-  { icon: <KeyRound />, t: msg('Published issuer key'), d: msg('Signatures anyone can check.') },
-  { icon: <ShieldCheck />, t: msg('Hardened by default'), d: msg('Strict headers, rate limits, hashed keys.') },
-  { icon: <Webhook />, t: msg('Signed webhooks'), d: msg('HMAC signatures with replay protection.') },
-];
 
 export function Landing() {
   const { tr, trx } = useTr();
@@ -153,29 +107,13 @@ export function Landing() {
     <>
       <Hero />
 
-      {/* ----------------------------------------------------- built on */}
-      <div className="border-b border-paper-rule">
-        <div className="mx-auto flex max-w-[1680px] flex-wrap items-center justify-center gap-x-10 gap-y-3 px-5 py-6 font-plexmono text-[11px] uppercase tracking-[0.16em] text-slate-500 sm:px-8 lg:px-12 2xl:px-16">
-          {BUILT_ON.map((t) => <span key={t}>{tr(t)}</span>)}
-        </div>
-      </div>
+      <GoodsMarquee />
 
-      {/* ------------------------------------------------------ pillars */}
-      <section id="product" className="mx-auto max-w-[1680px] scroll-mt-20 px-5 py-24 sm:px-8 lg:px-12 2xl:px-16">
-        <div className="grid gap-12 md:grid-cols-3 md:gap-10">
-          <Feature n="01" icon={<FileCheck2 />} title={tr('Generate & validate')}>
-            {tr('Invoice, EAC certificate of origin and packing list from one shipment record — checked against the corridor’s rules for tax IDs, HS codes, weights, Incoterms and required permits before anything is printed.')}
-          </Feature>
-          <Feature n="02" icon={<Fingerprint />} title={tr('Anchor at issuance')}>
-            {tr('Each PDF is fingerprinted, signed with our published issuer key and anchored on a public blockchain. Only a 32-byte hash leaves our servers — never your trade data.')}
-          </Feature>
-          <Feature n="03" icon={<ScanSearch />} title={tr('Screen what you receive')}>
-            {tr('Drop in a certificate from a supplier or partner. We look for altered copies, fabricated references, editing traces and fraud reported across the network.')}
-          </Feature>
-        </div>
-      </section>
+      <EasySteps />
 
       <PreflightDemo />
+
+      <BorderDay />
 
       <PhotoBand photo={PHOTOS.portTruck}>
         <div className="mx-auto flex min-h-[520px] max-w-[1680px] flex-col justify-center px-5 py-20 sm:px-8 lg:px-12 2xl:px-16">
@@ -210,15 +148,15 @@ export function Landing() {
         </div>
       </section>
 
+      <MobileSection />
+
       <ProductTour />
 
-      <section className="mx-auto max-w-[1680px] px-5 pt-24 sm:px-8 lg:px-12 2xl:px-16">
-        <FactsStrip />
-      </section>
+      <FriendlyStats />
 
       {/* --------------------------------------------------- audiences */}
       <section className="mx-auto max-w-[1680px] px-5 py-24 sm:px-8 lg:px-12 2xl:px-16">
-        <SectionHeading eyebrow={tr('Who it’s for')} title={tr('One record, three kinds of trust.')} body={tr('Exporters prepare, authorities endorse, and everyone downstream verifies — all against the same anchored document.')} />
+        <SectionHeading eyebrow={tr('Who it’s for')} title={tr('One record, three kinds of trust.')} body={tr('Exporters prepare, authorities approve, and everyone down the line checks — all looking at the same sealed document.')} />
         <div className="mt-12 grid gap-6 lg:grid-cols-3">
           {AUDIENCES.map((a) => (
             <Link key={a.t} to={a.to} className="lift group flex flex-col overflow-hidden rounded-[3px] border border-paper-rule bg-paper-card transition-colors hover:border-navy-300">
@@ -237,59 +175,9 @@ export function Landing() {
         </div>
       </section>
 
-      <CorridorsSection />
+      <DeparturesSection />
 
-      {/* ------------------------------------------------ how it works */}
-      <section className="mx-auto grid max-w-[1680px] gap-12 px-5 py-24 sm:px-8 lg:px-12 2xl:px-16 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
-        <div>
-          <SectionHeading eyebrow={tr('How verification works')} title={tr('Trust that doesn’t depend on trusting us.')} body={tr('Customs officers, banks and buyers check a document themselves — by scanning its QR code or dropping the file — with no account and no call to the exporter.')} />
-          <EndorsementCard className="mt-12 max-w-[380px]" />
-        </div>
-        <ol className="divide-y divide-paper-rule self-start border-y border-paper-rule">
-          {STEPS.map(([t, d], i) => (
-            <li key={t} className="grid grid-cols-[3rem_minmax(0,1fr)] gap-4 py-5">
-              <span className="font-plexmono text-[13px] text-stamp">{String(i + 1).padStart(2, '0')}</span>
-              <div>
-                <p className="font-serif text-[19px] font-medium">{tr(t)}</p>
-                <p className="mt-1 text-[15px] leading-relaxed text-slate-600">{tr(d)}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      {/* ------------------------------------- security + developers */}
-      <section className="border-y border-paper-rule bg-paper-card">
-        <div className="mx-auto grid max-w-[1680px] gap-16 px-5 py-24 sm:px-8 lg:px-12 2xl:px-16 lg:grid-cols-2">
-          <div>
-            <SectionHeading eyebrow={tr('Security')} title={tr('Private by design.')} body={tr('Your commercial terms are yours. We designed SealChain so that proving a document is genuine never requires publishing it.')} />
-            <ul className="mt-8 grid gap-5 sm:grid-cols-2">
-              {SECURITY.map((x) => (
-                <li key={x.t} className="flex gap-3">
-                  <span className="mt-0.5 text-ink [&>svg]:size-[18px] [&>svg]:stroke-[1.6]">{x.icon}</span>
-                  <div><p className="font-medium">{tr(x.t)}</p><p className="mt-0.5 text-[14px] text-slate-600">{tr(x.d)}</p></div>
-                </li>
-              ))}
-            </ul>
-            <Link to="/security" className="mt-8 inline-flex items-center gap-1.5 text-[14px] font-medium underline-offset-4 hover:underline">{tr('Security & trust')} <ArrowRight className="size-4" /></Link>
-          </div>
-          <div>
-            <SectionHeading eyebrow={tr('Developers')} title={tr('The same engine, as an API.')} />
-            <CodeSheet
-              className="mt-8"
-              title={tr('Issue a shipment’s documents')}
-              code={`curl -H "Authorization: Bearer $KEY" \\
-     -d @shipment.json $API/shipments
-# → { "id": "shp_…", "validation": { … } }
-
-curl -H "Authorization: Bearer $KEY" \\
-     -d '{"acknowledgeWarnings": true}' \\
-     $API/shipments/shp_…/issue`}
-            />
-            <Link to="/developers" className="mt-6 inline-flex items-center gap-1.5 text-[14px] font-medium underline-offset-4 hover:underline">{tr('Developer guide')} <ArrowRight className="size-4" /></Link>
-          </div>
-        </div>
-      </section>
+      <TrustSection />
 
       {/* ------------------------------------------------ verify drop */}
       <section className="mx-auto grid max-w-[1680px] grid-cols-1 items-center gap-12 px-5 py-24 sm:px-8 lg:grid-cols-2 lg:px-12 2xl:px-16">
@@ -297,7 +185,7 @@ curl -H "Authorization: Bearer $KEY" \\
           <SectionHeading
             eyebrow={tr('For buyers, banks and border officers')}
             title={tr('Received a certificate? Check it in two seconds.')}
-            body={tr('Any document issued through SealChain can be checked by anyone, for free, without an account. Changing a single character in the file changes its fingerprint.')}
+            body={tr('Anyone can check a SealChain document — free, with no account. If even one character was changed, you’ll know.')}
           />
           <Link to="/verify" className="mt-8 inline-flex items-center gap-1.5 text-[14px] font-medium underline-offset-4 hover:underline">{tr('Scan a QR code or enter a document number instead')} <ArrowRight className="size-4" /></Link>
         </div>

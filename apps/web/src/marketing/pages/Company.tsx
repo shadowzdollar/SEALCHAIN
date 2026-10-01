@@ -9,6 +9,7 @@ import { Bullets, Feature } from '../Blocks';
 import { CorridorMap, DocumentStack, Stamp } from '../Illustrations';
 import { PhotoBand, PhotoPrint } from '../Photo';
 import { PHOTOS, type Photo } from '../photos';
+import { LostTruck, PhotoMosaic } from '../PageExtras';
 
 // ------------------------------------------------------------------ About
 export function AboutPage() {
@@ -63,6 +64,8 @@ export function AboutPage() {
           <p className="mt-3 text-center font-plexmono text-[11px] uppercase tracking-[0.16em] text-slate-500">Piloting on four corridors from Rwanda</p>
         </div>
       </section>
+      <PhotoMosaic />
+
       <section className="border-t border-paper-rule bg-paper-card">
         <div className={cx('mx-auto flex max-w-[1680px] flex-col gap-6 py-16 sm:flex-row sm:items-center sm:justify-between', PAGE_X)}>
           <SectionHeading eyebrow="Work with us" title="Exporters, authorities, banks and associations." body="We’re looking for partners to shape the pilot with us." />
@@ -247,19 +250,7 @@ export function TermsPage() {
 
 // -------------------------------------------------------------------- 404
 export function NotFoundPage() {
-  return (
-    <section className="paper-grid">
-      <div className={cx('mx-auto flex max-w-3xl flex-col items-center py-28 text-center', PAGE_X)}>
-        <Stamp tick={false} className="rotate-[-6deg] !text-[18px]">Not found</Stamp>
-        <h1 className="mt-10 font-serif text-[40px] font-semibold tracking-[-0.02em]">This page isn’t in the file.</h1>
-        <p className="mt-4 max-w-md text-[16px] text-slate-600">The link may be old or mistyped. If you were checking a document, use the verifier instead.</p>
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link to="/" className={INK_BTN}>Go home</Link>
-          <Link to="/verify" className={PAPER_BTN}>Verify a document</Link>
-        </div>
-      </div>
-    </section>
-  );
+  return <LostTruck />;
 }
 
 // ---------------------------------------------------------------- Credits
@@ -267,7 +258,7 @@ export function CreditsPage() {
   const list = Object.values(PHOTOS) as Photo[];
   return (
     <>
-      <PageHero eyebrow="Photo credits" title="The pictures on this site." body="Photographs come from Wikimedia Commons under the licences shown. They have been resized and recompressed for the web; no other changes were made. Map geography: Natural Earth 1:50m countries and lakes (public domain, naturalearthdata.com); routes on the map are indicative. Home-page video: aerial footage of a container terminal at the Port of Cork, Ireland, by Filming Cork (CC BY 3.0, via Wikimedia Commons) — shortened, re-cut and recompressed." />
+      <PageHero eyebrow="Photo credits" title="The pictures on this site." body="Photographs come from Wikimedia Commons under the licences shown. They have been resized and recompressed for the web; no other changes were made. Map geography: Natural Earth 1:50m countries and lakes (public domain, naturalearthdata.com); routes on the map are indicative. Home-page video reel (cut, re-edited and recompressed, via Wikimedia Commons): RahimMngwaya (CC BY-SA 4.0), Wobvpu43y (CC BY-SA 4.0), Work With Sounds (CC BY 3.0), USDA (public domain), Filming Cork (CC BY 3.0), Jan Ainali (CC BY-SA 4.0), Estormiz (CC0), 4300streetcar (CC BY 4.0), NewsInStar (CC BY 3.0). Music: “Living Voyage” by Kevin MacLeod (incompetech.com), CC BY 3.0." />
       <section className={cx('mx-auto grid max-w-[1680px] gap-10 py-20 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4', PAGE_X)}>
         {list.map((p) => (
           <figure key={p.src}>

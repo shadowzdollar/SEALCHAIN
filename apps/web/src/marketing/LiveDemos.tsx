@@ -207,7 +207,7 @@ export function VerifyDrop() {
         <input type="file" accept="application/pdf" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) void check(f); e.target.value = ''; }} />
         {state.kind === 'busy' ? <Loader2 className="size-7 animate-spin text-ink" /> : <FileSearch className="size-7 stroke-[1.5] text-ink" />}
         <span className="font-serif text-[20px] font-medium">{tr('Drop a trade document to check it')}</span>
-        <span className="max-w-sm text-[13px] text-slate-500">{tr('The file is fingerprinted in your browser. Only its SHA-256 hash is sent — the document itself never leaves your device.')}</span>
+        <span className="max-w-sm text-[13px] text-slate-500">{tr('The check happens in your browser — the document itself never leaves your device.')}</span>
       </label>
 
       <div className="mt-4 min-h-[88px]" aria-live="polite">

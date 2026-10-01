@@ -16,7 +16,8 @@ import type { Config } from '../config';
 import { newId, nowIso, type Db } from '../db';
 import { HttpError } from './documents';
 import type { Mailer } from './mailer';
-import { statement } from './billing';
+import { currentPeriod, statement } from './billing';
+import { changePlan, upgradeQuote } from './plans';
 import type { NotificationService } from './notifications';
 
 export interface Intent {
@@ -36,6 +37,9 @@ export interface Intent {
   created_by: string;
   created_at: string;
   completed_at: string | null;
+  purpose?: 'statement' | 'plan_upgrade';
+  target_plan?: string | null;
+  created_by_user?: string | null;
 }
 
 interface Verified {
@@ -174,6 +178,34 @@ export class PaymentService {
     }
   }
 
+  /** Pay for a plan upgrade; the plan changes only once the payment is confirmed. */
+  async checkoutPlan(orgId: string, user: { id: string; email: string; name: string }, plan: string) {
+    if (!this.provider) throw new HttpError(409, 'payments_off', 'Online payment isn’t available yet — contact us and we’ll upgrade you by invoice.');
+    const q = upgradeQuote(this.db, this.cfg, orgId, plan);
+    if (q.amountCents <= 0) throw new HttpError(409, 'nothing_due', 'This upgrade has nothing to pay.');
+    const org = this.db.get<{ name: string }>('SELECT name FROM orgs WHERE id = ?', orgId)!;
+    const charge = chargeFor(this.cfg, q.amountCents);
+    const intent: Intent = {
+      id: newId('pay', 16), org_id: orgId, period: currentPeriod(), provider: this.provider.id, credit_cents: q.amountCents,
+      charge_amount: charge.amount, charge_currency: charge.currency, status: 'pending', checkout_url: null,
+      provider_tx_id: null, payment_type: null, failure_reason: null, payment_id: null, created_by: user.email, created_at: nowIso(), completed_at: null,
+      purpose: 'plan_upgrade', target_plan: q.to.id, created_by_user: user.id,
+    };
+    this.db.run(
+      "UPDATE payment_intents SET status = 'cancelled', failure_reason = 'Replaced by a newer attempt', completed_at = ? WHERE org_id = ? AND purpose = 'plan_upgrade' AND status = 'pending'",
+      nowIso(), orgId,
+    );
+    this.db.insert('payment_intents', { ...intent });
+    try {
+      const url = await this.provider.createCheckout(intent, { email: user.email, name: user.name, org: org.name }, `${this.cfg.publicWebUrl}/app/billing/return`);
+      this.db.run('UPDATE payment_intents SET checkout_url = ? WHERE id = ?', url, intent.id);
+      return { id: intent.id, url, chargeAmount: charge.amount, chargeCurrency: charge.currency, plan: q.to.id };
+    } catch (err) {
+      this.db.run("UPDATE payment_intents SET status = 'failed', failure_reason = ?, completed_at = ? WHERE id = ?", (err as Error).message.slice(0, 300), nowIso(), intent.id);
+      throw err;
+    }
+  }
+
   /**
    * Confirms a transaction with the provider and settles the intent. Safe to
    * call repeatedly (redirect + webhook): only the first success records a payment.
@@ -203,6 +235,9 @@ export class PaymentService {
         v.txId, v.paymentType ?? null, paymentId, nowIso(), intent.id,
       );
       if (!res.changes) return false;
+      if (intent.purpose === 'plan_upgrade' && intent.target_plan) {
+        changePlan(this.db, this.cfg, intent.org_id, intent.created_by_user ?? 'system', intent.target_plan, new Date(), { paid: true });
+      }
       this.db.insert('payments', {
         id: paymentId, org_id: intent.org_id, period: intent.period, amount_cents: intent.credit_cents,
         method: `${intent.provider}${v.paymentType ? `:${v.paymentType}` : ''}`, reference: v.txId,
@@ -211,6 +246,12 @@ export class PaymentService {
       return true;
     });
     const done = this.get(intent.id)!;
+    if (settled && done.purpose === 'plan_upgrade') {
+      this.notifications?.notify(done.org_id, 'payment.succeeded', {
+        title: `Upgraded to ${done.target_plan?.replace(/^./, (c) => c.toUpperCase())}`,
+        body: `Payment of ${done.charge_amount.toLocaleString('en-US')} ${done.charge_currency} received. Your new plan is active now.`, link: '/app/plans', severity: 'success',
+      });
+    }
     if (settled) {
       void this.receiptMail(done).catch(() => undefined);
       this.notifications?.notify(done.org_id, 'payment.succeeded', {

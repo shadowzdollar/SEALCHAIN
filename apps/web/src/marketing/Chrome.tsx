@@ -7,6 +7,7 @@ import { api } from '../api';
 import { Logo } from '../components/Layout';
 import { cx } from '../components/ui';
 import { FOOTER } from './content';
+import { PHOTOS, type Photo } from './photos';
 import { msg, useTr } from '../locale';
 import { useMarketingMotion } from './motion';
 import { Announcement, Header } from './Header';
@@ -49,18 +50,76 @@ export function SectionHeading({ eyebrow, title, body, className, center }: { ey
 }
 
 /** Top-of-page hero used by the inner marketing pages. */
-export function PageHero({ eyebrow, title, body, actions, art, grid = true }: { eyebrow: ReactNode; title: ReactNode; body?: ReactNode; actions?: ReactNode; art?: ReactNode; grid?: boolean }) {
+/** The photo behind each page's hero, by path prefix (most specific first). */
+const HERO_PHOTOS: Array<[string, Photo]> = [
+  ['/solutions/exporters', PHOTOS.lorryTanzania],
+  ['/solutions/authorities', PHOTOS.kigaliAirport],
+  ['/solutions/verifiers', PHOTOS.everGenius],
+  ['/solutions', PHOTOS.shipKoper],
+  ['/product', PHOTOS.shipKoper],
+  ['/pricing', PHOTOS.containerStacks],
+  ['/corridors', PHOTOS.truckNileBridge],
+  ['/security', PHOTOS.harbourNight],
+  ['/developers', PHOTOS.craneSilhouette],
+  ['/about', PHOTOS.kigaliSkyline],
+  ['/contact', PHOTOS.teaFields],
+  ['/changelog', PHOTOS.bremerhaven],
+  ['/status', PHOTOS.anaCargo],
+  ['/help', PHOTOS.teaFields],
+  ['/credits', PHOTOS.darHarbour],
+  ['/legal', PHOTOS.portCranes],
+];
+
+function Crumbs() {
+  const { pathname } = useLocation();
+  const { tr } = useTr();
+  const parts = pathname.split('/').filter(Boolean);
+  if (!parts.length) return null;
   return (
-    <section className={cx('border-b border-paper-rule', grid && 'paper-grid')}>
-      <div className={cx('mx-auto grid grid-cols-1 max-w-[1680px] items-center gap-14 px-5 pb-20 pt-14 sm:px-8 lg:px-12 2xl:px-16 lg:pb-24 lg:pt-20', !!art && 'lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]')}>
-        <div className="min-w-0">
+    <nav aria-label={tr('Breadcrumb')} className="mb-6 flex flex-wrap items-center gap-1.5 font-plexmono text-[11px] uppercase tracking-[0.14em] text-slate-500">
+      <Link to="/" className="hover:text-ink">{tr('Home')}</Link>
+      {parts.map((p, i) => (
+        <span key={p} className="flex items-center gap-1.5">
+          <span aria-hidden className="text-slate-300">/</span>
+          {i === parts.length - 1 ? <span className="text-ink">{decodeURIComponent(p).replace(/-/g, ' ')}</span> : <Link to={`/${parts.slice(0, i + 1).join('/')}`} className="hover:text-ink">{decodeURIComponent(p).replace(/-/g, ' ')}</Link>}
+        </span>
+      ))}
+    </nav>
+  );
+}
+
+export function PageHero({ eyebrow, title, body, actions, art, photo }: { eyebrow: ReactNode; title: ReactNode; body?: ReactNode; actions?: ReactNode; art?: ReactNode; grid?: boolean; photo?: Photo | null }) {
+  const { pathname } = useLocation();
+  const pic = photo === null ? null : photo ?? HERO_PHOTOS.find(([p]) => pathname.startsWith(p))?.[1] ?? null;
+  return (
+    <section className="page-hero no-rv relative isolate overflow-hidden border-b border-paper-rule">
+      <div aria-hidden className="page-hero-bg absolute inset-0 -z-30" />
+      {pic && (
+        <div aria-hidden className="page-hero-window absolute inset-y-0 right-0 -z-20 hidden w-[60%] lg:block">
+          <img src={pic.src} alt="" className="page-hero-photo absolute inset-0 size-full object-cover" />
+          <span className="room-sash absolute inset-0" />
+        </div>
+      )}
+      <div aria-hidden className="page-hero-orb absolute -left-40 top-10 -z-10 size-[520px] rounded-full" />
+      <div className={cx('mx-auto grid min-h-[460px] grid-cols-1 max-w-[1680px] items-center gap-12 px-5 pb-16 pt-10 sm:px-8 lg:min-h-[560px] lg:px-12 lg:pb-24 lg:pt-14 2xl:px-16', art ? 'lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]' : 'lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]')}>
+        <div className="hero-in min-w-0">
+          <Crumbs />
           <Eyebrow>{eyebrow}</Eyebrow>
-          <h1 className="mt-5 font-serif text-[40px] font-semibold leading-[1.06] tracking-[-0.02em] sm:text-[52px]">{title}</h1>
-          {body && <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-slate-600">{body}</p>}
+          <h1 className="mt-5 font-serif text-[40px] font-semibold leading-[1.04] tracking-[-0.025em] sm:text-[54px] xl:text-[60px]">{title}</h1>
+          {body && <p className="mt-6 max-w-xl text-[17.5px] leading-relaxed text-slate-600">{body}</p>}
           {actions && <div className="mt-9 flex flex-wrap gap-3">{actions}</div>}
         </div>
-        {art && <div className="min-w-0">{art}</div>}
+        {art ? (
+          <div className="drop-in min-w-0">
+            <div className="glass-card rounded-[28px] p-5 sm:p-8">{art}</div>
+          </div>
+        ) : pic ? (
+          <figure className="drop-in min-w-0 lg:hidden">
+            <img src={pic.sm} alt={pic.alt} className="aspect-[16/10] w-full rounded-3xl object-cover shadow-[0_30px_60px_-30px_rgba(11,31,58,0.5)]" />
+          </figure>
+        ) : null}
       </div>
+      {pic && <p className="absolute bottom-2 right-4 hidden font-plexmono text-[9.5px] text-slate-500 lg:block">{pic.place ? `${pic.place} · ` : ''}{pic.author} · {pic.license}</p>}
     </section>
   );
 }

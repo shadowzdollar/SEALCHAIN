@@ -468,6 +468,31 @@ const MIGRATIONS: string[] = [
     expires_at TEXT NOT NULL
   );
   `,
+  /* 16 — subscription plans: scheduled changes and history */ `
+  ALTER TABLE orgs ADD COLUMN pending_plan TEXT;
+  ALTER TABLE orgs ADD COLUMN pending_from TEXT;
+  ALTER TABLE orgs ADD COLUMN plan_changed_at TEXT;
+  CREATE TABLE plan_changes (
+    id TEXT PRIMARY KEY,
+    org_id TEXT NOT NULL REFERENCES orgs(id),
+    from_plan TEXT NOT NULL,
+    to_plan TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    effective_from TEXT NOT NULL,
+    changed_by TEXT REFERENCES users(id),
+    created_at TEXT NOT NULL
+  );
+  CREATE INDEX plan_changes_org ON plan_changes(org_id, created_at);
+  `,
+  /* 17 — personal profile details */ `
+  ALTER TABLE users ADD COLUMN job_title TEXT;
+  ALTER TABLE users ADD COLUMN phone TEXT;
+  `,
+  /* 18 — payments that buy a plan upgrade */ `
+  ALTER TABLE payment_intents ADD COLUMN purpose TEXT NOT NULL DEFAULT 'statement';
+  ALTER TABLE payment_intents ADD COLUMN target_plan TEXT;
+  ALTER TABLE payment_intents ADD COLUMN created_by_user TEXT;
+  `,
 ];
 
 export class Db {

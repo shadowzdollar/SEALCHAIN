@@ -7,6 +7,7 @@ import { Bullets } from '../Blocks';
 import { AppWindow, DocumentStack, EndorsementCard, MerkleDiagram, PhoneVerifier, ScreeningCard, ValidationCard } from '../Illustrations';
 import { PhotoBand, PhotoPrint } from '../Photo';
 import { PHOTOS } from '../photos';
+import { DocumentTrio } from '../PageExtras';
 
 function Chapter({ id, n, eyebrow, title, body, points, art, flip, tint }: { id: string; n: string; eyebrow: string; title: string; body: ReactNode; points: ReactNode[]; art: ReactNode; flip?: boolean; tint?: boolean }) {
   return (
@@ -33,6 +34,8 @@ export function ProductPage() {
         actions={<><Link to="/register" className={INK_BTN}>Start a shipment <ArrowRight className="size-4" /></Link><Link to="/contact?topic=pilot" className={PAPER_BTN}>Book a walkthrough</Link></>}
         art={<DocumentStack />}
       />
+
+      <DocumentTrio />
 
       <nav className="sticky top-16 z-30 border-b border-paper-rule bg-paper/95 backdrop-blur" aria-label="On this page">
         <div className={cx('mx-auto flex max-w-[1680px] gap-6 overflow-x-auto py-3 text-[13.5px]', PAGE_X)}>

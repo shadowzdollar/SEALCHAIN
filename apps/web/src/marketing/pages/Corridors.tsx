@@ -7,6 +7,7 @@ import { INK_BTN, PAGE_X, PageHero } from '../Chrome';
 import { CorridorMap } from '../Illustrations';
 import { PhotoPrint } from '../Photo';
 import { PHOTOS } from '../photos';
+import { DeparturesSection } from '../Departures';
 
 const COUNTRY: Record<string, string> = { RW: 'Rwanda', KE: 'Kenya', UG: 'Uganda', TZ: 'Tanzania', BI: 'Burundi' };
 
@@ -21,6 +22,8 @@ export function CorridorsPage() {
         actions={<Link to="/register" className={INK_BTN}>Start a shipment <ArrowRight className="size-4" /></Link>}
         art={<CorridorMap className="rounded-[3px] border border-paper-rule bg-paper-card" />}
       />
+
+      <DeparturesSection />
       <section className={cx('mx-auto grid max-w-[1680px] gap-10 pt-20 sm:grid-cols-3', PAGE_X)}>
         <PhotoPrint photo={PHOTOS.truckNileBridge} tilt={-1.5} caption="Road · Northern Uganda" />
         <PhotoPrint photo={PHOTOS.shipMombasa} tilt={1} caption="Sea · Mombasa" />

@@ -101,6 +101,12 @@ export function loadConfig() {
       currency: 'USD' as const,
       monthlyFeeCents: num('PLAN_MONTHLY_CENTS', 1500),
       perShipmentCents: num('PER_SHIPMENT_CENTS', 300),
+      plans: {
+        pilotSeats: num('PLAN_PILOT_SEATS', 3),
+        growthMonthlyCents: num('PLAN_GROWTH_MONTHLY_CENTS', 4900),
+        growthPerShipmentCents: num('PLAN_GROWTH_PER_SHIPMENT_CENTS', 200),
+        growthSeats: num('PLAN_GROWTH_SEATS', 15),
+      },
     },
     fx,
     payments: {

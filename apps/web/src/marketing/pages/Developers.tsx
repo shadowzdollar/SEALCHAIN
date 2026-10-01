@@ -4,6 +4,7 @@ import { cx } from '../../components/ui';
 import { INK_BTN, PAGE_X, PAPER_BTN, PageHero, SectionHeading } from '../Chrome';
 import { Bullets } from '../Blocks';
 import { CodeSheet } from '../Illustrations';
+import { ApiConsole } from '../PageExtras';
 
 const FLOW = `KEY=sc_live_…
 API=https://<your-sealchain-host>/api
@@ -70,6 +71,8 @@ export function DevelopersPage() {
         actions={<><Link to="/register" className={INK_BTN}>Get an API key <ArrowRight className="size-4" /></Link><Link to="/status" className={PAPER_BTN}>System status</Link></>}
         art={<CodeSheet title="Five calls to a verified shipment" code={FLOW.split('\n').slice(5, 13).join('\n')} />}
       />
+
+      <ApiConsole />
 
       <section className={cx('mx-auto grid max-w-[1680px] gap-12 py-24 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)]', PAGE_X)}>
         <div>

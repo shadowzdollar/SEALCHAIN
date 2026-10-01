@@ -26,6 +26,7 @@ import {
 import { HttpError, type Deps } from '../services/documents';
 
 import { createChallenge, hasTwoFactor } from '../services/twofactor';
+import { assertSeatAvailable } from '../services/plans';
 const RATE = { config: { rateLimit: { max: 10, timeWindow: '1 minute' } } };
 const INVITE_DAYS = 7;
 const RESET_MINUTES = 60;
@@ -53,7 +54,8 @@ export async function teamRoutes(api: FastifyInstance, deps: Deps) {
     if (db.get('SELECT 1 FROM users WHERE email = ?', body.email)) {
       throw new HttpError(409, 'email_taken', 'That email already has a SealChain account.');
     }
-    // Replace any earlier pending invite for the same email.
+    // Replace any earlier pending invite for the same email (it doesn't need a second seat).
+    if (!db.get('SELECT 1 FROM invites WHERE org_id = ? AND email = ? AND accepted_at IS NULL', req.auth!.org.id, body.email)) assertSeatAvailable(db, cfg, req.auth!.org.id);
     db.run('DELETE FROM invites WHERE org_id = ? AND email = ? AND accepted_at IS NULL', req.auth!.org.id, body.email);
     const { token, hash } = newToken();
     const expiresAt = new Date(Date.now() + INVITE_DAYS * 86_400_000).toISOString();
@@ -169,6 +171,25 @@ export async function teamRoutes(api: FastifyInstance, deps: Deps) {
     const ctx = resolveSession(db, token)!;
     audit(db, ctx, 'auth.password.reset', 'user', row.user_id);
     return { ...ctx, token };
+  });
+
+  /** The signed-in person's own profile. Email changes go through support (it is the login). */
+  const profileOf = (id: string) => {
+    const u = db.get<{ name: string; email: string; role: string; job_title: string | null; phone: string | null; created_at: string; totp_enabled_at: string | null }>(
+      'SELECT name, email, role, job_title, phone, created_at, totp_enabled_at FROM users WHERE id = ?', id,
+    )!;
+    return { name: u.name, email: u.email, role: u.role, jobTitle: u.job_title, phone: u.phone, memberSince: u.created_at, twoFactor: !!u.totp_enabled_at };
+  };
+  api.get('/auth/profile', { preHandler: requireSession }, async (req) => profileOf(req.auth!.user.id));
+  api.put('/auth/profile', { preHandler: requireSession, ...RATE }, async (req) => {
+    const body = z.object({
+      name: z.string().trim().min(2).max(120),
+      jobTitle: z.string().trim().max(80).optional().transform((v) => v || null),
+      phone: z.string().trim().max(32).regex(/^[+0-9 ()-]*$/, 'Use digits, spaces and + ( ) - only').optional().transform((v) => v || null),
+    }).parse(req.body);
+    db.run('UPDATE users SET name = ?, job_title = ?, phone = ? WHERE id = ?', body.name, body.jobTitle, body.phone, req.auth!.user.id);
+    audit(db, req.auth, 'user.profile.update', 'user', req.auth!.user.id);
+    return profileOf(req.auth!.user.id);
   });
 
   api.post('/auth/password/change', { preHandler: requireSession, ...RATE }, async (req) => {

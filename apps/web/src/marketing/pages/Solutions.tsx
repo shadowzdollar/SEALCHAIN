@@ -8,6 +8,7 @@ import { DocumentStack, EndorsementCard, PhoneVerifier, ScreeningCard, Validatio
 import { PhotoPrint } from '../Photo';
 import { PHOTOS } from '../photos';
 import type { Photo } from '../photos';
+import { BorderDay, MobileSection } from '../Sections';
 
 interface Solution {
   photo: Photo;
@@ -155,6 +156,8 @@ export function SolutionsPage() {
           </div>
         </div>
       </section>
+
+      {segment === 'verifiers' ? <MobileSection /> : <BorderDay />}
     </>
   );
 }

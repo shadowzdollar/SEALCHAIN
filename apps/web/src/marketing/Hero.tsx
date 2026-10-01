@@ -243,7 +243,7 @@ function Stage() {
     const move = (e: PointerEvent) => {
       const r = el.getBoundingClientRect();
       const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
-      t.style.transform = `rotateY(${x * 7}deg) rotateX(${-y * 6}deg)`;
+      t.style.transform = `rotateY(${x * 6}deg)`; // it stands on the floor: turn, don't tip
       t.style.setProperty('--gx', `${(x + 0.5) * 100}%`);
       t.style.setProperty('--gy', `${(y + 0.5) * 100}%`);
     };
@@ -260,7 +260,7 @@ function Stage() {
 
   return (
     <div ref={wrap} className="relative [perspective:1600px]" aria-hidden>
-      <div ref={tilt} className="stage-tilt relative flex flex-col items-center transition-transform duration-300 ease-out [transform-style:preserve-3d]">
+      <div ref={tilt} className="stage-tilt tv-reflect relative flex flex-col items-center transition-transform duration-500 ease-out [transform-origin:50%_100%] [transform-style:preserve-3d]">
         {/* bezel */}
         <div className="tv-bezel relative w-full rounded-[20px] p-[9px] pb-[9px]">
           <div className="relative overflow-hidden rounded-[11px] bg-paper-card p-3 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.35),inset_0_0_30px_rgba(11,31,58,0.12)]">
@@ -397,12 +397,62 @@ function Stage() {
             </span>
           </div>
         </div>
-        {/* stand */}
-        <div aria-hidden className="tv-neck h-9 w-[16%] min-w-[70px]" />
-        <div aria-hidden className="tv-base h-[10px] w-[42%] min-w-[180px] rounded-[50%/100%_100%_40%_40%]" />
-        <div aria-hidden className="-mt-1 h-4 w-[60%] rounded-[50%] bg-[radial-gradient(closest-side,rgba(11,31,58,0.35),transparent)] blur-[2px]" />
+        <Pedestal />
       </div>
+      {/* contact shadow on the floor */}
+      <div aria-hidden className="pointer-events-none absolute -bottom-3 left-1/2 -z-10 h-8 w-[62%] -translate-x-1/2 rounded-[50%] bg-[radial-gradient(closest-side,rgba(5,7,12,0.45),transparent)] blur-[3px]" />
+      <ContainerStack />
       {channel === 3 && <PhotoReel scene={frame.chapter === 'issue' ? 'origin' : frame.chapter === 'cleared' ? 'port' : 'road'} />}
+    </div>
+  );
+}
+
+/** Brushed-metal pedestal: a tapered neck rising from an elliptical plate seen in perspective. */
+function Pedestal() {
+  return (
+    <svg aria-hidden data-tv-foot viewBox="0 0 400 74" className="-mt-px w-[46%] min-w-[200px] overflow-visible">
+      <defs>
+        <linearGradient id="ped-neck" x1="0" x2="1">
+          <stop offset="0" stopColor="#151b27" /><stop offset="0.35" stopColor="#4a5468" /><stop offset="0.55" stopColor="#2c3445" /><stop offset="1" stopColor="#11161f" />
+        </linearGradient>
+        <radialGradient id="ped-top" cx="0.42" cy="0.3" r="0.8">
+          <stop offset="0" stopColor="#6b778d" /><stop offset="0.45" stopColor="#353e50" /><stop offset="1" stopColor="#141923" />
+        </radialGradient>
+        <linearGradient id="ped-edge" x1="0" x2="1">
+          <stop offset="0" stopColor="#0b0f18" /><stop offset="0.5" stopColor="#2a3242" /><stop offset="1" stopColor="#0b0f18" />
+        </linearGradient>
+      </defs>
+      {/* neck */}
+      <path d="M172 0 H228 L240 46 H160 Z" fill="url(#ped-neck)" />
+      <path d="M186 0 H192 L189 44 H183 Z" fill="white" opacity="0.12" />
+      {/* plate: edge then top surface */}
+      <path d="M40 52 A160 16 0 0 0 360 52 V60 A160 16 0 0 1 40 60 Z" fill="url(#ped-edge)" />
+      <ellipse cx="200" cy="52" rx="160" ry="16" fill="url(#ped-top)" />
+      <ellipse cx="200" cy="50.5" rx="150" ry="12" fill="none" stroke="white" strokeOpacity="0.14" />
+      <ellipse cx="200" cy="47" rx="40" ry="4" fill="#05070c" opacity="0.55" />
+    </svg>
+  );
+}
+
+/** A little stack of shipping containers beside the TV, built from CSS boxes. */
+function ContainerStack() {
+  const boxes = [
+    { c: '#b42318', x: 0, y: 0, label: 'SEALCHAIN' },
+    { c: '#0b1f3a', x: 100, y: 0, label: '' },
+    { c: '#2f6f4f', x: 48, y: -40, label: 'EAC' },
+  ];
+  return (
+    <div aria-hidden className="container-stack pointer-events-none absolute -bottom-1 right-[-3%] hidden h-[82px] w-[200px] sm:block lg:right-[-6%]">
+      <div className="absolute bottom-0 left-0 [transform:rotateX(-14deg)_rotateY(-32deg)] [transform-style:preserve-3d]">
+        {boxes.map((b, i) => (
+          <div key={i} className="box3d absolute" style={{ left: b.x, bottom: -b.y, ['--c' as never]: b.c }}>
+            <span className="box3d-front">{b.label && <em>{b.label}</em>}</span>
+            <span className="box3d-side" />
+            <span className="box3d-top" />
+          </div>
+        ))}
+      </div>
+      <div className="absolute -bottom-2 left-[-6%] h-6 w-[115%] rounded-[50%] bg-[radial-gradient(closest-side,rgba(5,7,12,0.4),transparent)] blur-[3px]" />
     </div>
   );
 }
@@ -436,16 +486,40 @@ export function Hero() {
       const r = el.getBoundingClientRect();
       el.style.setProperty('--mx', `${e.clientX - r.left}px`);
       el.style.setProperty('--my', `${e.clientY - r.top}px`);
+      el.style.setProperty('--nx', ((e.clientX - r.left) / r.width - 0.5).toFixed(3));
+      el.style.setProperty('--ny', ((e.clientY - r.top) / r.height - 0.5).toFixed(3));
     };
     el.addEventListener('pointermove', move);
     return () => el.removeEventListener('pointermove', move);
   }, []);
 
+  // The floor line follows the TV's foot, whatever the layout.
+  useLayoutEffect(() => {
+    const el = section.current;
+    if (!el) return;
+    const place = () => {
+      const foot = el.querySelector('[data-tv-foot]');
+      if (!foot) return;
+      const r = el.getBoundingClientRect(), f = foot.getBoundingClientRect();
+      el.style.setProperty('--floor', `${Math.round(f.bottom - r.top - f.height * 0.55)}px`);
+    };
+    place();
+    const ro = new ResizeObserver(place);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   return (
-    <section ref={section} className="hero-stage no-rv paper-grid relative isolate overflow-hidden border-b border-paper-rule">
+    <section ref={section} className="hero-stage hero-room no-rv relative isolate overflow-hidden border-b border-paper-rule">
+      {/* the room: wall, window onto the port, skirting, floor */}
+      <div aria-hidden className="room-wall absolute inset-0 -z-30" />
+      <div aria-hidden className="room-window absolute -z-20 hidden lg:block">
+        <img src={PHOTOS.containerStacks.src} alt="" className="room-view absolute inset-[-6%] size-[112%] max-w-none object-cover" />
+        <span className="room-sash absolute inset-0" />
+      </div>
+      <div aria-hidden className="room-floor absolute inset-x-0 bottom-0 -z-20 overflow-hidden"><div className="room-floor-plane" /></div>
+      <div aria-hidden className="room-skirting absolute inset-x-0 -z-10" />
       <div aria-hidden className="hero-spot pointer-events-none absolute inset-0 -z-10" />
-      <img aria-hidden src={PHOTOS.containerStacks.src} alt="" className="pointer-events-none absolute inset-y-0 right-0 -z-20 hidden h-full w-[62%] object-cover opacity-[0.5] [filter:sepia(0.25)_saturate(0.85)] [mask-image:linear-gradient(to_left,black_35%,transparent_95%)] lg:block dark:opacity-[0.3]" />
-      <img aria-hidden src="/brand/sealchain-seal-256.png" alt="" className="seal-spin pointer-events-none absolute hidden lg:block -right-40 -top-40 -z-10 w-[560px] opacity-[0.05] grayscale" />
       <div className="mx-auto grid max-w-[1680px] grid-cols-1 items-center gap-14 px-5 pb-20 pt-12 sm:px-8 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-12 lg:px-12 lg:pb-24 lg:pt-14 2xl:px-16">
         <div className="hero-in min-w-0">
           <Link to="/corridors" className="group inline-flex items-center gap-2.5 rounded-full border border-paper-rule bg-paper-card/80 py-1 pl-1 pr-3 text-[12.5px] text-slate-600 shadow-[0_1px_0_var(--color-paper-rule)] backdrop-blur transition-colors hover:border-ink/30">
@@ -475,7 +549,7 @@ export function Hero() {
         </div>
         <div className="drop-in min-w-0">
           <Stage />
-          <p className="mt-3 text-right"><span className="inline-block rounded-full bg-paper-card/85 px-3 py-1 font-plexmono text-[10px] uppercase tracking-[0.16em] text-slate-500 backdrop-blur">{tr('How a SealChain shipment crosses the Northern Corridor')}</span></p>
+
         </div>
       </div>
     </section>

@@ -104,16 +104,72 @@ export function Receipt({ className, shipments }: { className?: string; shipment
 
 const PRESETS = [5, 10, 25, 50];
 
+export interface Plan { name: string; price: string; unit: string; who: string; to: string; cta: string; featured?: boolean; perks: string[] }
+
+/** A plan as a cargo ticket: tear-off stub, barcode, and a 3D lean toward the cursor. */
+export function TicketCard({ plan: p, gate }: { plan: Plan; gate: string }) {
+  const { tr } = useTr();
+  const onMove = (e: React.PointerEvent<HTMLAnchorElement>) => {
+    if (e.pointerType !== 'mouse') return;
+    const r = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+    e.currentTarget.style.transform = `perspective(900px) rotateY(${x * 10}deg) rotateX(${-y * 8}deg) translateY(-6px)`;
+    e.currentTarget.style.setProperty('--sx', `${(x + 0.5) * 100}%`);
+    e.currentTarget.style.setProperty('--sy', `${(y + 0.5) * 100}%`);
+  };
+  const bars = Array.from(p.name + gate).flatMap((ch, i) => [((ch.charCodeAt(0) * (i + 3)) % 3) + 1, ((ch.charCodeAt(0) + i) % 2) + 1]);
+  const dark = p.featured;
+  return (
+    <Link
+      to={p.to}
+      onPointerMove={onMove}
+      onPointerLeave={(e) => { e.currentTarget.style.transform = ''; }}
+      className={cx('ticket group relative flex flex-col rounded-[20px] transition-transform duration-300 ease-out will-change-transform', dark ? 'bg-ink text-ink-contrast shadow-[0_40px_70px_-35px_rgba(11,31,58,0.9)]' : 'bg-paper-card text-ink shadow-[0_30px_60px_-38px_rgba(11,31,58,0.55)] ring-1 ring-paper-rule')}
+    >
+      <span aria-hidden className="ticket-shine pointer-events-none absolute inset-0 rounded-[20px]" />
+      {dark && <span className="absolute -right-3 -top-3 z-10 rotate-[8deg] rounded-md border-2 border-stamp bg-paper-card px-2 py-0.5 font-plexmono text-[10px] font-semibold uppercase tracking-[0.16em] text-stamp shadow">{tr('Most popular')}</span>}
+      <div className="p-6 pb-5">
+        <div className={cx('flex items-center justify-between font-plexmono text-[10px] uppercase tracking-[0.2em]', dark ? 'opacity-60' : 'text-slate-500')}>
+          <span>SealChain · {tr('Cargo pass')}</span><span>{tr('Gate')} {gate}</span>
+        </div>
+        <div className="mt-5 flex items-end justify-between gap-2">
+          <div><p className={cx('font-plexmono text-[10px] uppercase tracking-[0.18em]', dark ? 'opacity-60' : 'text-slate-500')}>{tr('From')}</p><p className="font-serif text-[26px] font-semibold leading-none">KGL</p></div>
+          <span aria-hidden className={cx('mb-1 flex flex-1 items-center gap-1 px-2', dark ? 'text-white/40' : 'text-slate-300')}><span className="h-px flex-1 border-t border-dashed border-current" />✈<span className="h-px flex-1 border-t border-dashed border-current" /></span>
+          <div className="text-right"><p className={cx('font-plexmono text-[10px] uppercase tracking-[0.18em]', dark ? 'opacity-60' : 'text-slate-500')}>{tr('To')}</p><p className="font-serif text-[26px] font-semibold leading-none">{tr('World')}</p></div>
+        </div>
+        <p className="mt-6 font-serif text-[23px] font-semibold">{p.name}</p>
+        <p className={cx('text-[13px]', dark ? 'opacity-70' : 'text-slate-500')}>{p.who}</p>
+        <p className="mt-4 font-serif text-[40px] font-semibold leading-none tracking-[-0.02em]">{p.price}</p>
+        <p className={cx('mt-1.5 text-[13px]', dark ? 'opacity-70' : 'text-slate-600')}>{p.unit}</p>
+        <ul className="mt-5 space-y-2">
+          {p.perks.map((k) => <li key={k} className="flex items-center gap-2 text-[13.5px]"><Check className={cx('size-4 shrink-0', dark ? 'text-emerald-300' : 'text-emerald-700')} />{k}</li>)}
+        </ul>
+      </div>
+      {/* perforation */}
+      <div aria-hidden className="relative mx-5 h-0 border-t-2 border-dashed" style={{ borderColor: dark ? 'rgba(255,255,255,0.18)' : 'var(--color-paper-rule)' }}>
+        <span className="ticket-notch -left-[30px]" /><span className="ticket-notch -right-[30px]" />
+      </div>
+      {/* stub */}
+      <div className="mt-auto flex items-center justify-between gap-3 p-6 pt-5">
+        <span className="inline-flex items-center gap-1.5 text-[14px] font-semibold">{p.cta} <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" /></span>
+        <span aria-hidden className={cx('flex h-8 items-stretch gap-[2px]', dark ? 'opacity-70' : 'opacity-60')}>
+          {bars.slice(0, 22).map((w, i) => <span key={i} className="bg-current" style={{ width: w }} />)}
+        </span>
+      </div>
+    </Link>
+  );
+}
+
 /** Landing-page pricing: live estimator, receipt pinned over a port photo, plans. */
 export function PricingShowcase() {
   const [n, setN] = useState(10);
   const { monthly, perShipment } = usePricing();
   const { tr, trx } = useTr();
   const plans = [
-    { name: tr('Pilot'), price: `$${monthly}`, unit: tr('/mo + ${fee}/shipment', { fee: perShipment }), who: tr('Exporters & SMEs'), to: '/register', cta: tr('Start a shipment'), featured: true },
-    { name: tr('Authority'), price: tr('Free'), unit: tr('for issuing bodies'), who: tr('Customs & certificate issuers'), to: '/contact?topic=authority', cta: tr('Talk to us') },
-    { name: tr('Verifier'), price: tr('Free'), unit: tr('no account needed'), who: tr('Banks, buyers, insurers'), to: '/verify', cta: tr('Verify a document') },
-    { name: tr('Network'), price: tr('Custom'), unit: tr('volume & membership'), who: tr('Associations & forwarders'), to: '/contact?topic=integration', cta: tr('Talk to us') },
+    { name: tr('Pilot'), price: `$${monthly}`, unit: tr('/mo + ${fee}/shipment', { fee: perShipment }), who: tr('Exporters & SMEs'), to: '/register', cta: tr('Start a shipment'), featured: true, perks: [tr('Unlimited drafts & team'), tr('Free corrections'), tr('Fraud screening & API')] },
+    { name: tr('Authority'), price: tr('Free'), unit: tr('for issuing bodies'), who: tr('Customs & certificate issuers'), to: '/contact?topic=authority', cta: tr('Talk to us'), perks: [tr('Approve certificates online'), tr('A clear review queue'), tr('Every approval sealed')] },
+    { name: tr('Verifier'), price: tr('Free'), unit: tr('no account needed'), who: tr('Banks, buyers, insurers'), to: '/verify', cta: tr('Verify a document'), perks: [tr('Scan a QR or drop a file'), tr('Answer in two seconds'), tr('In four languages')] },
+    { name: tr('Network'), price: tr('Custom'), unit: tr('volume & membership'), who: tr('Associations & forwarders'), to: '/contact?topic=integration', cta: tr('Talk to us'), perks: [tr('Volume pricing'), tr('Onboard your members'), tr('Connect your systems')] },
   ];
   return (
     <section className="paper-grid border-b border-paper-rule">
@@ -151,19 +207,8 @@ export function PricingShowcase() {
           </div>
         </div>
 
-        <div className="mt-20 grid gap-px overflow-hidden rounded-[3px] border border-paper-rule bg-paper-rule sm:grid-cols-2 lg:grid-cols-4">
-          {plans.map((p) => (
-            <Link key={p.name} to={p.to} className={cx('group flex flex-col p-6 transition-colors', p.featured ? 'bg-ink text-ink-contrast' : 'bg-paper-card hover:bg-paper')}>
-              <div className="flex items-center justify-between">
-                <span className="font-serif text-[21px] font-semibold">{p.name}</span>
-                {p.featured && <span className="rounded-[2px] bg-stamp px-1.5 py-0.5 font-plexmono text-[10px] uppercase tracking-[0.12em] text-white">{tr('Open')}</span>}
-              </div>
-              <span className={cx('mt-1 text-[13px]', p.featured ? 'opacity-75' : 'text-slate-500')}>{p.who}</span>
-              <span className="mt-6 font-serif text-[34px] font-semibold leading-none">{p.price}</span>
-              <span className={cx('mt-1.5 text-[13px]', p.featured ? 'opacity-75' : 'text-slate-600')}>{p.unit}</span>
-              <span className="mt-6 inline-flex items-center gap-1.5 text-[14px] font-medium">{p.cta} <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" /></span>
-            </Link>
-          ))}
+        <div className="mt-20 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
+          {plans.map((p, i) => <TicketCard key={p.name} plan={p} gate={['A1', 'B2', 'C3', 'D4'][i]!} />)}
         </div>
         <p className="mt-5 text-[13px] text-slate-500">{trx('Full comparison and questions on the {link}.', { link: <Link to="/pricing" className="font-medium text-ink underline underline-offset-4">{tr('pricing page')}</Link> })}</p>
       </div>

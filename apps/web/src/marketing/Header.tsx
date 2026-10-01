@@ -3,18 +3,18 @@
  * floating glass capsule on scroll, a gliding hover indicator, animated mega
  * panels, a reading-progress hairline and a ⌘K search palette.
  */
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Link, useLocation, useNavigate } from 'react-router';
-import { ArrowRight, BookOpen, ChevronDown, CornerDownLeft, Menu as MenuIcon, ScanLine, Search, Tag, X } from 'lucide-react';
+import { Link, useLocation } from 'react-router';
+import { ArrowRight, ChevronDown, Menu as MenuIcon, ScanLine, Search, X } from 'lucide-react';
 import { useAuth } from '../auth';
 import { Logo, ThemeToggle } from '../components/Layout';
 import { cx } from '../components/ui';
-import { GUIDES } from '../help/guides';
 import { LanguageSwitcher, msg, useTr } from '../locale';
 import { INK_BTN, PAPER_BTN, STATE_DOT, STATE_LABEL, useStatus } from './Chrome';
 import { MENUS, type Menu } from './content';
 import { CorridorMap, QrGlyph, Stamp } from './Illustrations';
+import { SearchPalette } from './CommandCentre';
 
 // ------------------------------------------------------- announcement
 const NEWS = [
@@ -136,120 +136,6 @@ function MegaPanel({ menu, onNavigate }: { menu: Menu; onNavigate: () => void })
         <p className="mt-1 text-[13px] leading-snug text-slate-600">{tr(menu.featured.body)}</p>
         <p className="mt-auto inline-flex items-center gap-1.5 pt-3 text-[13px] font-medium text-ink">{tr(menu.featured.cta)} <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" /></p>
       </Link>
-    </div>
-  );
-}
-
-// -------------------------------------------------------- search palette
-interface Hit { label: string; desc: string; to: string; group: 'pages' | 'guides'; icon: typeof Search }
-
-function useSearchIndex(): Hit[] {
-  const { tr } = useTr();
-  return useMemo(() => {
-    const seen = new Set<string>();
-    const pages: Hit[] = [];
-    for (const m of MENUS) for (const g of m.groups) for (const it of g.items) {
-      if (seen.has(it.to)) continue;
-      seen.add(it.to);
-      pages.push({ label: tr(it.label), desc: tr(it.desc), to: it.to, group: 'pages', icon: it.icon });
-    }
-    pages.push({ label: tr('Pricing'), desc: tr('Plans, per-shipment fees and what’s always free'), to: '/pricing', group: 'pages', icon: Tag });
-    pages.push({ label: tr('Verify a document'), desc: tr('Check any SealChain document — free, no account'), to: '/verify', group: 'pages', icon: ScanLine });
-    const guides = GUIDES.map<Hit>((g) => ({ label: g.title, desc: g.summary, to: `/help/${g.slug}`, group: 'guides', icon: BookOpen }));
-    return [...pages, ...guides];
-  }, [tr]);
-}
-
-function SearchPalette({ onClose }: { onClose: () => void }) {
-  const { tr } = useTr();
-  const navigate = useNavigate();
-  const index = useSearchIndex();
-  const [q, setQ] = useState('');
-  const [sel, setSel] = useState(0);
-  const list = useRef<HTMLUListElement>(null);
-
-  const hits = useMemo(() => {
-    const terms = q.toLowerCase().split(/\s+/).filter(Boolean);
-    const scored = index
-      .map((h) => {
-        const hay = `${h.label} ${h.desc}`.toLowerCase();
-        if (!terms.every((t) => hay.includes(t))) return null;
-        return { h, score: terms.reduce((s, t) => s + (h.label.toLowerCase().includes(t) ? 2 : 1), 0) };
-      })
-      .filter((x): x is { h: Hit; score: number } => !!x)
-      .sort((a, b) => b.score - a.score || (a.h.group === 'pages' ? -1 : 1));
-    return (terms.length ? scored.map((x) => x.h) : index.filter((h) => h.group === 'pages').slice(0, 7).concat(index.filter((h) => h.group === 'guides').slice(0, 4))).slice(0, 12);
-  }, [q, index]);
-
-  useEffect(() => setSel(0), [q]);
-  useEffect(() => {
-    list.current?.querySelector<HTMLElement>(`[data-i="${sel}"]`)?.scrollIntoView({ block: 'nearest' });
-  }, [sel]);
-  useEffect(() => {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = prev; };
-  }, []);
-
-  const go = (h?: Hit) => { if (!h) return; onClose(); void navigate(h.to); };
-  const onKey = (e: ReactKeyboardEvent) => {
-    if (e.key === 'ArrowDown') { e.preventDefault(); setSel((s) => Math.min(hits.length - 1, s + 1)); }
-    else if (e.key === 'ArrowUp') { e.preventDefault(); setSel((s) => Math.max(0, s - 1)); }
-    else if (e.key === 'Enter') { e.preventDefault(); go(hits[sel]); }
-    else if (e.key === 'Escape') onClose();
-  };
-
-  let last: Hit['group'] | null = null;
-  return (
-    <div className="marketing fixed inset-0 z-[60] flex items-start justify-center bg-navy-950/40 px-4 pt-[12vh] font-plex text-ink backdrop-blur-sm palette-fade" onMouseDown={onClose}>
-      <div role="dialog" aria-modal aria-label={tr('Search SealChain')} onMouseDown={(e) => e.stopPropagation()} className="palette-in w-full max-w-[640px] overflow-hidden rounded-2xl border border-paper-rule bg-paper-card shadow-[0_40px_80px_-30px_rgba(11,31,58,0.55)]">
-        <div className="flex items-center gap-3 border-b border-paper-rule px-5">
-          <Search className="size-[18px] text-slate-500" />
-          <input
-            autoFocus
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            onKeyDown={onKey}
-            placeholder={tr('Search pages and help guides…')}
-            className="h-14 min-w-0 flex-1 bg-transparent text-[16px] text-ink outline-none placeholder:text-slate-400"
-            aria-controls="palette-list"
-            aria-activedescendant={hits[sel] ? `hit-${sel}` : undefined}
-          />
-          <kbd className="rounded-md border border-paper-rule px-1.5 py-0.5 font-plexmono text-[11px] text-slate-500">esc</kbd>
-        </div>
-        <ul id="palette-list" ref={list} role="listbox" className="max-h-[52vh] overflow-y-auto p-2">
-          {hits.length === 0 && <li className="px-4 py-10 text-center text-[14px] text-slate-500">{tr('No results for “{q}”.').replace('{q}', q)}</li>}
-          {hits.map((h, k) => {
-            const header = h.group !== last ? (last = h.group) : null;
-            return (
-              <li key={h.to} role="presentation">
-                {header && <p className="px-3 pb-1.5 pt-3 font-plexmono text-[10.5px] uppercase tracking-[0.18em] text-slate-500">{header === 'pages' ? tr('Pages') : tr('Help guides')}</p>}
-                <button
-                  id={`hit-${k}`}
-                  data-i={k}
-                  role="option"
-                  aria-selected={k === sel}
-                  onMouseMove={() => setSel(k)}
-                  onClick={() => go(h)}
-                  className={cx('flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors', k === sel ? 'bg-ink text-ink-contrast' : 'text-ink')}
-                >
-                  <span className={cx('flex size-8 shrink-0 items-center justify-center rounded-lg border', k === sel ? 'border-white/20' : 'border-paper-rule bg-paper')}><h.icon className="size-4" strokeWidth={1.7} /></span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[14px] font-medium">{h.label}</span>
-                    <span className={cx('block truncate text-[12.5px]', k === sel ? 'opacity-70' : 'text-slate-500')}>{h.desc}</span>
-                  </span>
-                  {k === sel && <CornerDownLeft className="size-4 shrink-0 opacity-70" />}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-        <div className="flex items-center gap-4 border-t border-paper-rule bg-paper px-5 py-2.5 text-[11.5px] text-slate-500">
-          <span className="flex items-center gap-1.5"><kbd className="rounded border border-paper-rule bg-paper-card px-1 font-plexmono">↑</kbd><kbd className="rounded border border-paper-rule bg-paper-card px-1 font-plexmono">↓</kbd>{tr('to navigate')}</span>
-          <span className="flex items-center gap-1.5"><kbd className="rounded border border-paper-rule bg-paper-card px-1 font-plexmono">↵</kbd>{tr('to open')}</span>
-          <Link to="/help" onClick={onClose} className="ml-auto font-medium text-ink hover:underline">{tr('Help centre')} →</Link>
-        </div>
-      </div>
     </div>
   );
 }

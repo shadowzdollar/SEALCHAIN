@@ -7,6 +7,7 @@
  */
 import type { Config } from '../config';
 import { newId, nowIso, type Db } from '../db';
+import { planForPeriod } from './plans';
 
 export function currentPeriod(d = new Date()): string {
   return d.toISOString().slice(0, 7);
@@ -18,7 +19,7 @@ export function recordUsage(db: Db, cfg: Config, orgId: string, shipmentId: stri
     org_id: orgId,
     shipment_id: shipmentId,
     kind: 'shipment',
-    amount_cents: cfg.billing.perShipmentCents,
+    amount_cents: planForPeriod(db, cfg, orgId, currentPeriod()).perShipmentCents ?? cfg.billing.perShipmentCents,
     period: currentPeriod(),
     created_at: nowIso(),
   });
@@ -37,15 +38,16 @@ export function statement(db: Db, cfg: Config, orgId: string, period = currentPe
   const payments = db.all<{ id: string; amount_cents: number; method: string; reference: string | null; created_at: string; currency_charged: string | null; amount_charged: number | null }>(
     'SELECT id, amount_cents, method, reference, created_at, currency_charged, amount_charged FROM payments WHERE org_id = ? AND period = ? ORDER BY created_at', orgId, period,
   );
-  const subscriptionCents = active ? cfg.billing.monthlyFeeCents : 0;
+  const plan = planForPeriod(db, cfg, orgId, period);
+  const subscriptionCents = active ? plan.monthlyFeeCents ?? cfg.billing.monthlyFeeCents : 0;
   const usageCents = events.reduce((s, e) => s + e.amount_cents, 0);
   const paidCents = payments.reduce((s, p) => s + p.amount_cents, 0);
   const totalCents = subscriptionCents + usageCents;
   return {
     period,
-    plan: org.plan,
+    plan: plan.id,
     currency: cfg.billing.currency,
-    pricing: { monthlyFeeCents: cfg.billing.monthlyFeeCents, perShipmentCents: cfg.billing.perShipmentCents },
+    pricing: { monthlyFeeCents: plan.monthlyFeeCents ?? cfg.billing.monthlyFeeCents, perShipmentCents: plan.perShipmentCents ?? cfg.billing.perShipmentCents },
     subscriptionCents,
     shipments: events.length,
     usageCents,

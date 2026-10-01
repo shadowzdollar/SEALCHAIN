@@ -21,6 +21,7 @@ import { orgRoutes } from './routes/org';
 import { securityRoutes } from './routes/security';
 import { reportRoutes } from './routes/reports';
 import { billingRoutes } from './routes/billing';
+import { planRoutes } from './routes/plans';
 import { webhookRoutes } from './routes/webhooks';
 import { teamRoutes } from './routes/team';
 import { sharingRoutes } from './routes/sharing';
@@ -112,6 +113,7 @@ export async function buildApp(cfg: Config, opts: { logger?: boolean; startAncho
     await metaRoutes(api, deps);
     await publicRoutes(api, deps);
     await billingRoutes(api, deps);
+    await planRoutes(api, deps);
     await notificationRoutes(api, deps);
     await orgRoutes(api, deps);
     await securityRoutes(api, deps);

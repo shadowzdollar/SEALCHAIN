@@ -33,8 +33,9 @@ interface PaymentInfo {
 
 interface Attempt { id: string; status: 'pending' | 'succeeded' | 'failed' | 'cancelled'; chargeAmount: number; chargeCurrency: string; createdAt: string; failureReason: string | null }
 
-interface Intent { id: string; period: string; status: Attempt['status']; provider: string; chargeAmount: number; chargeCurrency: string; creditCents: number; failureReason: string | null; createdAt: string; completedAt: string | null; paymentId: string | null }
+interface Intent { id: string; period: string; status: Attempt['status']; provider: string; chargeAmount: number; chargeCurrency: string; creditCents: number; failureReason: string | null; createdAt: string; completedAt: string | null; paymentId: string | null ; purpose?: 'statement' | 'plan_upgrade'; targetPlan?: string | null }
 
+const planName = (t: string | null | undefined) => (t ? t.charAt(0).toUpperCase() + t.slice(1) : '');
 const monthName = (p: string) => new Date(`${p}-01T00:00:00Z`).toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' });
 const major = (amount: number, currency: string) => `${currency} ${amount.toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
 const methodLabel = (m: string) => {
@@ -62,11 +63,14 @@ export function Billing() {
     <>
       <PageHeader
         title="Billing"
-        subtitle={`Pilot plan · ${cents(s.pricing.monthlyFeeCents)} per month + ${cents(s.pricing.perShipmentCents)} per shipment issued`}
+        subtitle={`${s.plan.charAt(0).toUpperCase()}${s.plan.slice(1)} plan · ${cents(s.pricing.monthlyFeeCents)} per month + ${cents(s.pricing.perShipmentCents)} per shipment issued`}
         actions={
+          <div className="flex items-center gap-2">
+          <Link to="/app/plans" className="inline-flex h-9 items-center gap-1.5 rounded-md border border-slate-300 px-3 text-[13px] font-medium hover:border-ink dark:border-navy-600">Change plan <ArrowRight className="size-3.5" /></Link>
           <select className="input w-48" value={s.period} onChange={(e) => setPeriod(e.target.value)} aria-label="Statement month">
             {q.data.periods.map((p) => <option key={p} value={p}>{monthName(p)}</option>)}
           </select>
+          </div>
         }
       />
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -191,7 +195,7 @@ export function SandboxCheckout() {
         <Badge tone="amber"><FlaskConical className="size-3" /> Test checkout — no real money moves</Badge>
         <p className="eyebrow mt-6">Pay SealChain</p>
         <p className="mt-2 font-serif text-[34px] font-semibold leading-none">{major(i.chargeAmount, i.chargeCurrency)}</p>
-        <p className="mt-2 text-sm text-slate-500">Statement for {monthName(i.period)} · credits {cents(i.creditCents)}</p>
+        <p className="mt-2 text-sm text-slate-500">{i.purpose === 'plan_upgrade' ? `Upgrade to ${planName(i.targetPlan)} · ${monthName(i.period)}` : `Statement for ${monthName(i.period)} · credits ${cents(i.creditCents)}`}</p>
         {i.status !== 'pending' ? (
           <Alert tone="info" className="mt-6">This payment is already {i.status}.</Alert>
         ) : (
@@ -226,6 +230,8 @@ export function PaymentReturn() {
         const i = txId && !cancelled ? await api.post<Intent>('/billing/confirm', { transactionId: txId, intentId: txRef }) : await api.get<Intent>(`/billing/intents/${txRef}`);
         setIntent(i);
         void qc.invalidateQueries({ queryKey: ['billing'] });
+        void qc.invalidateQueries({ queryKey: ['plans'] });
+        void qc.invalidateQueries({ queryKey: ['me'] });
       } catch (e) {
         setError(e instanceof ApiError ? e.message : 'Could not confirm the payment.');
       }
@@ -247,7 +253,7 @@ export function PaymentReturn() {
           <>
             <div className="stamp mx-auto rotate-[-4deg]">Paid ✓</div>
             <h1 className="mt-6 font-serif text-[28px] font-semibold">Thank you</h1>
-            <p className="mt-2 text-sm text-slate-600 dark:text-navy-300">{intent && `${major(intent.chargeAmount, intent.chargeCurrency)} received for ${monthName(intent.period)}. A receipt is on the billing page and in your email.`}</p>
+            <p className="mt-2 text-sm text-slate-600 dark:text-navy-300">{intent && (intent.purpose === 'plan_upgrade' ? `${major(intent.chargeAmount, intent.chargeCurrency)} received — you’re now on ${planName(intent.targetPlan)}. A receipt is in your email.` : `${major(intent.chargeAmount, intent.chargeCurrency)} received for ${monthName(intent.period)}. A receipt is on the billing page and in your email.`)}</p>
           </>
         ) : status === 'pending' ? (
           <>
@@ -262,7 +268,11 @@ export function PaymentReturn() {
             <p className="mt-2 text-sm text-slate-600 dark:text-navy-300">{intent?.failureReason ?? 'No money was taken. You can try again from the billing page.'}</p>
           </>
         )}
-        <Link to={intent ? `/app/billing?period=${intent.period}` : '/app/billing'} className="mt-8 inline-flex items-center gap-1.5 text-sm font-medium hover:underline">Back to billing <ArrowRight className="size-4" /></Link>
+        {intent?.purpose === 'plan_upgrade' ? (
+          <Link to="/app/plans" className="mt-8 inline-flex items-center gap-1.5 text-sm font-medium hover:underline">Back to plans <ArrowRight className="size-4" /></Link>
+        ) : (
+          <Link to={intent ? `/app/billing?period=${intent.period}` : '/app/billing'} className="mt-8 inline-flex items-center gap-1.5 text-sm font-medium hover:underline">Back to billing <ArrowRight className="size-4" /></Link>
+        )}
       </div>
     </div>
   );

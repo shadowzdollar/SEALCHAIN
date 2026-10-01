@@ -5,13 +5,15 @@
  * so the verifier does not have to trust SealChain's servers.
  */
 import { useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
-import { Link, useParams } from 'react-router';
+import { Link, useNavigate, useParams } from 'react-router';
 import {
-  AlertOctagon, BadgeCheck, CheckCircle2, ChevronDown, Clock, ExternalLink, FileQuestion, FileWarning, HelpCircle, Loader2, RefreshCw, ShieldCheck, XCircle,
+  AlertOctagon, BadgeCheck, CheckCircle2, ChevronDown, Clock, ExternalLink, FileQuestion, FileWarning, HelpCircle, Printer, RefreshCw, RotateCcw, Search, ShieldCheck, XCircle,
 } from 'lucide-react';
 import { anchoredAtCallData, computeRootFromProof, decodeUint, formatHs, sha256Hex } from '@sealchain/core';
 import { ApiError, api, type VerificationResult } from '../api';
 import { Logo, ThemeToggle } from '../components/Layout';
+import { LanguageSwitcher, useTr } from '../locale';
+import { Inspecting, MethodPicker, SealRings, StampedDocument, VERIFY_ICONS, verdictTone } from '../marketing/VerifyDesk';
 import { Alert, Badge, Button, Dropzone, Hash, Spinner, cx } from '../components/ui';
 import { COUNTRY_NAME, bytes, dateTime, money, num, date } from '../format';
 import { EndorsementsView } from '../components/Endorsement';
@@ -82,19 +84,27 @@ export function LanguageSelect() {
 
 function VerifyPage() {
   const { t } = useT();
+  const { tr } = useTr();
   const { id } = useParams();
+  const navigate = useNavigate();
   const [state, setState] = useState<State>({ kind: id ? 'loading' : 'idle', msg: t('lookingUp') } as State);
+  // Keep the inspection on screen long enough to read; the checks themselves are real.
+  const settle = async <T,>(p: Promise<T>): Promise<T> => {
+    const [r] = await Promise.allSettled([p, new Promise((ok) => setTimeout(ok, 1300))]);
+    if (r.status === 'rejected') throw r.reason;
+    return r.value as T;
+  };
 
   const loadById = useCallback(async (sha?: string, file?: File) => {
     setState({ kind: 'loading', msg: sha ? t('comparing') : t('lookingUp') });
     try {
-      const result = await api.get<VerificationResult>(`/verify/${id}${sha ? `?sha256=${sha}` : ''}`);
+      const result = await settle(api.get<VerificationResult>(`/verify/${id}${sha ? `?sha256=${sha}` : ''}`));
       setState({ kind: 'result', result, file: file ? { name: file.name, size: file.size } : undefined });
     } catch (e) {
       if (e instanceof ApiError && e.status === 404) setState({ kind: 'not_found', message: e.message });
       else setState({ kind: 'error', message: e instanceof Error ? e.message : 'Verification failed' });
     }
-  }, [id]);
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (id) void loadById();
@@ -105,7 +115,7 @@ function VerifyPage() {
     const sha = await hashFile(file);
     if (id) return loadById(sha, file);
     try {
-      const result = await api.get<VerificationResult>(`/verify/hash/${sha}`);
+      const result = await settle(api.get<VerificationResult>(`/verify/hash/${sha}`));
       setState({ kind: 'result', result, file: { name: file.name, size: file.size } });
     } catch (e) {
       if (e instanceof ApiError && e.status === 404) setState({ kind: 'not_found', sha256: sha, file, message: e.message });
@@ -118,95 +128,140 @@ function VerifyPage() {
     const fd = new FormData();
     fd.append('file', file);
     try {
-      const result = await api.post<VerificationResult>('/verify/file', fd);
+      const result = await settle(api.post<VerificationResult>('/verify/file', fd));
       setState({ kind: 'result', result, file: { name: file.name, size: file.size } });
     } catch (e) {
       setState({ kind: 'not_found', message: e instanceof ApiError ? e.message : 'Not found' });
     }
   }
 
+  const again = () => { setState({ kind: 'idle' }); if (id) void navigate('/verify'); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+  const tone = state.kind === 'result' ? verdictTone(state.result.verdict) : state.kind === 'not_found' ? 'bad' : null;
+
   return (
-    <div className="paper-grid min-h-dvh">
-      <header className="border-b border-slate-200 bg-surface/90 dark:border-navy-800 dark:bg-navy-950">
-        <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
-          <div className="flex min-w-0 items-center gap-4">
-            <Link to="/"><Logo /></Link>
-            <span className="hidden h-5 w-px bg-slate-300 sm:block dark:bg-white/20" />
-            <span className="hidden truncate font-mono text-[11px] uppercase tracking-[0.16em] text-slate-500 sm:block dark:text-navy-300">Document verification service</span>
+    <div className="verify-page min-h-dvh bg-paper">
+      {/* the desk */}
+      <div className={cx('verify-desk relative isolate overflow-hidden bg-[#08111f] text-white', tone && `tone-${tone}`, state.kind !== 'result' && 'min-h-dvh')}>
+        <div aria-hidden className="verify-grid absolute inset-0 -z-10" />
+        <div aria-hidden className="verify-glow absolute inset-0 -z-10" />
+        <header className="print:hidden">
+          <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
+            <div className="flex min-w-0 items-center gap-4">
+              <Link to="/"><Logo light /></Link>
+              <span className="hidden h-5 w-px bg-white/20 sm:block" />
+              <span className="hidden truncate font-plexmono text-[11px] uppercase tracking-[0.16em] text-white/55 sm:block">{tr('Document verification')}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <LanguageSwitcher tone="onDark" />
+              <ThemeToggle className="!text-inherit opacity-80 hover:!bg-white/10 hover:opacity-100" />
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <LanguageSelect />
-            <ThemeToggle />
-          </div>
-        </div>
-      </header>
+        </header>
 
-      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
-        {!id && (
-          <div className="mb-6">
-            <h1 className="font-serif text-[34px] font-semibold tracking-[-0.02em]">{t('title')}</h1>
-            <p className="mt-1 text-sm text-slate-600 dark:text-navy-300">{t('subtitle')}</p>
-          </div>
-        )}
-
-        {state.kind === 'loading' && (
-          <div className="card flex items-center justify-center gap-3 p-10 text-sm text-slate-600 dark:text-navy-300">
-            <Loader2 className="size-5 animate-spin" /> {state.msg}
-          </div>
-        )}
-
-        {state.kind === 'error' && <Alert tone="error" title={t('couldNotVerify')}>{state.message}</Alert>}
-
-        {state.kind === 'not_found' && (
-          <div className="space-y-4">
-            <div className="card border-red-300 p-6 dark:border-red-900">
-              <div className="flex gap-4">
-                <FileQuestion className="size-8 shrink-0 text-red-600" />
-                <div>
-                  <h2 className="text-lg font-semibold">{t('notFound')}</h2>
-                  <p className="mt-1 text-sm text-slate-600 dark:text-navy-300">{state.message}</p>
-                  {state.sha256 && <p className="mt-3 text-xs text-slate-500">Fingerprint: <Hash value={state.sha256} /></p>}
-                  {state.file && (
-                    <div className="mt-4">
-                      <Button size="sm" variant="secondary" onClick={() => void identify(state.file!)}>{t('identify')}</Button>
-                      <p className="mt-1.5 text-xs text-slate-500">{t('identifyHint')}</p>
-                    </div>
-                  )}
-                </div>
+        <main className="mx-auto max-w-6xl px-4 pb-14 pt-6 sm:px-6 sm:pb-20 sm:pt-10">
+          {state.kind === 'idle' && (
+            <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+              <div className="hero-in">
+                <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 font-plexmono text-[11px] uppercase tracking-[0.16em] text-[#f4c542]"><ShieldCheck className="size-3.5" /> {tr('Free · no account · 4 languages')}</p>
+                <h1 className="mt-5 font-serif text-[42px] font-semibold leading-[1.04] tracking-[-0.02em] sm:text-[58px]">{tr('Is this document real?')}</h1>
+                <p className="mt-4 max-w-md text-[17px] leading-relaxed text-white/70">{tr('Find out in seconds. Scan its QR code, drop the PDF, or type its number — we check it against the original that was issued.')}</p>
+                <ul className="mt-8 space-y-3 text-[14.5px] text-white/80">
+                  {[tr('Spots any change, down to a single character'), tr('Shows whether an authority approved it'), tr('Your file is checked on your device — never uploaded')].map((x) => (
+                    <li key={x} className="flex items-center gap-3"><span className="flex size-6 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300"><CheckCircle2 className="size-4" /></span>{x}</li>
+                  ))}
+                </ul>
               </div>
+              <MethodPicker onFile={onFile} />
             </div>
-            <Dropzone onFile={onFile} label={t('checkAnother')} sub={t('hashedLocally')} compact />
-          </div>
-        )}
+          )}
 
-        {state.kind === 'result' && <ResultView result={state.result} file={state.file} onFile={onFile} withDrop={!!id} />}
+          {state.kind === 'loading' && <Inspecting label={state.msg} />}
 
-        {state.kind === 'idle' && (
-          <>
-            <Dropzone onFile={onFile} label={t('dropLabel')} sub={t('dropSub')} />
-            <div className="mt-8 grid gap-4 sm:grid-cols-3">
-              {[
-                [t('hint1t'), t('hint1d')],
-                [t('hint2t'), t('hint2d')],
-                [t('hint3t'), t('hint3d')],
-              ].map(([t, d]) => (
-                <div key={t} className="card p-4">
-                  <p className="text-sm font-medium">{t}</p>
-                  <p className="mt-1 text-xs text-slate-500">{d}</p>
+          {state.kind === 'error' && <Alert tone="error" title={t('couldNotVerify')}>{state.message}</Alert>}
+
+          {state.kind === 'not_found' && (
+            <div className="grid items-center gap-10 lg:grid-cols-2">
+              <div className="pop-in">
+                <span className="flex size-16 items-center justify-center rounded-2xl bg-red-500/20 text-red-300"><FileQuestion className="size-8" /></span>
+                <h1 className="mt-5 font-serif text-[36px] font-semibold leading-tight sm:text-[46px]">{t('notFound')}</h1>
+                <p className="mt-3 max-w-lg text-[16px] leading-relaxed text-white/70">{state.message}</p>
+                {state.sha256 && <p className="mt-4 break-all font-plexmono text-[11px] text-white/40">sha256 {state.sha256}</p>}
+                <div className="mt-7 flex flex-wrap gap-3">
+                  {state.file && <button type="button" onClick={() => void identify(state.file!)} className="inline-flex h-11 items-center gap-2 rounded-full bg-[#f4c542] px-5 text-[14px] font-semibold text-[#0b1f3a]"><Search className="size-4" /> {t('identify')}</button>}
+                  <button type="button" onClick={again} className="inline-flex h-11 items-center gap-2 rounded-full border border-white/25 px-5 text-[14px] font-medium text-white hover:bg-white/10"><RotateCcw className="size-4" /> {tr('Check another document')}</button>
                 </div>
-              ))}
+                {state.file && <p className="mt-3 max-w-md text-[12.5px] text-white/50">{t('identifyHint')}</p>}
+              </div>
+              <StampedDocument verdict="not_found" kindLabel={tr('Unknown document')} number="—" from="—" to="—" goods="—" issued="—" />
             </div>
-          </>
-        )}
-      </main>
+          )}
+
+          {state.kind === 'result' && <ResultHero result={state.result} file={state.file} onAgain={again} />}
+        </main>
+      </div>
+
+      {state.kind === 'result' && (
+        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+          <ResultView result={state.result} onFile={onFile} withDrop={!!id} />
+        </div>
+      )}
     </div>
   );
 }
 
 // ---------------------------------------------------------------- result
-function ResultView({ result, file, onFile, withDrop }: { result: VerificationResult; file?: { name: string; size: number }; onFile: (f: File) => void; withDrop: boolean }) {
-  const { t, status } = useT();
+function ResultHero({ result, file, onAgain }: { result: VerificationResult; file?: { name: string; size: number }; onAgain: () => void }) {
+  const { t } = useT();
+  const { tr } = useTr();
   const v = VERDICT[result.verdict] ?? VERDICT.authentic_pending_anchor!;
+  const d = result.document;
+  const s = d.summary;
+  const localRoot = result.anchor.proof ? computeRootFromProof(result.integrity.sha256, result.anchor.proof) : null;
+  const proofOk = !!localRoot && localRoot === result.anchor.root;
+  const ledgerOk = result.anchor.status !== 'confirmed' ? null : result.anchor.onChain.checked ? !!result.anchor.onChain.anchoredAt : null;
+  const endorsers = (result.endorsements ?? []).filter((e) => e.signatureValid && e.matchesDocument).map((e) => e.authority);
+  return (
+    <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+      <StampedDocument
+        verdict={result.verdict}
+        kindLabel={d.kindLabel}
+        number={d.number}
+        from={s.exporterName}
+        to={s.consigneeName}
+        goods={s.items[0]?.description ?? '—'}
+        issued={date(d.issuedAt)}
+      />
+      <div className="min-w-0">
+        <p className="font-plexmono text-[11px] uppercase tracking-[0.2em] text-white/50">{tr('Verdict')}</p>
+        <h1 className="verdict-title mt-2 font-serif text-[34px] font-semibold leading-[1.08] tracking-[-0.015em] sm:text-[46px]">{t(`v.${v.key}.t`)}</h1>
+        <p className="mt-3 max-w-xl text-[16px] leading-relaxed text-white/75">{t(`v.${v.key}.b`)}</p>
+        {result.verdict === 'superseded' && d.supersededBy && (
+          <p className="mt-3 text-[15px]">{t('currentVersion')} <Link className="font-semibold text-[#f4c542] underline" to={`/v/${d.supersededBy.id}`}>{d.supersededBy.number}</Link></p>
+        )}
+        {result.verdict === 'revoked' && d.revokedReason && <p className="mt-3 text-[15px] font-medium">{t('reasonGiven')} {d.revokedReason}</p>}
+        {endorsers.length > 0 && result.verdict === 'authentic' && (
+          <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-emerald-500/15 px-3.5 py-1.5 text-[13.5px] font-medium text-emerald-200"><BadgeCheck className="size-4" /> {t('endorsedBy', { who: endorsers.join(', ') })}</p>
+        )}
+        <div className="mt-8">
+          <SealRings checks={[
+            { label: result.integrity.matches === null ? tr('File not compared') : tr('Your file matches'), ok: result.integrity.matches, icon: VERIFY_ICONS.file },
+            { label: tr('SealChain seal'), ok: result.signature.valid, icon: VERIFY_ICONS.seal },
+            { label: tr('Proof rebuilt here'), ok: result.anchor.proof ? proofOk : null, icon: VERIFY_ICONS.proof },
+            { label: tr('Public ledger'), ok: ledgerOk, icon: VERIFY_ICONS.ledger },
+          ]} />
+        </div>
+        {file && <p className="mt-6 text-[12.5px] text-white/50">{t('checkedFile')} {file.name} ({bytes(file.size)})</p>}
+        <div className="mt-6 flex flex-wrap gap-3 print:hidden">
+          <button type="button" onClick={() => window.print()} className="inline-flex h-11 items-center gap-2 rounded-full bg-white px-5 text-[14px] font-semibold text-[#0b1f3a]"><Printer className="size-4" /> {tr('Print verification receipt')}</button>
+          <button type="button" onClick={onAgain} className="inline-flex h-11 items-center gap-2 rounded-full border border-white/25 px-5 text-[14px] font-medium hover:bg-white/10"><RotateCcw className="size-4" /> {tr('Check another document')}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ResultView({ result, onFile, withDrop }: { result: VerificationResult; onFile: (f: File) => void; withDrop: boolean }) {
+  const { t, status } = useT();
   const d = result.document;
   const s = d.summary;
   const localRoot = result.anchor.proof ? computeRootFromProof(result.integrity.sha256, result.anchor.proof) : null;
@@ -214,28 +269,9 @@ function ResultView({ result, file, onFile, withDrop }: { result: VerificationRe
 
   return (
     <div className="space-y-5">
-      <div className={cx('rounded-[3px] border-2 p-5 sm:p-6', v.tone)}>
-        <div className="flex gap-4">
-          <div className="shrink-0">{v.icon}</div>
-          <div className="min-w-0">
-            <h1 className="font-serif text-[26px] font-semibold tracking-[-0.015em] sm:text-[30px]">{t(`v.${v.key}.t`)}</h1>
-            <p className="mt-1 text-sm opacity-90">{t(`v.${v.key}.b`)}</p>
-            {result.verdict === 'superseded' && d.supersededBy && (
-              <p className="mt-2 text-sm">{t('currentVersion')} <Link className="font-medium underline" to={`/v/${d.supersededBy.id}`}>{d.supersededBy.number}</Link></p>
-            )}
-            {result.verdict === 'revoked' && d.revokedReason && <p className="mt-2 text-sm font-medium">{t('reasonGiven')} {d.revokedReason}</p>}
-            {(result.endorsements ?? []).some((e) => e.signatureValid && e.matchesDocument) && result.verdict === 'authentic' && (
-              <p className="mt-2 text-sm font-medium">{t('endorsedBy', { who: result.endorsements.filter((e) => e.signatureValid && e.matchesDocument).map((e) => e.authority).join(', ') })}</p>
-            )}
-            {file && <p className="mt-2 text-xs opacity-75">{t('checkedFile')} {file.name} ({bytes(file.size)})</p>}
-          </div>
-        </div>
-      </div>
-
       {withDrop && result.integrity.matches === null && (
         <Dropzone
           onFile={onFile}
-          compact
           label={t('compareLabel')}
           sub={t('compareSub')}
         />

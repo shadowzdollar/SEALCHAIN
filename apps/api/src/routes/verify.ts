@@ -5,7 +5,7 @@
  */
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { PDFDocument } from 'pdf-lib';
-import { extractFields } from '@sealchain/core';
+import { DOCUMENT_KIND_LABEL, extractFields } from '@sealchain/core';
 import { DOC_COLUMNS, buildVerification, recordVerification, sha256, type Deps, type DocumentRow } from '../services/documents';
 import { extractPdfText } from '../services/forensics';
 import { alertTampered } from '../services/alerts';
@@ -13,6 +13,7 @@ import { alertTampered } from '../services/alerts';
 const RATE = { config: { rateLimit: { max: 60, timeWindow: '1 minute' } } };
 const ID_RE = /^doc_[a-z0-9]{16,40}$/;
 const SHA_RE = /^[a-f0-9]{64}$/;
+const NUMBER_RE = /^[A-Z0-9][A-Z0-9-]{5,47}$/;
 
 export async function verifyRoutes(api: FastifyInstance, deps: Deps) {
   const { db } = deps;
@@ -45,6 +46,23 @@ export async function verifyRoutes(api: FastifyInstance, deps: Deps) {
     const result = await buildVerification(deps, doc, provided);
     record(req, doc, provided ? 'id+hash' : 'id', result.verdict);
     return result;
+  });
+
+  /**
+   * Lookup by printed document number. Numbers are sequential, so this only
+   * confirms that the document exists and its status — never the trade
+   * particulars, which need the QR link or the file itself.
+   */
+  api.get<{ Params: { number: string } }>('/verify/number/:number', RATE, async (req, reply) => {
+    const number = req.params.number.trim().toUpperCase();
+    if (!NUMBER_RE.test(number)) return reply.code(400).send({ error: 'invalid_request', message: 'That does not look like a SealChain document number' });
+    const doc = db.get<Pick<DocumentRow, 'id' | 'kind' | 'number' | 'version' | 'status' | 'issued_at'>>('SELECT id, kind, number, version, status, issued_at FROM documents WHERE number = ?', number);
+    if (!doc) {
+      record(req, undefined, 'number', 'not_found');
+      return reply.code(404).send({ verdict: 'not_found', message: 'No document with this number was ever issued by SealChain.' });
+    }
+    recordVerification(db, doc.id, 'number', doc.status, req.ip);
+    return { number: doc.number, kind: doc.kind, kindLabel: DOCUMENT_KIND_LABEL[doc.kind], version: doc.version, status: doc.status, issuedAt: doc.issued_at };
   });
 
   api.get<{ Params: { sha256: string } }>('/verify/hash/:sha256', RATE, async (req, reply) => {

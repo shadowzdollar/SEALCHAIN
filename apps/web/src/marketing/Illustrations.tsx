@@ -93,7 +93,7 @@ export function QrGlyph({ className }: { className?: string }) {
  * public domain), with indicative road routes from Kigali and border posts.
  * Colours come from theme tokens, so it follows light and dark mode.
  */
-export function CorridorMap({ className, highlight, compact }: { className?: string; highlight?: string | null; compact?: boolean }) {
+export function CorridorMap({ className, highlight, compact, traveller }: { className?: string; highlight?: string | null; compact?: boolean; traveller?: boolean }) {
   const { width, height, countries, lakes, places, posts, routes } = MAP;
   const LABEL_SIDE: Record<string, 'start' | 'end'> = { kigali: 'end', bujumbura: 'end', akanyaru: 'end', gatuna: 'end' };
   const halo = 'paint-order:stroke;stroke:var(--color-paper-card);stroke-width:3.5px;stroke-linejoin:round';
@@ -113,6 +113,14 @@ export function CorridorMap({ className, highlight, compact }: { className?: str
       {Object.entries(routes).map(([id, d]) => (
         <path key={id} d={d} fill="none" className="route-flow stroke-ink transition-opacity" strokeWidth={2.4} strokeDasharray="7 5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: !highlight || highlight === id ? 1 : 0.18 }} />
       ))}
+      {traveller && highlight && (routes as Record<string, string>)[highlight] && (
+        <g key={highlight}>
+          <circle r={16} className="fill-stamp" opacity={0.15} />
+          <circle r={9.5} className="fill-ink stroke-paper-card" strokeWidth={2} />
+          <path d="M-4.5 -2.5h5v4.5h-5z M0.5 -0.8h2.4l1.4 1.6v1.2h-3.8z" className="fill-paper-card" />
+          <animateMotion dur={`${Math.max(3, ((routes as Record<string, string>)[highlight]!.length / 40) | 0)}s`} repeatCount="indefinite" path={(routes as Record<string, string>)[highlight]} keyPoints="0;1;1" keyTimes="0;0.85;1" calcMode="linear" />
+        </g>
+      )}
       {Object.entries(posts).map(([k, p]) => (
         <g key={k} style={{ opacity: !highlight || ROUTE_POSTS[highlight]?.includes(k) ? 1 : 0.25 }}>
           {!compact && <circle cx={p.at[0]} cy={p.at[1]} r={4.5} fill="none" className="post-pulse stroke-stamp" strokeWidth={1.5} />}
