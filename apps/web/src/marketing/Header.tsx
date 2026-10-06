@@ -40,16 +40,16 @@ export function Announcement() {
   if (hidden) return null;
   return (
     <div className="relative overflow-hidden bg-navy-950 text-[13px] text-slate-100" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
-      <div aria-hidden className="announce-glow pointer-events-none absolute inset-0" />
       <div className="relative mx-auto flex h-10 max-w-[1680px] items-center gap-4 px-5 sm:px-8 lg:px-12 2xl:px-16">
-        <Link to="/status" className="hidden shrink-0 items-center gap-2 font-plexmono text-[11px] uppercase tracking-[0.14em] text-navy-200 hover:text-white md:inline-flex">
-          <span className="relative flex size-2">
-            <span className={cx('absolute inset-0 animate-ping rounded-full opacity-60', status ? STATE_DOT[status] : 'bg-slate-400')} />
-            <span className={cx('relative size-2 rounded-full', status ? STATE_DOT[status] : 'bg-slate-400')} />
-          </span>
-          {status ? tr(STATE_LABEL[status]) : tr('Checking status…')}
-        </Link>
-        <span aria-hidden className="hidden h-4 w-px bg-white/15 md:block" />
+        {status === 'operational' && (
+          <>
+            <Link to="/status" className="hidden shrink-0 items-center gap-2 font-plexmono text-[11px] uppercase tracking-[0.14em] text-navy-200 hover:text-white md:inline-flex">
+              <span className="size-2 rounded-full bg-emerald-500" />
+              {tr(STATE_LABEL[status])}
+            </Link>
+            <span aria-hidden className="hidden h-4 w-px bg-white/15 md:block" />
+          </>
+        )}
         <div className="relative h-10 min-w-0 flex-1 overflow-hidden" aria-live="polite">
           {NEWS.map((n, k) => (
             <div

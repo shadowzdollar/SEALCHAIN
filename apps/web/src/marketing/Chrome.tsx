@@ -16,9 +16,9 @@ import { Announcement, Header } from './Header';
 export const PAGE_X = 'px-5 sm:px-8 lg:px-12 2xl:px-16';
 
 export const INK_BTN =
-  'inline-flex h-11 items-center justify-center gap-2 rounded-[3px] bg-ink px-6 text-[14px] font-medium text-ink-contrast shadow-[0_1px_0_rgba(0,0,0,0.25)] transition-opacity hover:opacity-90';
+  'inline-flex h-11 items-center justify-center gap-2 rounded-full bg-ink px-6 text-[14px] font-medium text-ink-contrast shadow-[0_1px_0_rgba(0,0,0,0.25)] transition-opacity hover:opacity-90';
 export const PAPER_BTN =
-  'inline-flex h-11 items-center justify-center gap-2 rounded-[3px] border border-paper-rule bg-paper-card px-6 text-[14px] font-medium text-ink shadow-[0_1px_0_rgba(11,31,58,0.06)] transition-colors hover:border-navy-300';
+  'inline-flex h-11 items-center justify-center gap-2 rounded-full border border-paper-rule bg-paper-card px-6 text-[14px] font-medium text-ink shadow-[0_1px_0_rgba(11,31,58,0.06)] transition-colors hover:border-navy-300';
 
 export interface StatusResponse {
   overall: 'operational' | 'degraded' | 'down';
@@ -139,8 +139,8 @@ export function CtaBand() {
           <p className="mt-4 max-w-xl text-[16px] leading-relaxed text-navy-200">{tr('Create your first shipment in minutes, or talk to us about onboarding your cooperative, agency or authority.')}</p>
         </div>
         <div className="flex flex-wrap gap-3 lg:justify-end">
-          <Link to="/register" className="inline-flex h-11 items-center gap-2 rounded-[3px] bg-[#f8f5ee] px-6 text-[14px] font-medium text-[#0b1f3a] hover:bg-[#fffdf8]">{tr('Start a shipment')} <ArrowRight className="size-4" /></Link>
-          <Link to="/contact" className="inline-flex h-11 items-center rounded-[3px] border border-white/25 px-6 text-[14px] font-medium text-white hover:bg-white/10">{tr('Talk to us')}</Link>
+          <Link to="/register" className="inline-flex h-11 items-center gap-2 rounded-full bg-[#f8f5ee] px-6 text-[14px] font-medium text-[#0b1f3a] hover:bg-[#fffdf8]">{tr('Start a shipment')} <ArrowRight className="size-4" /></Link>
+          <Link to="/contact" className="inline-flex h-11 items-center rounded-full border border-white/25 px-6 text-[14px] font-medium text-white hover:bg-white/10">{tr('Talk to us')}</Link>
         </div>
       </div>
     </section>
@@ -201,6 +201,9 @@ function Footer() {
             </div>
           </div>
         </div>
+      </div>
+      <div aria-hidden className="overflow-hidden border-t border-paper-rule">
+        <p className="footer-wordmark mx-auto max-w-[1680px] select-none px-3 pt-4 text-center font-serif font-semibold leading-[0.78] tracking-[-0.045em] text-ink">SealChain</p>
       </div>
     </footer>
   );

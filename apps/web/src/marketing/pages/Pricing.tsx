@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import { ArrowRight, Check, Minus } from 'lucide-react';
 import { cx } from '../../components/ui';
 import { Eyebrow, INK_BTN, PAGE_X, PAPER_BTN, SectionHeading } from '../Chrome';
-import { FAQS, Faq, TicketCard, usePricing } from '../Blocks';
+import { FAQS, Faq, PlanCard, usePricing } from '../Blocks';
 import { DelayCalculator } from '../PageExtras';
 
 const PRICING_FAQS = [
@@ -78,15 +78,15 @@ export function PricingPage() {
   ];
   return (
     <>
-      <section className="paper-grid border-b border-paper-rule">
+      <section className="border-b border-paper-rule bg-paper">
         <div className={cx('mx-auto max-w-[1680px] pb-20 pt-16 text-center lg:pt-20', PAGE_X)}>
           <Eyebrow>Pricing · {currency}</Eyebrow>
           <h1 className="mx-auto mt-5 max-w-3xl font-serif text-[40px] font-semibold leading-[1.06] tracking-[-0.02em] sm:text-[52px]">Pay for what you ship. <em className="font-medium text-stamp">Verify</em> for free.</h1>
           <p className="mx-auto mt-5 max-w-xl text-[17px] leading-relaxed text-slate-600">Simple pilot pricing while we onboard exporters on EAC corridors. No contract, no minimum term.</p>
 
           <div className="mt-14 grid grid-cols-1 gap-6 text-left md:grid-cols-3">
-            {plans.map((p, i) => (
-              <TicketCard key={p.name} gate={['A1', 'B2', 'C3'][i]!} plan={{ name: p.name, who: p.who, price: p.price, unit: p.unit, to: p.cta.to, cta: p.cta.label, featured: p.featured, perks: p.points }} />
+            {plans.map((p) => (
+              <PlanCard key={p.name} plan={{ name: p.name, who: p.who, price: p.price, unit: p.unit, to: p.cta.to, cta: p.cta.label, featured: p.featured, perks: p.points }} />
             ))}
           </div>
 

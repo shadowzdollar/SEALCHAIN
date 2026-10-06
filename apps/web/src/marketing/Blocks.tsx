@@ -4,10 +4,8 @@ import { Link } from 'react-router';
 import { ArrowRight, Check, Minus, Plus } from 'lucide-react';
 import { useMeta } from '../auth';
 import { cx } from '../components/ui';
-import { INK_BTN } from './Chrome';
+import { INK_BTN, PAPER_BTN } from './Chrome';
 import { msg, useTr } from '../locale';
-import { PhotoPrint } from './Photo';
-import { PHOTOS } from './photos';
 import { useCountUp } from './motion';
 
 export function usePricing() {
@@ -106,57 +104,21 @@ const PRESETS = [5, 10, 25, 50];
 
 export interface Plan { name: string; price: string; unit: string; who: string; to: string; cta: string; featured?: boolean; perks: string[] }
 
-/** A plan as a cargo ticket: tear-off stub, barcode, and a 3D lean toward the cursor. */
-export function TicketCard({ plan: p, gate }: { plan: Plan; gate: string }) {
+/** A plan card: name, audience, price, three inclusions, one action. */
+export function PlanCard({ plan: p }: { plan: Plan }) {
   const { tr } = useTr();
-  const onMove = (e: React.PointerEvent<HTMLAnchorElement>) => {
-    if (e.pointerType !== 'mouse') return;
-    const r = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
-    e.currentTarget.style.transform = `perspective(900px) rotateY(${x * 10}deg) rotateX(${-y * 8}deg) translateY(-6px)`;
-    e.currentTarget.style.setProperty('--sx', `${(x + 0.5) * 100}%`);
-    e.currentTarget.style.setProperty('--sy', `${(y + 0.5) * 100}%`);
-  };
-  const bars = Array.from(p.name + gate).flatMap((ch, i) => [((ch.charCodeAt(0) * (i + 3)) % 3) + 1, ((ch.charCodeAt(0) + i) % 2) + 1]);
-  const dark = p.featured;
   return (
-    <Link
-      to={p.to}
-      onPointerMove={onMove}
-      onPointerLeave={(e) => { e.currentTarget.style.transform = ''; }}
-      className={cx('ticket group relative flex flex-col rounded-[20px] transition-transform duration-300 ease-out will-change-transform', dark ? 'bg-ink text-ink-contrast shadow-[0_40px_70px_-35px_rgba(11,31,58,0.9)]' : 'bg-paper-card text-ink shadow-[0_30px_60px_-38px_rgba(11,31,58,0.55)] ring-1 ring-paper-rule')}
-    >
-      <span aria-hidden className="ticket-shine pointer-events-none absolute inset-0 rounded-[20px]" />
-      {dark && <span className="absolute -right-3 -top-3 z-10 rotate-[8deg] rounded-md border-2 border-stamp bg-paper-card px-2 py-0.5 font-plexmono text-[10px] font-semibold uppercase tracking-[0.16em] text-stamp shadow">{tr('Most popular')}</span>}
-      <div className="p-6 pb-5">
-        <div className={cx('flex items-center justify-between font-plexmono text-[10px] uppercase tracking-[0.2em]', dark ? 'opacity-60' : 'text-slate-500')}>
-          <span>SealChain · {tr('Cargo pass')}</span><span>{tr('Gate')} {gate}</span>
-        </div>
-        <div className="mt-5 flex items-end justify-between gap-2">
-          <div><p className={cx('font-plexmono text-[10px] uppercase tracking-[0.18em]', dark ? 'opacity-60' : 'text-slate-500')}>{tr('From')}</p><p className="font-serif text-[26px] font-semibold leading-none">KGL</p></div>
-          <span aria-hidden className={cx('mb-1 flex flex-1 items-center gap-1 px-2', dark ? 'text-white/40' : 'text-slate-300')}><span className="h-px flex-1 border-t border-dashed border-current" />✈<span className="h-px flex-1 border-t border-dashed border-current" /></span>
-          <div className="text-right"><p className={cx('font-plexmono text-[10px] uppercase tracking-[0.18em]', dark ? 'opacity-60' : 'text-slate-500')}>{tr('To')}</p><p className="font-serif text-[26px] font-semibold leading-none">{tr('World')}</p></div>
-        </div>
-        <p className="mt-6 font-serif text-[23px] font-semibold">{p.name}</p>
-        <p className={cx('text-[13px]', dark ? 'opacity-70' : 'text-slate-500')}>{p.who}</p>
-        <p className="mt-4 font-serif text-[40px] font-semibold leading-none tracking-[-0.02em]">{p.price}</p>
-        <p className={cx('mt-1.5 text-[13px]', dark ? 'opacity-70' : 'text-slate-600')}>{p.unit}</p>
-        <ul className="mt-5 space-y-2">
-          {p.perks.map((k) => <li key={k} className="flex items-center gap-2 text-[13.5px]"><Check className={cx('size-4 shrink-0', dark ? 'text-emerald-300' : 'text-emerald-700')} />{k}</li>)}
-        </ul>
-      </div>
-      {/* perforation */}
-      <div aria-hidden className="relative mx-5 h-0 border-t-2 border-dashed" style={{ borderColor: dark ? 'rgba(255,255,255,0.18)' : 'var(--color-paper-rule)' }}>
-        <span className="ticket-notch -left-[30px]" /><span className="ticket-notch -right-[30px]" />
-      </div>
-      {/* stub */}
-      <div className="mt-auto flex items-center justify-between gap-3 p-6 pt-5">
-        <span className="inline-flex items-center gap-1.5 text-[14px] font-semibold">{p.cta} <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" /></span>
-        <span aria-hidden className={cx('flex h-8 items-stretch gap-[2px]', dark ? 'opacity-70' : 'opacity-60')}>
-          {bars.slice(0, 22).map((w, i) => <span key={i} className="bg-current" style={{ width: w }} />)}
-        </span>
-      </div>
-    </Link>
+    <div className={cx('relative flex flex-col rounded-2xl border bg-paper-card p-7 text-left', p.featured ? 'border-ink shadow-[0_24px_50px_-30px_rgba(11,31,58,0.55)]' : 'border-paper-rule')}>
+      {p.featured && <span className="absolute -top-3 left-7 rounded-full bg-ink px-3 py-1 text-[11px] font-semibold text-ink-contrast">{tr('Most popular')}</span>}
+      <p className="font-serif text-[22px] font-semibold">{p.name}</p>
+      <p className="mt-1 text-[14px] text-slate-500">{p.who}</p>
+      <p className="mt-6 font-serif text-[40px] font-semibold leading-none tracking-[-0.02em]">{p.price}</p>
+      <p className="mt-2 text-[13.5px] text-slate-600">{p.unit}</p>
+      <ul className="mt-6 flex-1 space-y-2.5 border-t border-paper-rule pt-6">
+        {p.perks.map((k) => <li key={k} className="flex gap-2.5 text-[14px] text-slate-700"><Check className="mt-0.5 size-4 shrink-0 text-emerald-700" />{k}</li>)}
+      </ul>
+      <Link to={p.to} className={cx(p.featured ? INK_BTN : PAPER_BTN, 'mt-8 w-full')}>{p.cta}</Link>
+    </div>
   );
 }
 
@@ -172,7 +134,7 @@ export function PricingShowcase() {
     { name: tr('Network'), price: tr('Custom'), unit: tr('volume & membership'), who: tr('Associations & forwarders'), to: '/contact?topic=integration', cta: tr('Talk to us'), perks: [tr('Volume pricing'), tr('Onboard your members'), tr('Connect your systems')] },
   ];
   return (
-    <section className="paper-grid border-b border-paper-rule">
+    <section className="border-b border-paper-rule bg-paper">
       <div className="mx-auto max-w-[1680px] px-5 py-24 sm:px-8 lg:px-12 2xl:px-16">
         <div className="grid items-center gap-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
           <div>
@@ -202,13 +164,12 @@ export function PricingShowcase() {
           </div>
 
           <div className="relative mx-auto w-full max-w-[620px] pt-4 lg:mr-0">
-            <PhotoPrint photo={PHOTOS.containerStacks} tilt={-4} className="w-[80%]" ratio="aspect-[4/3]" caption={tr('Mombasa')} />
-            <Receipt shipments={n} className="relative z-10 -mt-40 ml-auto rotate-[1.5deg] sm:-mt-52" />
+            <Receipt shipments={n} className="relative mx-auto" />
           </div>
         </div>
 
         <div className="mt-20 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
-          {plans.map((p, i) => <TicketCard key={p.name} plan={p} gate={['A1', 'B2', 'C3', 'D4'][i]!} />)}
+          {plans.map((p) => <PlanCard key={p.name} plan={p} />)}
         </div>
         <p className="mt-5 text-[13px] text-slate-500">{trx('Full comparison and questions on the {link}.', { link: <Link to="/pricing" className="font-medium text-ink underline underline-offset-4">{tr('pricing page')}</Link> })}</p>
       </div>

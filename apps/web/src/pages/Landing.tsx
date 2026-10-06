@@ -107,52 +107,31 @@ export function Landing() {
     <>
       <Hero />
 
-      <GoodsMarquee />
-
       <EasySteps />
 
-      <PreflightDemo />
-
-      <BorderDay />
-
-      <PhotoBand photo={PHOTOS.portTruck}>
-        <div className="mx-auto flex min-h-[520px] max-w-[1680px] flex-col justify-center px-5 py-20 sm:px-8 lg:px-12 2xl:px-16">
-          <p className="font-plexmono text-[12px] uppercase tracking-[0.22em] text-navy-200">{tr('Port of Mombasa · Northern Corridor')}</p>
-          <h2 className="mt-5 max-w-2xl font-serif text-[36px] font-semibold leading-[1.08] tracking-[-0.02em] sm:text-[52px]">
-            {trx('Every container that crosses a border travels on {paper}.', { paper: <em className="font-medium text-[#f3b4ad]">{tr('paper')}</em> })}
-          </h2>
-          <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-navy-100">
-            {tr('Invoices, certificates and packing lists decide how fast goods move and what duty is paid. SealChain makes sure they’re right — and that anyone can prove they’re real.')}
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link to="/product" className="inline-flex h-11 items-center gap-2 rounded-[3px] bg-[#f8f5ee] px-6 text-[14px] font-medium text-[#0b1f3a] hover:bg-[#fffdf8]">{tr('See the product')} <ArrowRight className="size-4" /></Link>
-            <Link to="/corridors" className="inline-flex h-11 items-center rounded-[3px] border border-white/30 px-6 text-[14px] font-medium text-white hover:bg-white/10">{tr('Our corridors')}</Link>
-          </div>
-        </div>
-      </PhotoBand>
-
-      {/* -------------------------------------------------------- modes */}
-      <section className="mx-auto max-w-[1680px] px-5 py-24 sm:px-8 lg:px-12 2xl:px-16">
-        <SectionHeading eyebrow={tr('Road · Air · Sea')} title={tr('However your goods travel, the paperwork goes with them.')} body={tr('Each shipment records its mode of transport, exit point and entry point — and the checks change with them.')} />
-        <div className="mt-14 grid gap-10 md:grid-cols-3 md:gap-8">
+      {/* ------------------------------------------------ road · air · sea */}
+      <section className="mx-auto max-w-[1680px] px-5 pb-24 sm:px-8 lg:px-12 2xl:px-16">
+        <SectionHeading eyebrow={tr('Road · Air · Sea')} title={tr('However your goods travel, the paperwork goes with them.')} />
+        <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3">
           {MODES.map((m) => (
-            <article key={m.t}>
-              <PhotoPrint photo={m.photo} tilt={m.tilt} ratio="aspect-[4/3]" />
-              <div className="mt-8 flex items-baseline justify-between border-t-2 border-ink pt-4">
-                <h3 className="font-serif text-[24px] font-medium">{tr(m.t)}</h3>
-                <span className="font-plexmono text-[12px] text-stamp">{m.n}</span>
+            <article key={m.t} className="group relative h-[380px] overflow-hidden rounded-3xl bg-ink sm:h-[420px]">
+              <img src={m.photo.sm} srcSet={`${m.photo.sm} 800w, ${m.photo.src} 1600w`} sizes="(min-width: 768px) 33vw, 100vw" alt={m.photo.alt} loading="lazy" className="absolute inset-0 size-full object-cover transition-transform duration-700 group-hover:scale-[1.04]" />
+              <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#0b1f3a] via-[#0b1f3a]/35 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 p-6 text-white">
+                <h3 className="font-serif text-[28px] font-semibold leading-tight">{tr(m.t)}</h3>
+                <p className="mt-2 max-w-sm text-[14.5px] leading-relaxed text-white/80">{tr(m.d)}</p>
               </div>
-              <p className="mt-2 text-[15px] leading-relaxed text-slate-600">{tr(m.d)}</p>
+              <Credit photo={m.photo} light plain className="absolute right-4 top-3 max-w-[70%] truncate [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]" />
             </article>
           ))}
         </div>
       </section>
 
-      <MobileSection />
+      <PreflightDemo />
+
+      <BorderDay />
 
       <ProductTour />
-
-      <FriendlyStats />
 
       {/* --------------------------------------------------- audiences */}
       <section className="mx-auto max-w-[1680px] px-5 py-24 sm:px-8 lg:px-12 2xl:px-16">
@@ -174,8 +153,6 @@ export function Landing() {
           ))}
         </div>
       </section>
-
-      <DeparturesSection />
 
       <TrustSection />
 

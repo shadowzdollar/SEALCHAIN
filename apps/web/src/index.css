@@ -510,3 +510,8 @@ html:not(.dark) .verify-desk .bg-black .text-white, html:not(.dark) .verify-desk
   .plan-done { animation: rise-sm 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
 }
 .profile-banner { background: radial-gradient(60% 120% at 20% 0%, rgba(180, 35, 24, 0.35), transparent 60%), radial-gradient(50% 140% at 90% 100%, rgba(14, 165, 233, 0.3), transparent 60%), linear-gradient(120deg, #0b1f3a, #16325c); }
+
+
+
+/* footer: giant wordmark, clipped at the baseline */
+.footer-wordmark { font-size: clamp(64px, 17.5vw, 300px); margin-bottom: -0.16em; background: linear-gradient(to bottom, var(--color-ink) 30%, color-mix(in srgb, var(--color-ink) 10%, transparent)); -webkit-background-clip: text; background-clip: text; color: transparent; }

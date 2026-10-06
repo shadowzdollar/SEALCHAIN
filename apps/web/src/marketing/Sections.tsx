@@ -123,8 +123,7 @@ export function EasySteps() {
       <SectionHeading center eyebrow={tr('How it works')} title={tr('As easy as one, two, three.')} body={tr('No training, no jargon. If you can fill in a form, you can use SealChain.')} />
       <div className="mt-14 grid gap-6 md:grid-cols-3">
         {steps.map((s) => (
-          <article key={s.n} className={cx('lift group relative flex flex-col overflow-hidden rounded-3xl border border-paper-rule bg-gradient-to-b to-paper-card p-7 dark:from-paper-tint', s.tone)}>
-            <span aria-hidden className="absolute -right-3 -top-8 select-none font-serif text-[150px] font-semibold leading-none text-ink/[0.05]">{s.n}</span>
+          <article key={s.n} className="relative flex flex-col overflow-hidden rounded-2xl border border-paper-rule bg-paper-card p-7">
             <span className="flex size-11 items-center justify-center rounded-full bg-ink font-serif text-[20px] font-semibold text-ink-contrast">{s.n}</span>
             <h3 className="mt-5 font-serif text-[24px] font-semibold leading-snug tracking-[-0.01em]">{s.title}</h3>
             <p className="mt-2 text-[15.5px] leading-relaxed text-slate-600">{s.body}</p>
@@ -316,10 +315,10 @@ export function FriendlyStats() {
 export function TrustSection() {
   const { tr } = useTr();
   const cards: Array<{ icon: LucideIcon; t: string; d: string; tone: string }> = [
-    { icon: StampIcon, t: tr('A seal that can’t be copied'), d: tr('Change a single comma in the file and the seal breaks. Fakes and edited copies are spotted instantly.'), tone: 'bg-stamp' },
-    { icon: Lock, t: tr('Your business stays private'), d: tr('Your prices, buyers and quantities are never published. Only a tamper-proof fingerprint is.'), tone: 'bg-ink' },
-    { icon: BadgeCheck, t: tr('Backed by the authorities'), d: tr('Where the issuing authority uses SealChain, its officers approve your certificate right on the document.'), tone: 'bg-emerald-700' },
-    { icon: ShieldCheck, t: tr('Proof that outlives us'), d: tr('Documents are recorded on a public ledger, so they can be checked even without SealChain.'), tone: 'bg-[#1d4ed8]' },
+    { icon: StampIcon, t: tr('A seal that can’t be copied'), d: tr('Change a single comma in the file and the seal breaks. Fakes and edited copies are spotted instantly.'), tone: 'bg-ink text-ink-contrast' },
+    { icon: Lock, t: tr('Your business stays private'), d: tr('Your prices, buyers and quantities are never published. Only a tamper-proof fingerprint is.'), tone: 'bg-ink text-ink-contrast' },
+    { icon: BadgeCheck, t: tr('Backed by the authorities'), d: tr('Where the issuing authority uses SealChain, its officers approve your certificate right on the document.'), tone: 'bg-ink text-ink-contrast' },
+    { icon: ShieldCheck, t: tr('Proof that outlives us'), d: tr('Documents are recorded on a public ledger, so they can be checked even without SealChain.'), tone: 'bg-ink text-ink-contrast' },
   ];
   return (
     <section className="border-y border-paper-rule bg-paper-card">
@@ -328,7 +327,7 @@ export function TrustSection() {
         <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {cards.map((c) => (
             <article key={c.t} className="lift group rounded-3xl border border-paper-rule bg-paper p-7">
-              <span className={cx('flex size-12 items-center justify-center rounded-2xl text-white transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110', c.tone)}><c.icon className="size-6" strokeWidth={1.8} /></span>
+              <span className={cx('flex size-12 items-center justify-center rounded-2xl', c.tone)}><c.icon className="size-6" strokeWidth={1.8} /></span>
               <h3 className="mt-6 font-serif text-[21px] font-semibold leading-snug">{c.t}</h3>
               <p className="mt-2 text-[15px] leading-relaxed text-slate-600">{c.d}</p>
             </article>
