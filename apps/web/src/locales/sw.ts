@@ -652,4 +652,5 @@ export const SW: Record<string, string> = {
   "The page you were looking for isn’t here. Let’s get you back on the road.": "Ukurasa uliokuwa unatafuta haupo hapa. Turudi barabarani.",
   "Back to the home page": "Rudi ukurasa wa nyumbani",
   "Search the site": "Tafuta kwenye tovuti",
+  "Exporter": "Msafirishaji",
 };

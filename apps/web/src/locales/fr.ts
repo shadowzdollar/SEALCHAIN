@@ -649,4 +649,5 @@ export const FR: Record<string, string> = {
   "The page you were looking for isn’t here. Let’s get you back on the road.": "La page que vous cherchiez n’est pas ici. Reprenons la route.",
   "Back to the home page": "Retour à l’accueil",
   "Search the site": "Rechercher sur le site",
+  "Exporter": "Exportateur",
 };

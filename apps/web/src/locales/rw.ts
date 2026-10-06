@@ -652,4 +652,5 @@ export const RW: Record<string, string> = {
   "The page you were looking for isn’t here. Let’s get you back on the road.": "Ipaji washakaga ntiri hano. Reka dusubire mu nzira.",
   "Back to the home page": "Subira ahabanza",
   "Search the site": "Shakisha ku rubuga",
+  "Exporter": "Uwohereza",
 };
